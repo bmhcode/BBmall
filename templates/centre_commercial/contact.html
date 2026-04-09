@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact — YES MALL{% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    <p class="ym-eyebrow"><i class="fas fa-envelope"></i> Contact</p>
+    <h1 class="ym-section-title">Contactez l'Élite</h1>
+    <p class="ym-section-subtitle">Notre équipe est disponible 7j/7 pour vous accompagner dans votre expérience shopping.</p>
+  </div>
+</section>
+
+<!-- Contact Content -->
+<section class="ym-section ym-section--gray">
+  <div class="ym-container">
+    <div class="ym-contact-layout">
+
+      <!-- Info Column -->
+      <div class="ym-contact-info ym-reveal">
+        <div class="ym-contact-info-block">
+          <div class="ym-info-icon ym-info-icon--lg"><i class="fas fa-phone-alt"></i></div>
+          <div>
+            <h3 class="ym-info-label">Téléphone</h3>
+            <p class="ym-info-value">+33 1 23 45 67 89</p>
+          </div>
+        </div>
+
+        <div class="ym-contact-info-block">
+          <div class="ym-info-icon ym-info-icon--lg"><i class="fas fa-envelope"></i></div>
+          <div>
+            <h3 class="ym-info-label">E-mail</h3>
+            <p class="ym-info-value">contact@yesmall.com</p>
+          </div>
+        </div>
+
+        <div class="ym-contact-info-block">
+          <div class="ym-info-icon ym-info-icon--lg"><i class="fas fa-clock"></i></div>
+          <div>
+            <h3 class="ym-info-label">Horaires</h3>
+            <p class="ym-info-value">Lundi – Dimanche : 10h00 – 23h00</p>
+          </div>
+        </div>
+
+        <div class="ym-contact-info-block">
+          <div class="ym-info-icon ym-info-icon--lg"><i class="fas fa-map-marker-alt"></i></div>
+          <div>
+            <h3 class="ym-info-label">Adresse</h3>
+            <p class="ym-info-value">YES MALL, Constantine, Algérie</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Column -->
+      <div class="ym-contact-form-wrap ym-reveal">
+        <div class="ym-detail-card">
+          <h2 class="ym-detail-section-title" style="margin-bottom:28px;">Envoyez-nous un message</h2>
+          <form method="post" class="ym-contact-form">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="ym-form-group">
+              <label class="ym-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+              <p class="ym-form-error">{{ field.errors.0 }}</p>
+              {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="ym-btn ym-btn--primary" style="width:100%; justify-content:center; margin-top:8px;">
+              Envoyer le message <i class="fas fa-paper-plane ym-btn__icon"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

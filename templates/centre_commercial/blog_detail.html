@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ article.titre }} — YES MALL{% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'blog_list' %}" style="color:inherit;">Blog</a></p>
+    <h1 class="ym-section-title" style="max-width:800px;">{{ article.titre }}</h1>
+    <p class="ym-blog-card__date" style="margin-top:12px; font-size:0.8rem;">{{ article.date_publication|date:"d F Y" }}</p>
+  </div>
+</section>
+
+<!-- Article Content -->
+<section class="ym-section ym-section--light">
+  <div class="ym-container">
+    <div class="ym-article-layout">
+
+      {% if article.image %}
+      <div class="ym-article-hero-image">
+        <img src="{{ article.image.url }}" alt="{{ article.titre }}">
+      </div>
+      {% endif %}
+
+      <div class="ym-article-body ym-reveal">
+        <p class="ym-detail-text" style="white-space:pre-line; font-size:1.05rem; line-height:1.9;">{{ article.contenu }}</p>
+      </div>
+
+      <div class="ym-article-footer">
+        <a href="{% url 'blog_list' %}" class="ym-btn ym-btn--dark">
+          <i class="fas fa-arrow-left"></i> Retour aux articles
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,386 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BB MALL — Découvrez nos centres commerciaux premium partout en Algérie. Trouvez votre mall et commencez votre expérience shopping.">
+  <title>BB MALL — Trouvez Votre Centre</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'css/portal.css' %}">
+</head>
+<body class="portal-body">
+
+<!-- ═══════════ PORTAL NAVBAR ═══════════ -->
+<header class="portal-nav">
+  <a href="{% url 'home' %}" class="portal-nav__brand">
+    <span class="portal-nav__brand-icon"><i class="fas fa-gem"></i></span>
+    BB <span>MALLs</span>
+  </a>
+  <nav class="portal-nav__links">
+    <a href="{% url 'mall_list' %}"><i class="fas fa-cog"></i> Gérer les Malls</a>
+    <a href="{% url 'home' %}"><i class="fas fa-store"></i> Mon Mall</a>
+    <a href="{% url 'evenement_list' %}"><i class="fas fa-calendar-alt"></i> Événements</a>
+  </nav>
+<!-- 
+ <nav aria-label="Navigation principale">
+    <ul class="ym-navbar__nav">
+      <li><a href="{% url 'home' %}">Accueil</a></li>
+      <li><a href="{% url 'magasin_list_all' %}">Magasins</a></li>
+      <li><a href="{% url 'evenement_list' %}">Événements</a></li>
+      <li><a href="{% url 'promotion_list' %}">Promotions</a></li>
+      <li><a href="{% url 'blog_list' %}">Blog</a></li>
+      <li><a href="{% url 'contact' %}">Contact</a></li>
+    </ul>
+  </nav> -->
+
+
+</header>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="portal-hero">
+  <div class="portal-hero__bg"></div>
+  <div class="portal-hero__overlay"></div>
+
+  <div class="portal-hero__content">
+    <p class="portal-hero__eyebrow">
+      <i class="fas fa-map-marker-alt"></i> Algérie &nbsp;·&nbsp; Algérie 
+    </p>
+    <h1 class="portal-hero__title">Trouvez Votre<br><em>Centre Commercial</em></h1>
+    <p class="portal-hero__subtitle">Des dizaines de malls premium. Un seul endroit pour tout trouver.</p>
+
+    <!-- Search Bar -->
+    <form class="portal-search" id="portal-search-form" action="#malls" method="get">
+      <div class="portal-search__inner">
+        <i class="fas fa-search portal-search__icon"></i>
+        <input
+          id="portal-search-input"
+          class="portal-search__input"
+          type="search"
+          name="q"
+          placeholder="Recherchez un mall, une ville, une région…"
+          autocomplete="off"
+          aria-label="Rechercher un mall"
+        >
+        <button type="submit" class="portal-search__btn">
+          Rechercher
+        </button>
+      </div>
+    </form>
+
+    <!-- Quick Cities -->
+    <div class="portal-quick-cities">
+      <span class="portal-quick-cities__label">Villes populaires :</span>
+      <button class="portal-quick-city" data-filter="constantine">Constantine</button>
+      <button class="portal-quick-city" data-filter="alger">Alger</button>
+      <button class="portal-quick-city" data-filter="oran">Oran</button>
+      <button class="portal-quick-city" data-filter="annaba">Annaba</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="portal-hero__stats">
+    <div class="portal-stat"><span class="portal-stat__num">{{ malls.count|default:"0" }}</span><span class="portal-stat__label">Centres</span></div>
+    <div class="portal-stat"><span class="portal-stat__num">1 200+</span><span class="portal-stat__label">Boutiques</span></div>
+    <div class="portal-stat"><span class="portal-stat__num">5</span><span class="portal-stat__label">Pays</span></div>
+    <div class="portal-stat"><span class="portal-stat__num">2M+</span><span class="portal-stat__label">Visiteurs/an</span></div>
+  </div>
+</section>
+
+<!-- ═══════════ TICKER ═══════════ -->
+<div class="ym-ticker" aria-hidden="true">
+  <div class="ym-ticker__track">
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Nouvelles ouvertures 2026</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Soldes jusqu'à -70% dans tous les centres</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Parking gratuit dans tous nos malls</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Carte BB MALLs — Profitez de privilèges exclusifs</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Événements chaque weekend dans vos centres</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Nouvelles ouvertures 2026</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Soldes jusqu'à -70% dans tous les centres</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Parking gratuit dans tous nos malls</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Carte BB MALLs — Profitez de privilèges exclusifs</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Événements chaque weekend dans vos centres</span>
+  </div>
+</div>
+
+<!-- ═══════════ MALLS GRID ═══════════ -->
+<section class="portal-section" id="malls">
+  <div class="ym-container">
+
+    <div class="portal-section__header ym-reveal">
+      <div>
+        <p class="ym-eyebrow"><i class="fas fa-building"></i> Nos Centres</p>
+        <h2 class="ym-section-title">Choisissez Votre Mall</h2>
+        <p class="ym-section-subtitle">Sélectionnez un centre commercial pour accéder à ses boutiques, promotions et événements.</p>
+      </div>
+    </div>
+
+    <!-- Region Filters -->
+    <div class="portal-filter-bar ym-reveal" role="group" aria-label="Filtrer par ville">
+      <button class="portal-filter-btn active" data-ville="all">Tous les centres</button>
+      <button class="portal-filter-btn" data-ville="constantine">Constantine</button>
+      <button class="portal-filter-btn" data-ville="alger">Alger</button>
+      <button class="portal-filter-btn" data-ville="oran">Oran</button>
+      <button class="portal-filter-btn" data-ville="annaba">Annaba</button>
+    </div>
+
+    <!-- Malls Grid -->
+    <div class="portal-malls-grid ym-reveal" id="malls-grid">
+
+      {% for mall in malls %}
+      <!-- Mall Card -->
+      <article class="portal-mall-card {% if not mall.est_ouvert and not mall.ouverture_prevue %}portal-mall-card--soon{% endif %}" 
+               data-ville="{{ mall.ville }}" 
+               data-name="{{ mall.nom|lower }}">
+        <div class="portal-mall-card__image">
+          {% if mall.image %}
+            <div class="portal-mall-card__image-bg" style="background: url('{{ mall.image.url }}') center/cover no-repeat;"></div>
+          {% else %}
+            <div class="portal-mall-card__image-bg" style="background: {{ mall.couleur_bg }};"></div>
+          {% endif %}
+          <div class="portal-mall-card__image-icon"><i class="fas fa-building"></i></div>
+          
+          {% if mall.est_ouvert %}
+            <span class="portal-mall-card__status portal-mall-card__status--open">Ouvert</span>
+          {% else %}
+            <span class="portal-mall-card__status portal-mall-card__status--soon">Bientôt</span>
+          {% endif %}
+          
+          {% if mall.badge %}
+            <span class="portal-mall-card__badge">{{ mall.badge }}</span>
+          {% endif %}
+        </div>
+        <div class="portal-mall-card__body">
+          <p class="portal-mall-card__city"><i class="fas fa-map-marker-alt"></i> {{ mall.ville }}</p>
+          <h3 class="portal-mall-card__name">{{ mall.nom }}</h3>
+          <p class="portal-mall-card__desc">{{ mall.description_courte|default:mall.description|truncatechars:180 }}</p>
+          <div class="portal-mall-card__info">
+            <span><i class="fas fa-store"></i> {{ mall.nombre_boutiques }} boutiques</span>
+            <span><i class="fas fa-clock"></i> {{ mall.horaires }}</span>
+          </div>
+          {% if mall.est_ouvert %}
+            <a href="{% url 'mall' slug=mall.slug %}" class="portal-mall-card__cta">
+              Entrer dans le mall <i class="fas fa-arrow-right"></i>
+            </a>
+          {% else %}
+            <button class="portal-mall-card__cta portal-mall-card__cta--disabled" disabled>
+              Ouverture {{ mall.ouverture_prevue|date:"Y"|default:"prochainement" }} <i class="fas fa-lock"></i>
+            </button>
+          {% endif %}
+        </div>
+      </article>
+      {% empty %}
+      <div class="ym-empty" style="grid-column: 1/-1; padding: 100px; background: rgba(255,255,255,0.5); border-radius: 20px;">
+          <i class="fas fa-building" style="font-size: 3rem; color: #d1d5db; margin-bottom: 20px;"></i>
+          <p>Aucun centre commercial n'est disponible pour le moment.</p>
+          <a href="{% url 'mall_create' %}" class="ym-btn ym-btn--dark" style="margin-top: 20px;">Ajouter le premier Mall</a>
+      </div>
+      {% endfor %}
+
+    </div><!-- /malls-grid -->
+
+
+    <!-- No results -->
+    <div class="portal-no-results ym-empty" id="portal-no-results" style="display:none;">
+      <i class="fas fa-search"></i>
+      <p>Aucun centre commercial ne correspond à votre recherche.</p>
+      <button class="ym-btn ym-btn--dark ym-btn--sm" style="margin-top:20px;" onclick="resetSearch()">
+        Voir tous les centres
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════ SERVICES STRIP ═══════════ -->
+<section class="portal-services">
+  <div class="ym-container">
+    <div class="portal-services__grid">
+
+      <div class="portal-service-card">
+        <div class="portal-service-card__icon"><i class="fas fa-gift"></i></div>
+        <h3>Carte Cadeau</h3>
+        <p>Une seule carte. Des milliers de possibilités dans tous nos centres.</p>
+        <a href="{% url 'contact' %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+      <div class="portal-service-card">
+        <div class="portal-service-card__icon"><i class="fas fa-car"></i></div>
+        <h3>Parking Smart</h3>
+        <p>Parking gratuit et guidage en temps réel dans tous nos centres.</p>
+        <a href="{% url 'contact' %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+      <div class="portal-service-card">
+        <div class="portal-service-card__icon"><i class="fas fa-concierge-bell"></i></div>
+        <h3>Conciergerie</h3>
+        <p>Notre équipe dédiée vous accueille et vous guide à chaque visite.</p>
+        <a href="{% url 'contact' %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+      <div class="portal-service-card">
+        <div class="portal-service-card__icon"><i class="fas fa-mobile-alt"></i></div>
+        <h3>App YES MALL</h3>
+        <p>Commandez, explorez et profitez d'offres exclusives depuis votre téléphone.</p>
+        <a href="{% url 'contact' %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CTA NEWSLETTER ═══════════ -->
+<section class="portal-cta">
+  <div class="ym-container">
+    <div class="portal-cta__content ym-reveal">
+      <p class="ym-eyebrow" style="color:var(--color-accent);"><i class="fas fa-gem"></i> Rejoignez la famille</p>
+      <h2 class="portal-cta__title">Ne ratez aucune <span>offre exclusive</span></h2>
+      <p class="portal-cta__sub">Inscrivez-vous et recevez en avant-première les promotions, nouvelles ouvertures et événements de tous nos centres.</p>
+      <form class="portal-newsletter-form" method="post" action="{% url 'contact' %}">
+        {% csrf_token %}
+        <input type="email" name="email" placeholder="Votre adresse e-mail" required aria-label="E-mail">
+        <button type="submit" class="ym-btn ym-btn--primary">
+          M'abonner <i class="fas fa-arrow-right ym-btn__icon"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PORTAL FOOTER ═══════════ -->
+<footer class="portal-footer">
+  <div class="ym-container">
+    <div class="portal-footer__grid">
+      <div>
+        <div class="ym-footer__brand">
+          <span class="ym-navbar__brand-icon"><i class="fas fa-gem fa-sm"></i></span>
+          <span class="ym-footer__brand-name">BB <span>MALLs</span></span>
+        </div>
+        <p class="ym-footer__tagline">Le réseau de centres commerciaux premium d'Algérie.</p>
+        <div class="ym-footer__social">
+          <a href="#" class="ym-footer__social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="ym-footer__social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="ym-footer__social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="ym-footer__social-link" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div>
+        <h3 class="ym-footer__heading">Nos Centres</h3>
+        <ul class="ym-footer__links">
+          <li><a href="#">YES MALL Constantine</a></li>
+          <li><a href="#">YES MALL Alger Centre</a></li>
+          <li><a href="#">YES MALL Bab Ezzouar</a></li>
+          <li><a href="#">YES MALL Oran</a></li>
+          <li><a href="#">YES MALL Annaba</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="ym-footer__heading">Services</h3>
+        <ul class="ym-footer__links">
+          <li><a href="{% url 'magasin_list_all' %}">Boutiques</a></li>
+          <li><a href="{% url 'evenement_list' %}">Événements</a></li>
+          <li><a href="{% url 'promotion_list' %}">Promotions</a></li>
+          <li><a href="{% url 'blog_list' %}">Blog</a></li>
+          <li><a href="{% url 'contact' %}">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="ym-footer__heading">Contact</h3>
+        <div class="ym-footer__hours">
+          <p><strong>Service Client</strong><br>+213 776 47 16 46</p>
+          <br>
+          <p><strong>Email</strong><br>contact@yesmall.dz</p>
+          <br>
+          <p><strong>Horaires</strong><br>Lun–Dim : 10h – 23h</p>
+        </div>
+      </div>
+    </div>
+    <div class="ym-footer__bottom">
+      <p>© {% now "Y" %} BB MALLs Group. Tous droits réservés.</p>
+      <div class="ym-footer__legal">
+        <a href="#">Mentions légales</a>
+        <a href="#">Confidentialité</a>
+        <a href="#">Accessibilité</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+<script>
+(function() {
+  // ── Filter by region ──
+  const filterBtns = document.querySelectorAll('.portal-filter-btn');
+  const cards = document.querySelectorAll('.portal-mall-card');
+  const noResults = document.getElementById('portal-no-results');
+  const searchInput = document.getElementById('portal-search-input');
+
+  function applyFilters(ville, query) {
+    let visible = 0;
+    cards.forEach(card => {
+      const matchVille = ville === 'all' || card.dataset.ville === ville;
+      const matchQuery  = !query || card.dataset.name.includes(query.toLowerCase());
+      const show = matchVille && matchQuery;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    noResults.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  let activeVille = 'all';
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeVille = btn.dataset.ville;
+      applyFilters(activeVille, searchInput.value);
+    });
+  });
+
+  // Quick city buttons in hero
+  document.querySelectorAll('.portal-quick-city').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ville = btn.dataset.filter;
+      document.querySelector(`[data-ville="${ville}"]`)?.click();
+      document.getElementById('malls').scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Search
+  searchInput.addEventListener('input', () => {
+    applyFilters(activeVille, searchInput.value);
+    if (searchInput.value) {
+      document.getElementById('malls').scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  document.getElementById('portal-search-form').addEventListener('submit', e => {
+    e.preventDefault();
+    applyFilters(activeVille, searchInput.value);
+    document.getElementById('malls').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  window.resetSearch = function() {
+    searchInput.value = '';
+    filterBtns.forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-ville="all"]').classList.add('active');
+    activeVille = 'all';
+    applyFilters('all', '');
+  };
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.ym-reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+})();
+</script>
+</body>
+</html>

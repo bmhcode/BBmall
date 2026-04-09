@@ -1,0 +1,222 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if object %}Modifier{% else %}Ajouter{% endif %} un Mall — BB MALLs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/portal.css' %}">
+    <style>
+        .form-section {
+            padding: 120px 0;
+            background: #f7f5f2;
+            min-height: 100vh;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 48px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .form-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1a1a2e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            padding: 14px 18px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #e91e8c;
+            box-shadow: 0 0 0 4px rgba(233, 30, 140, 0.1);
+        }
+        .btn-submit {
+            grid-column: span 2;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 16px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .btn-submit:hover {
+            background: #e91e8c;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(233, 30, 140, 0.3);
+        }
+        .btn-cancel {
+            text-align: center;
+            display: block;
+            margin-top: 20px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<header class="portal-nav">
+    <a href="{% url 'home' %}" class="portal-nav__brand">
+        <span class="portal-nav__brand-icon"><i class="fas fa-gem"></i></span>
+        BB <span>MALLs</span>
+    </a>
+    <a href="{% url 'mall_list' %}" class="ym-btn ym-btn--sm ym-btn--ghost" style="color:#fff; border-color: rgba(255,255,255,0.2);">
+        <i class="fas fa-arrow-left"></i> Retour
+    </a>
+</header>
+
+<section class="form-section">
+    <div class="ym-container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>{% if object %}Editer{% else %}Créer{% endif %} un Mall</h1>
+                <p class="text-muted">Remplissez les informations ci-dessous pour gérer votre centre commercial.</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="form-grid">
+                {% csrf_token %}
+                
+                <div class="form-group full-width">
+                    <label for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
+                    {{ form.nom }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.ville.id_for_label }}">{{ form.ville.label }}</label>
+                    {{ form.ville }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.region.id_for_label }}">{{ form.region.label }}</label>
+                    {{ form.region }}
+                </div>
+
+
+                <div class="form-group full-width">
+                    <label for="{{ form.adresse.id_for_label }}">{{ form.adresse.label }}</label>
+                    {{ form.adresse }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+                    {{ form.image }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.couleur_bg.id_for_label }}">{{ form.couleur_bg.label }}</label>
+                    {{ form.couleur_bg }}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.description_courte.id_for_label }}">{{ form.description_courte.label }}</label>
+                    {{ form.description_courte }}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                    {{ form.description }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.nombre_boutiques.id_for_label }}">{{ form.nombre_boutiques.label }}</label>
+                    {{ form.nombre_boutiques }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.horaires.id_for_label }}">{{ form.horaires.label }}</label>
+                    {{ form.horaires }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.telephone.id_for_label }}">{{ form.telephone.label }}</label>
+                    {{ form.telephone }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                    {{ form.email }}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.site_web.id_for_label }}">{{ form.site_web.label }}</label>
+                    {{ form.site_web }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.ouverture_prevue.id_for_label }}">{{ form.ouverture_prevue.label }}</label>
+                    {{ form.ouverture_prevue }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.badge.id_for_label }}">{{ form.badge.label }}</label>
+                    {{ form.badge }}
+                </div>
+
+                <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px;">
+                    {{ form.est_ouvert }}
+                    <label for="{{ form.est_ouvert.id_for_label }}" style="margin-bottom: 0;">{{ form.est_ouvert.label }}</label>
+                </div>
+
+                <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px;">
+                    {{ form.est_en_vedette }}
+                    <label for="{{ form.est_en_vedette.id_for_label }}" style="margin-bottom: 0;">{{ form.est_en_vedette.label }}</label>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    {% if object %}Enregistrer les modifications{% else %}Créer le Mall{% endif %}
+                </button>
+            </form>
+            
+            <a href="{% url 'home' %}" class="btn-cancel">Annuler et retourner au portail</a>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

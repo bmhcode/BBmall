@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ magasin.nom }} — {{mall.nom}} {% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    {% if mall and mall.slug %}
+    <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'magasin_list_by_mall' mall.slug %}" style="color:inherit;">Nos Magasins</a></p>
+    {% else %}
+    <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'magasin_list_all' %}" style="color:inherit;">Nos Magasins</a></p>
+    {% endif %}
+    <h1 class="ym-section-title">{{ magasin.nom }}</h1>
+    <span class="ym-store-card__badge ym-store-card__badge--featured" style="position:static; display:inline-block; margin-top:12px;">
+      {{ magasin.get_categorie_display }}
+    </span>
+  </div>
+</section>
+
+<!-- Detail Content -->
+<section class="ym-section ym-section--gray">
+  <div class="ym-container">
+    <div class="ym-detail-layout">
+
+      <!-- Main Column -->
+      <div class="ym-detail-main">
+
+        <!-- Store Image -->
+        {% if magasin.image %}
+        <div class="ym-detail-image-wrap">
+          <img src="{{ magasin.image.url }}" alt="{{ magasin.nom }}">
+        </div>
+        {% endif %}
+
+        <!-- About -->
+        <div class="ym-detail-card">
+          <h2 class="ym-detail-section-title">À propos de {{ magasin.nom }}</h2>
+          <p class="ym-detail-text">{{ magasin.description }}</p>
+        </div>
+
+        <!-- Active Promotions -->
+        {% if magasin.promotions.all %}
+        <div class="ym-detail-card">
+          <h2 class="ym-detail-section-title">
+            <i class="fas fa-tags" style="color:var(--color-pink); margin-right:8px;"></i>Offres en cours
+          </h2>
+          <div class="ym-promos-inline">
+            {% for promo in magasin.promotions.all %}
+            <div class="ym-promo-inline-card">
+              <span class="ym-promo-card__tag">Promo</span>
+              <h3 class="ym-promo-card__title" style="font-size:1.1rem;">{{ promo.titre }}</h3>
+              <p style="font-size:0.875rem; color:rgba(255,255,255,0.7); margin-bottom:8px;">{{ promo.description }}</p>
+              <p class="ym-promo-card__date">
+                <i class="far fa-clock"></i> Jusqu'au {{ promo.date_fin|date:"d F Y" }}
+              </p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="ym-detail-sidebar">
+        <div class="ym-detail-card">
+          <h2 class="ym-detail-section-title">Informations Pratiques</h2>
+
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div>
+              <small class="ym-info-label">Localisation</small>
+              <span class="ym-info-value">{{ magasin.localisation }}</span>
+            </div>
+          </div>
+
+          {% if magasin.telephone %}
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-phone"></i></div>
+            <div>
+              <small class="ym-info-label">Téléphone</small>
+              <a href="tel:{{ magasin.telephone }}" class="ym-info-value">{{ magasin.telephone }}</a>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if magasin.site_web %}
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-globe"></i></div>
+            <div>
+              <small class="ym-info-label">Site Internet</small>
+              <a href="{{ magasin.site_web }}" target="_blank" class="ym-info-value" style="color:var(--color-pink);">Visiter le site</a>
+            </div>
+          </div>
+          {% endif %}
+
+          <a href="{% url 'contact' %}?magasin={{ magasin.nom }}" class="ym-btn ym-btn--primary" style="width:100%; justify-content:center; margin-top:24px;">
+            Contacter la boutique <i class="fas fa-arrow-right ym-btn__icon"></i>
+          </a>
+        </div>
+
+        <!-- Share -->
+        <div class="ym-detail-card" style="margin-top:20px;">
+          <h3 class="ym-detail-section-title" style="font-size:1rem;">Partagez l'expérience</h3>
+          <div style="display:flex; gap:10px; margin-top:16px;">
+            <button class="ym-btn ym-btn--dark ym-btn--sm" style="flex:1; justify-content:center;">
+              <i class="fab fa-facebook-f"></i> Partager
+            </button>
+            <button class="ym-btn ym-btn--dark ym-btn--sm" style="flex:1; justify-content:center;">
+              <i class="fab fa-twitter"></i> Tweet
+            </button>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

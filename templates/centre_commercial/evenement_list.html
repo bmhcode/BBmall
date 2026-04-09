@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Événements — YES MALL{% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    <p class="ym-eyebrow"><i class="fas fa-calendar-alt"></i> Agenda</p>
+    <h1 class="ym-section-title">Événements &amp; Divertissement</h1>
+    <p class="ym-section-subtitle">Plongez dans l'effervescence de notre centre. Concerts, ateliers, expositions et bien plus encore.</p>
+  </div>
+</section>
+
+<!-- Events List -->
+<section class="ym-section ym-section--light">
+  <div class="ym-container">
+
+    <div class="ym-events-row ym-reveal">
+      {% for evenement in evenements %}
+      <a href="{{ evenement.get_absolute_url }}" class="ym-event-item">
+        <!-- Date -->
+        <div class="ym-event-item__date">
+          <span class="ym-event-item__day">{{ evenement.date|date:"d" }}</span>
+          <span class="ym-event-item__month">{{ evenement.date|date:"M" }}</span>
+        </div>
+
+        <!-- Image -->
+        {% if evenement.image %}
+        <img src="{{ evenement.image.url }}" class="ym-event-item__image" alt="{{ evenement.titre }}">
+        {% else %}
+        <div class="ym-event-item__image-placeholder">
+          <i class="fas fa-calendar-star"></i>
+        </div>
+        {% endif %}
+
+        <!-- Info -->
+        <div class="ym-event-item__info">
+          <p class="ym-event-item__category">Événement</p>
+          <h2 class="ym-event-item__title">{{ evenement.titre }}</h2>
+          <p class="ym-event-item__location">
+            <i class="fas fa-map-marker-alt"></i> {{ evenement.lieu }}
+            &nbsp;&nbsp;<i class="far fa-clock"></i> {{ evenement.date|date:"H:i" }}
+          </p>
+        </div>
+
+        <!-- Arrow -->
+        <div class="ym-event-item__arrow">
+          <i class="fas fa-arrow-right"></i>
+        </div>
+      </a>
+      {% empty %}
+      <div class="ym-empty">
+        <i class="fas fa-calendar-times"></i>
+        <p>Aucun événement n'est prévu pour le moment. Revenez bientôt !</p>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

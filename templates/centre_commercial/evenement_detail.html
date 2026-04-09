@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ evenement.titre }} — YES MALL{% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'evenement_list' %}" style="color:inherit;">Événements</a></p>
+    <h1 class="ym-section-title">{{ evenement.titre }}</h1>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+      <span class="ym-store-card__badge ym-store-card__badge--new" style="position:static; display:inline-flex; align-items:center; gap:6px;">
+        <i class="far fa-calendar-alt"></i> {{ evenement.date|date:"l d F Y" }}
+      </span>
+      <span class="ym-store-card__badge ym-store-card__badge--featured" style="position:static; display:inline-flex; align-items:center; gap:6px;">
+        <i class="far fa-clock"></i> {{ evenement.date|date:"H:i" }}
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- Detail Content -->
+<section class="ym-section ym-section--gray">
+  <div class="ym-container">
+    <div class="ym-detail-layout">
+
+      <!-- Main -->
+      <div class="ym-detail-main">
+        <div class="ym-detail-card">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:20px; color:var(--color-muted); font-size:0.9rem;">
+            <i class="fas fa-map-marker-alt" style="color:var(--color-pink);"></i>
+            <span>Lieu : <strong style="color:var(--color-text);">{{ evenement.lieu }}</strong></span>
+          </div>
+          <p class="ym-detail-text" style="white-space:pre-line;">{{ evenement.description }}</p>
+        </div>
+
+        <div style="margin-top:24px;">
+          <a href="{% url 'evenement_list' %}" class="ym-btn ym-btn--dark">
+            <i class="fas fa-arrow-left"></i> Retour aux événements
+          </a>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="ym-detail-sidebar">
+        {% if evenement.image %}
+        <div class="ym-detail-image-wrap" style="border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-xl);">
+          <img src="{{ evenement.image.url }}" alt="{{ evenement.titre }}" style="width:100%; height:300px; object-fit:cover;">
+        </div>
+
+        <div class="ym-detail-card" style="margin-top:20px; text-align:center;">
+          <h3 class="ym-detail-section-title" style="font-size:1rem; margin-bottom:16px;">Ajouter à mon agenda ?</h3>
+          <div style="display:flex; justify-content:center; gap:10px;">
+            <button class="ym-btn ym-btn--dark ym-btn--sm">
+              <i class="fab fa-google"></i> Google
+            </button>
+            <button class="ym-btn ym-btn--dark ym-btn--sm">
+              <i class="fab fa-apple"></i> Apple
+            </button>
+          </div>
+        </div>
+        {% endif %}
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}
