@@ -72,7 +72,6 @@ class Mall(models.Model):
         verbose_name_plural = "Centres Commerciaux (Malls)"
         ordering = ['-est_en_vedette', 'nom']
 
-
 class Magasin(models.Model):
     CATEGORIES = [
         ('mode', 'Mode'),
@@ -116,6 +115,26 @@ class Magasin(models.Model):
         verbose_name_plural = "Magasins"
 
 
+class Promotion(models.Model):
+    # ── Relation ──
+    # Note: Promotion already has a FK to Magasin, which has a FK to Mall.
+    # But adding a direct FK to Mall can optimize queries and allow mall-wide promos.
+    magasin = models.ForeignKey(Magasin, on_delete=models.CASCADE, related_name='promotions')
+   
+    titre = models.CharField(max_length=200)
+    description = models.TextField()
+    image = models.ImageField(upload_to='promotions/')
+    date_debut = models.DateField()
+    date_fin = models.DateField()
+    cree_le = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.titre} - {self.magasin.nom}"
+
+    class Meta:
+        verbose_name = "Promotion"
+        verbose_name_plural = "Promotions"
+
 class Evenement(models.Model):
     # ── Relation ──
     mall = models.ForeignKey(Mall, on_delete=models.SET_NULL, null=True, blank=True, related_name='evenements')
@@ -144,40 +163,10 @@ class Evenement(models.Model):
         verbose_name_plural = "Événements"
 
 
-class Promotion(models.Model):
-    # ── Relation ──
-    # Note: Promotion already has a FK to Magasin, which has a FK to Mall.
-    # But adding a direct FK to Mall can optimize queries and allow mall-wide promos.
-    mall = models.ForeignKey(Mall, on_delete=models.SET_NULL, null=True, blank=True, related_name='promotions')
-    
-    titre = models.CharField(max_length=200)
-    description = models.TextField()
-    image = models.ImageField(upload_to='promotions/')
-    date_debut = models.DateField()
-    date_fin = models.DateField()
-    magasin = models.ForeignKey(Magasin, on_delete=models.CASCADE, related_name='promotions')
-    cree_le = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.titre} - {self.magasin.nom}"
-
-    class Meta:
-        verbose_name = "Promotion"
-        verbose_name_plural = "Promotions"
-
-
-class ContactMessage(models.Model):
-    nom = models.CharField(max_length=100)
-    email = models.EmailField()
-    sujet = models.CharField(max_length=200)
-    message = models.TextField()
-    cree_le = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Message de {self.nom} - {self.sujet}"
-
-
 class ArticleBlog(models.Model):
+    # ── Relation ──
+    mall = models.ForeignKey(Mall, on_delete=models.SET_NULL, null=True, blank=True, related_name='blogs')
+
     titre = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     contenu = models.TextField()
@@ -198,4 +187,20 @@ class ArticleBlog(models.Model):
     class Meta:
         verbose_name = "Article de Blog"
         verbose_name_plural = "Articles de Blog"
+
+        
+class ContactMessage(models.Model):
+    # ── Relation ──
+    mall = models.ForeignKey(Mall, on_delete=models.SET_NULL, null=True, blank=True, related_name='contacts')
+
+    nom = models.CharField(max_length=100)
+    email = models.EmailField()
+    sujet = models.CharField(max_length=200)
+    message = models.TextField()
+    cree_le = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message de {self.nom} - {self.sujet}"
+
+
 

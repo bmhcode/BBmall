@@ -34,7 +34,7 @@
   <div class="ym-search-overlay__inner">
     <p class="ym-search-overlay__label">Que recherchez-vous ?</p>
     {% if mall and mall.slug %}
-    <form class="ym-search-overlay__form" action="{% url 'magasin_list_by_mall' mall.slug %}" method="get">
+    <form class="ym-search-overlay__form" action="{% url 'magasins_by_mall' mall.slug %}" method="get">
     {% endif %}
       <input id="ym-search-input" class="ym-search-overlay__input" type="search"
              name="q" placeholder="Magasins, marques, événements…" autocomplete="off">
@@ -57,11 +57,11 @@
     </button>
     <ul class="ym-mobile-nav__links">
       <li><a href="{% url 'home' %}"><i class="fas fa-home me-2"></i>Accueil</a></li>
-      <li><a href="{% url 'magasin_list_all' %}"><i class="fas fa-store me-2"></i>Magasins</a></li>
-      <li><a href="{% url 'evenement_list' %}"><i class="fas fa-calendar-alt me-2"></i>Événements</a></li>
-      <li><a href="{% url 'promotion_list' %}"><i class="fas fa-tag me-2"></i>Promotions</a></li>
-      <li><a href="{% url 'blog_list' %}"><i class="fas fa-newspaper me-2"></i>Blog</a></li>
-      <li><a href="{% url 'contact' %}"><i class="fas fa-envelope me-2"></i>Contact</a></li>
+      <li><a href="{% url 'promotions_all' %}"><i class="fas fa-tag me-2"></i>Promotions</a></li>
+      <li><a href="{% url 'magasins_all' %}"><i class="fas fa-store me-2"></i>Magasins</a></li>
+      <li><a href="{% url 'evenements_all' %}"><i class="fas fa-calendar-alt me-2"></i>Événements</a></li>
+      <li><a href="{% url 'blogs_all' %}"><i class="fas fa-newspaper me-2"></i>Blog</a></li>
+      <li><a href="{% url 'contacts_all' %}"><i class="fas fa-envelope me-2"></i>Contact</a></li>
     </ul>
   </nav>
 </div>
@@ -82,15 +82,21 @@
   <nav aria-label="Navigation principale">
     <ul class="ym-navbar__nav">
 
-      {% if mall %}
-      <li><a href="{% url 'mall' mall.slug %}">Accueil</a></li>
-      <li><a href="{% url 'magasin_list_by_mall' mall.slug %}">Magasins</a></li>
+      {% if mall and mall.slug %}
+        <li><a href="{% url 'mall' mall.slug %}">Accueil</a></li>
+        <li><a href="{% url 'promotions_by_mall' mall.slug %}">Promotions</a></li>
+        <li><a href="{% url 'magasins_by_mall' mall.slug %}">Magasins</a></li>
+        <li><a href="{% url 'evenements_by_mall' mall.slug %}">Événements</a></li>
+        <li><a href="{% url 'blogs_by_mall' mall.slug %}">Blog</a></li>
+        <li><a href="{% url 'contacts_by_mall' mall.slug %}">Contact</a></li>
+      {% else %}
+        <li><a href="{% url 'home' %}">Accueil</a></li>
+        <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
+        <li><a href="{% url 'magasins_all' %}">Magasins</a></li>
+        <li><a href="{% url 'evenements_all' %}">Événements</a></li>
+        <li><a href="{% url 'blogs_all' %}">Blog</a></li>
+        <li><a href="{% url 'contacts_all' %}">Contact</a></li>
       {% endif %}
-
-      <li><a href="{% url 'evenement_list' %}">Événements</a></li>
-      <li><a href="{% url 'promotion_list' %}">Promotions</a></li>
-      <li><a href="{% url 'blog_list' %}">Blog</a></li>
-      <li><a href="{% url 'contact' %}">Contact</a></li>
 
     </ul>
   </nav>
@@ -100,7 +106,7 @@
     <button class="ym-navbar__search-btn" aria-label="Ouvrir la recherche" id="ym-nav-search">
       <i class="fas fa-search"></i>
     </button>
-    <a href="{% url 'contact' %}" class="ym-btn ym-btn--dark ym-btn--sm ym-navbar__cta">
+    <a href="{% url 'contacts_all' %}" class="ym-btn ym-btn--dark ym-btn--sm ym-navbar__cta">
       Nous visiter <i class="fas fa-arrow-right ym-btn__icon"></i>
     </a>
     <button id="ym-hamburger" class="ym-navbar__hamburger" aria-label="Ouvrir le menu mobile"
@@ -158,11 +164,21 @@
       <div>
         <h3 class="ym-footer__heading">Explorer</h3>
         <ul class="ym-footer__links">
-          <li><a href="{% url 'magasin_list_all' %}">Tous les magasins</a></li>
-          <li><a href="{% url 'evenement_list' %}">Événements</a></li>
-          <li><a href="{% url 'promotion_list' %}">Promotions</a></li>
-          <li><a href="{% url 'blog_list' %}">Actualités</a></li>
-          <li><a href="{% url 'contact' %}">Contact</a></li>
+          {% if mall and mall.slug %}
+        <li><a href="{% url 'mall' mall.slug %}">Accueil</a></li>
+        <li><a href="{% url 'promotions_by_mall' mall.slug %}">Promotions</a></li>
+        <li><a href="{% url 'magasins_by_mall' mall.slug %}">Magasins</a></li>
+        <li><a href="{% url 'evenements_by_mall' mall.slug %}">Événements</a></li>
+        <li><a href="{% url 'blogs_by_mall' mall.slug %}">Blog</a></li>
+        <li><a href="{% url 'contacts_by_mall' mall.slug %}">Contact</a></li>
+      {% else %}
+        <li><a href="{% url 'home' %}">Accueil</a></li>
+        <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
+        <li><a href="{% url 'magasins_all' %}">Magasins</a></li>
+        <li><a href="{% url 'evenements_all' %}">Événements</a></li>
+        <li><a href="{% url 'blogs_all' %}">Blog</a></li>
+        <li><a href="{% url 'contacts_all' %}">Contact</a></li>
+      {% endif %}
         </ul>
       </div>
 
@@ -170,11 +186,11 @@
       <div>
         <h3 class="ym-footer__heading">Catégories</h3>
         <ul class="ym-footer__links">
-          <li><a href="{% url 'magasin_list_all' %}?category=mode">Mode & Accessoires</a></li>
-          <li><a href="{% url 'magasin_list_all' %}?category=beaute">Beauté & Santé</a></li>
-          <li><a href="{% url 'magasin_list_all' %}?category=restauration">Restauration</a></li>
-          <li><a href="{% url 'magasin_list_all' %}?category=technologie">Technologie</a></li>
-          <li><a href="{% url 'magasin_list_all' %}?category=loisirs">Loisirs & Culture</a></li>
+          <li><a href="{% url 'magasins_all' %}?category=mode">Mode & Accessoires</a></li>
+          <li><a href="{% url 'magasins_all' %}?category=beaute">Beauté & Santé</a></li>
+          <li><a href="{% url 'magasins_all' %}?category=restauration">Restauration</a></li>
+          <li><a href="{% url 'magasins_all' %}?category=technologie">Technologie</a></li>
+          <li><a href="{% url 'magasins_all' %}?category=loisirs">Loisirs & Culture</a></li>
         </ul>
       </div>
 
@@ -210,4 +226,5 @@
 <script src="{% static 'js/main.js' %}"></script>
 {% block extra_js %}{% endblock %}
 </body>
+
 </html>

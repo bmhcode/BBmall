@@ -26,11 +26,11 @@
       Plus de {{mall.nombre_boutiques}} boutiques, restaurants gastronomiques et espaces de divertissement — tout sous un même toit d'exception.
     </p>
     <div class="ym-hero__actions">
-      <a href="{% url 'magasin_list_by_mall' mall.slug %}" class="ym-btn ym-btn--primary" id="hero-explore-btn">
+      <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--primary" id="hero-explore-btn">
         Explorer les boutiques
         <i class="fas fa-arrow-right ym-btn__icon"></i>
       </a>
-      <a href="{% url 'evenement_list' %}" class="ym-btn ym-btn--ghost" id="hero-events-btn">
+      <a href="{% url 'evenements_all' %}" class="ym-btn ym-btn--ghost" id="hero-events-btn">
         <i class="fas fa-calendar-alt"></i>
         Voir les événements
       </a>
@@ -100,7 +100,7 @@
         <p class="ym-eyebrow">Offres Exclusives</p>
         <h2 class="ym-section-title" id="promo-heading">Promotions du Moment</h2>
       </div>
-      <a href="{% url 'promotion_list' %}" class="ym-view-all">
+      <a href="{% url 'promotions_by_mall' mall.slug %}" class="ym-view-all">
         Toutes les promos <i class="fas fa-arrow-right fa-sm"></i>
       </a>
     </div>
@@ -174,7 +174,7 @@
         <h2 class="ym-section-title" id="stores-heading">Boutiques à la Une</h2>
         <p class="ym-section-subtitle">Découvrez notre sélection de boutiques premium soigneusement choisies pour vous.</p>
       </div>
-      <a href="{% url 'magasin_list_by_mall' mall.slug %}" class="ym-view-all">
+      <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-view-all">
         Voir toutes les boutiques <i class="fas fa-arrow-right fa-sm"></i>
       </a>
     </div>
@@ -237,7 +237,7 @@
 
     {% if magasins_vedette %}
     <div style="text-align:center;margin-top:48px" class="ym-reveal">
-      <a href="{% url 'magasin_list_by_mall' mall.slug %}" class="ym-btn ym-btn--dark" id="all-stores-btn">
+      <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--dark" id="all-stores-btn">
         Découvrir toutes les boutiques
         <i class="fas fa-arrow-right ym-btn__icon"></i>
       </a>
@@ -321,7 +321,7 @@
         </div>
 
         <div style="margin-top:40px">
-          <a href="{% url 'magasin_list_by_mall' mall.slug %}" class="ym-btn ym-btn--dark">
+          <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--dark">
             Explorer le mall <i class="fas fa-arrow-right ym-btn__icon"></i>
           </a>
         </div>
@@ -343,7 +343,7 @@
         <p class="ym-eyebrow" style="color:var(--color-accent)">À ne pas manquer</p>
         <h2 class="ym-section-title" id="events-heading">Événements à Venir</h2>
       </div>
-      <a href="{% url 'evenement_list' %}" class="ym-view-all">
+      <a href="{% url 'evenements_all' %}" class="ym-view-all">
         Tous les événements <i class="fas fa-arrow-right fa-sm"></i>
       </a>
     </div>
@@ -409,11 +409,11 @@
         Accumulez des points à chaque achat, profitez d'offres exclusives et d'invitations aux événements privés.
       </p>
       <div class="ym-cta-banner__actions">
-        <a href="{% url 'contact' %}" class="ym-btn ym-btn--primary" id="cta-join-btn">
+        <a href="{% url 'contacts_by_mall' mall.slug %}" class="ym-btn ym-btn--primary" id="cta-join-btn">
           <i class="fas fa-gem"></i>
           S'inscrire gratuitement
         </a>
-        <a href="{% url 'magasin_list_by_mall' mall.slug %}" class="ym-btn ym-btn--ghost" id="cta-discover-btn">
+        <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--ghost" id="cta-discover-btn">
           En savoir plus
         </a>
       </div>
@@ -474,7 +474,7 @@
 
     {% if articles_blog %}
     <div style="text-align:center;margin-top:48px" class="ym-reveal">
-      <a href="{% url 'blog_list' %}" class="ym-view-all" style="font-size:0.95rem">
+      <a href="{% url 'blogs_by_mall' mall.slug %}" class="ym-view-all" style="font-size:0.95rem">
         Voir tous les articles <i class="fas fa-arrow-right fa-sm"></i>
       </a>
     </div>
@@ -515,4 +515,5 @@ document.addEventListener('DOMContentLoaded', () => {
 .me-1 { margin-right: 0.25rem; }
 .me-2 { margin-right: 0.5rem; }
 </style>
+
 {% endblock %}

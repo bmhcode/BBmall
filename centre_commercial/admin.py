@@ -34,18 +34,20 @@ class EvenementAdmin(admin.ModelAdmin):
 
 @admin.register(Promotion)
 class PromotionAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'mall', 'magasin', 'date_debut', 'date_fin')
-    list_filter = ('mall', 'magasin', 'date_debut')
+    list_display = ('titre',  'magasin', 'date_debut', 'date_fin')
+    list_filter = ('magasin', 'date_debut')
     search_fields = ('titre', 'description')
 
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'email', 'sujet', 'cree_le')
+    list_display = ('nom', 'mall',  'email', 'sujet', 'cree_le')
     readonly_fields = ('cree_le',)
+    list_filter = ('mall', 'cree_le')
+    search_fields = ('nom', 'email', 'sujet', 'message')
 
 @admin.register(ArticleBlog)
 class ArticleBlogAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'date_publication')
+    list_display = ('titre', 'mall', 'date_publication')
     search_fields = ('titre', 'contenu')
     prepopulated_fields = {'slug': ('titre',)}
 

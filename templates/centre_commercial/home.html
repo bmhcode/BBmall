@@ -23,17 +23,19 @@
     BB <span>MALLs</span>
   </a>
   <nav class="portal-nav__links">
-    <a href="{% url 'mall_list' %}"><i class="fas fa-cog"></i> Gérer les Malls</a>
+    <a href="{% url 'mall_table_list' %}"><i class="fas fa-cog"></i> Gérer les Malls</a>
     <a href="{% url 'home' %}"><i class="fas fa-store"></i> Mon Mall</a>
-    <a href="{% url 'evenement_list' %}"><i class="fas fa-calendar-alt"></i> Événements</a>
+    <a href="{% url 'evenements_all' %}"><i class="fas fa-calendar-alt"></i> Événements</a>
   </nav>
+
+  
 <!-- 
  <nav aria-label="Navigation principale">
     <ul class="ym-navbar__nav">
       <li><a href="{% url 'home' %}">Accueil</a></li>
-      <li><a href="{% url 'magasin_list_all' %}">Magasins</a></li>
-      <li><a href="{% url 'evenement_list' %}">Événements</a></li>
-      <li><a href="{% url 'promotion_list' %}">Promotions</a></li>
+      <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
+      <li><a href="{% url 'magasins_all' %}">Magasins</a></li>
+      <li><a href="{% url 'evenements_all' %}">Événements</a></li>
       <li><a href="{% url 'blog_list' %}">Blog</a></li>
       <li><a href="{% url 'contact' %}">Contact</a></li>
     </ul>
@@ -164,7 +166,7 @@
             <span><i class="fas fa-clock"></i> {{ mall.horaires }}</span>
           </div>
           {% if mall.est_ouvert %}
-            <a href="{% url 'mall' slug=mall.slug %}" class="portal-mall-card__cta">
+            <a href="{% url 'mall' mall.slug %}" class="portal-mall-card__cta">
               Entrer dans le mall <i class="fas fa-arrow-right"></i>
             </a>
           {% else %}
@@ -183,7 +185,6 @@
       {% endfor %}
 
     </div><!-- /malls-grid -->
-
 
     <!-- No results -->
     <div class="portal-no-results ym-empty" id="portal-no-results" style="display:none;">
@@ -282,9 +283,9 @@
       <div>
         <h3 class="ym-footer__heading">Services</h3>
         <ul class="ym-footer__links">
-          <li><a href="{% url 'magasin_list_all' %}">Boutiques</a></li>
-          <li><a href="{% url 'evenement_list' %}">Événements</a></li>
-          <li><a href="{% url 'promotion_list' %}">Promotions</a></li>
+          <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
+          <li><a href="{% url 'magasins_all' %}">Boutiques</a></li>
+          <li><a href="{% url 'evenements_all' %}">Événements</a></li>
           <li><a href="{% url 'blog_list' %}">Blog</a></li>
           <li><a href="{% url 'contact' %}">Contact</a></li>
         </ul>

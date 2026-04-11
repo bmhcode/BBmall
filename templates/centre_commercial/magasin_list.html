@@ -20,12 +20,12 @@
     <!-- Filter Bar -->
     <div class="ym-filter-bar">
       {% if mall and mall.slug %}
-      <a href="{% url 'magasin_list_by_mall' mall.slug %}"
+      <a href="{% url 'magasins_by_mall' mall.slug %}"
          class="ym-filter-btn {% if not request.GET.category %}active{% endif %}">
         Tous
       </a>
       {% else %}
-      <a href="{% url 'magasin_list_all' %}"
+      <a href="{% url 'magasins_all' %}"
          class="ym-filter-btn {% if not request.GET.category %}active{% endif %}">
         Tous
       </a>
