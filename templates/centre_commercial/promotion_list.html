@@ -19,7 +19,11 @@
 
     <div class="ym-promos-grid ym-reveal">
       {% for promotion in promotions %}
-      <a href="{{ promotion.magasin.get_absolute_url }}" class="ym-promo-card">
+      {% if mall %}
+        <a href="{% url 'magasin_detail' mall_slug=mall.slug slug=promotion.magasin.slug %}" class="ym-promo-card">
+      {% else %}
+        <a href="{% url 'magasin_detail' slug=promotion.magasin.slug %}" class="ym-promo-card">
+      {% endif %}
         {% if promotion.image %}
         <div class="ym-promo-card__bg" style="background-image:url('{{ promotion.image.url }}');"></div>
         <div class="ym-promo-card__overlay"></div>

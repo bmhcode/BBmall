@@ -8,9 +8,9 @@
 <section class="ym-page-hero">
   <div class="ym-container">
     {% if mall and mall.slug %}
-    <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'magasin_list_by_mall' mall.slug %}" style="color:inherit;">Nos Magasins</a></p>
+      <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'magasins_by_mall' mall.slug %}" style="color:inherit;">Nos Magasins</a></p>
     {% else %}
-    <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'magasin_list_all' %}" style="color:inherit;">Nos Magasins</a></p>
+      <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'magasins_all' %}" style="color:inherit;">Nos Magasins</a></p>
     {% endif %}
     <h1 class="ym-section-title">{{ magasin.nom }}</h1>
     <span class="ym-store-card__badge ym-store-card__badge--featured" style="position:static; display:inline-block; margin-top:12px;">
@@ -96,7 +96,7 @@
           </div>
           {% endif %}
 
-          <a href="{% url 'contact' %}?magasin={{ magasin.nom }}" class="ym-btn ym-btn--primary" style="width:100%; justify-content:center; margin-top:24px;">
+          <a href="{% url 'contact_create' mall.slug %}" class="ym-btn ym-btn--primary" style="width:100%; justify-content:center; margin-top:24px;">
             Contacter la boutique <i class="fas fa-arrow-right ym-btn__icon"></i>
           </a>
         </div>

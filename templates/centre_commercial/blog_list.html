@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Blog &amp; Actualités — YES MALL{% endblock %}
+{% block title %}Blog &amp; Actualités — {{mall.nom}}{% endblock %}
 
 {% block content %}
 
@@ -19,7 +19,11 @@
 
     <div class="ym-blog-grid ym-reveal">
       {% for article in articles %}
-      <a href="{{ article.get_absolute_url }}" class="ym-blog-card">
+
+        {% if mall %}
+          <a href="{% url 'blog_detail' mall_slug=mall.slug slug=article.slug %}" class="ym-blog-card">
+        {% endif %}
+
         <div class="ym-blog-card__image-wrap">
           {% if article.image %}
           <img src="{{ article.image.url }}" alt="{{ article.titre }}">

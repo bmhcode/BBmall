@@ -3,14 +3,11 @@ from django.views.generic import ListView, DetailView, TemplateView, CreateView,
 from django.db.models import Q
 from .models import Mall,Magasin, Evenement, Promotion, ArticleBlog, ContactMessage
 from .forms import MallForm,ContactForm
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.contrib import messages
-
 from django.utils import timezone
 
-
 # ================ Start Home views ==========================
-
 class HomeView(TemplateView):
     """Landing portal — display all malls."""
     template_name = 'centre_commercial/home.html'
@@ -25,12 +22,10 @@ class HomeView(TemplateView):
         context['articles_blog'] = ArticleBlog.objects.all().order_by('-date_publication')[:3]
         return context
 
-# table list mall 
 class MallTableListView(ListView):
     model = Mall
     template_name = 'centre_commercial/mall_table_list.html'
     context_object_name = 'malls'
-
 # ================ End Start Home views =======================
 
 # ================ Start Mall views ==========================
@@ -80,12 +75,6 @@ class MallDeleteView(DeleteView):
 # ================ End Mall views ==========================
 
 # ================ Start Promotion views ==========================
-# class PromotionListView(ListView):
-#     model = Promotion
-#     template_name = 'centre_commercial/promotion_list.html'
-#     context_object_name = 'promotions'
-#     ordering = ['-cree_le']
-
 class PromotionListView(ListView):
     model = Promotion
     template_name = 'centre_commercial/promotion_list.html'
@@ -118,7 +107,6 @@ class PromotionListView(ListView):
 
 
 # ================ Start Magasin views ==========================
-
 class MagasinListView(ListView):
     model = Magasin
     template_name = 'centre_commercial/magasin_list.html'
@@ -169,27 +157,26 @@ class MagasinDetailView(DetailView):
     context_object_name = 'magasin'
 
     def get_queryset(self):
+        # ⚡ تحسين الأداء (join مع mall)
         return Magasin.objects.select_related('mall')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         magasin = self.object
 
-        # ✅ جلب mall من URL (GET param)
-        mall_slug = self.request.GET.get('mall')
-        mall = None
+        # ✅ المول مباشرة من العلاقة
+        mall = magasin.mall
 
-        if mall_slug:
-            mall = Mall.objects.filter(slug=mall_slug).first()
-
-        # ✅ related magasins (من نفس المول)
-        related_magasins = Magasin.objects.filter(
-            mall=magasin.mall
-        ).exclude(id=magasin.id).select_related('mall')[:4]
+        # ✅ متاجر من نفس المول
+        related_magasins = (
+            Magasin.objects
+            .filter(mall=mall)
+            .exclude(id=magasin.id)
+            .select_related('mall')[:4]
+        )
 
         context.update({
-            'mall': mall,  # 👈 مهم للرجوع
+            'mall': mall,  # 👈 الآن مضمون دائماً
             'related_magasins': related_magasins,
         })
 
@@ -223,6 +210,18 @@ class EvenementDetailView(DetailView):
     model = Evenement
     template_name = 'centre_commercial/evenement_detail.html'
     context_object_name = 'evenement'
+
+    def get_object(self):
+        return get_object_or_404(
+            Evenement,
+            slug=self.kwargs['slug'],
+            mall__slug=self.kwargs['mall_slug']
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.object.mall
+        return context
 # ================ End Evenement views ==========================
 
 
@@ -252,19 +251,30 @@ class ArticleBlogDetailView(DetailView):
     model = ArticleBlog
     template_name = 'centre_commercial/blog_detail.html'
     context_object_name = 'article'
+
+    def get_object(self):
+        return get_object_or_404(
+            ArticleBlog,
+            slug=self.kwargs['slug'],
+            mall__slug=self.kwargs['mall_slug']
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.object.mall
+        return context
 # ================ End ArticleBlog views ==========================
 
 
 # ================ Start Contact views ==========================
 
-
-class ContactView(CreateView):
+class ContactCreateView(CreateView):
     model = ContactMessage
     form_class = ContactForm
     template_name = 'centre_commercial/contact.html'
 
     def dispatch(self, request, *args, **kwargs):
-        self.mall = get_object_or_404(Mall, slug=self.kwargs.get('slug'))
+        self.mall = get_object_or_404(Mall, slug=self.kwargs.get('mall_slug'))  # ✅
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -273,5 +283,63 @@ class ContactView(CreateView):
 
         messages.success(self.request, "Message envoyé avec succès")
 
-        return self.render_to_response(self.get_context_data(form=self.form_class()))
+        return redirect('mall', self.mall.slug)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.mall  # ✅ أفضل
+        return context
+
+
+class ContactListView(ListView):
+    model = ContactMessage
+    template_name = 'centre_commercial/contacts_messages_list.html'
+    context_object_name = 'contacts'
+
+    def get_queryset(self):
+        self.mall_slug = self.kwargs.get('mall_slug')  # ✅ التصحيح هنا
+        self.mall = None
+
+        if self.mall_slug:
+            self.mall = get_object_or_404(Mall, slug=self.mall_slug)
+            return ContactMessage.objects.filter(mall=self.mall).order_by('-cree_le')
+
+        return ContactMessage.objects.all().order_by('-cree_le')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = get_object_or_404(Mall, slug=self.kwargs['mall_slug'])
+        return context
+
+class ContactDetailView(DetailView):
+    model = ContactMessage
+    template_name = 'centre_commercial/contact_message_detail.html'
+    context_object_name = 'contact'
+
+    def get_object(self):
+        return get_object_or_404(ContactMessage, id=self.kwargs['id'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.object.mall
+        return context
+
+class ContactDeleteView(DeleteView):
+    model = ContactMessage
+    template_name = 'centre_commercial/contact_message_delete.html'
+    context_object_name = 'contact'
+
+    def get_object(self):
+        return get_object_or_404(ContactMessage, id=self.kwargs['id'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.object.mall
+        return context  
+
+    def get_success_url(self):
+        return reverse('contacts_by_mall', kwargs={
+        'mall_slug': self.object.mall.slug
+    })
+
 # ================ End Contact views ==========================

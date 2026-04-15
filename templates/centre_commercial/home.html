@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="BB MALL — Découvrez nos centres commerciaux premium partout en Algérie. Trouvez votre mall et commencez votre expérience shopping.">
-  <title>BB MALL — Trouvez Votre Centre</title>
+  <title>BB Shopping — Trouvez Votre Centre</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,28 +20,13 @@
 <header class="portal-nav">
   <a href="{% url 'home' %}" class="portal-nav__brand">
     <span class="portal-nav__brand-icon"><i class="fas fa-gem"></i></span>
-    BB <span>MALLs</span>
+    BB <span>Shopping</span>
   </a>
   <nav class="portal-nav__links">
     <a href="{% url 'mall_table_list' %}"><i class="fas fa-cog"></i> Gérer les Malls</a>
     <a href="{% url 'home' %}"><i class="fas fa-store"></i> Mon Mall</a>
     <a href="{% url 'evenements_all' %}"><i class="fas fa-calendar-alt"></i> Événements</a>
   </nav>
-
-  
-<!-- 
- <nav aria-label="Navigation principale">
-    <ul class="ym-navbar__nav">
-      <li><a href="{% url 'home' %}">Accueil</a></li>
-      <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
-      <li><a href="{% url 'magasins_all' %}">Magasins</a></li>
-      <li><a href="{% url 'evenements_all' %}">Événements</a></li>
-      <li><a href="{% url 'blog_list' %}">Blog</a></li>
-      <li><a href="{% url 'contact' %}">Contact</a></li>
-    </ul>
-  </nav> -->
-
-
 </header>
 
 <!-- ═══════════ HERO ═══════════ -->
@@ -100,12 +85,12 @@
     <span class="ym-ticker__item"><i class="fas fa-circle"></i>Nouvelles ouvertures 2026</span>
     <span class="ym-ticker__item"><i class="fas fa-circle"></i>Soldes jusqu'à -70% dans tous les centres</span>
     <span class="ym-ticker__item"><i class="fas fa-circle"></i>Parking gratuit dans tous nos malls</span>
-    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Carte BB MALLs — Profitez de privilèges exclusifs</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Carte BB Shopping — Profitez de privilèges exclusifs</span>
     <span class="ym-ticker__item"><i class="fas fa-circle"></i>Événements chaque weekend dans vos centres</span>
     <span class="ym-ticker__item"><i class="fas fa-circle"></i>Nouvelles ouvertures 2026</span>
     <span class="ym-ticker__item"><i class="fas fa-circle"></i>Soldes jusqu'à -70% dans tous les centres</span>
     <span class="ym-ticker__item"><i class="fas fa-circle"></i>Parking gratuit dans tous nos malls</span>
-    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Carte BB MALLs — Profitez de privilèges exclusifs</span>
+    <span class="ym-ticker__item"><i class="fas fa-circle"></i>Carte BB Shopping — Profitez de privilèges exclusifs</span>
     <span class="ym-ticker__item"><i class="fas fa-circle"></i>Événements chaque weekend dans vos centres</span>
   </div>
 </div>
@@ -147,7 +132,7 @@
           {% endif %}
           <div class="portal-mall-card__image-icon"><i class="fas fa-building"></i></div>
           
-          {% if mall.est_ouvert %}
+          {% if mall.estOuvert %}
             <span class="portal-mall-card__status portal-mall-card__status--open">Ouvert</span>
           {% else %}
             <span class="portal-mall-card__status portal-mall-card__status--soon">Bientôt</span>
@@ -207,28 +192,36 @@
         <div class="portal-service-card__icon"><i class="fas fa-gift"></i></div>
         <h3>Carte Cadeau</h3>
         <p>Une seule carte. Des milliers de possibilités dans tous nos centres.</p>
-        <a href="{% url 'contact' %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+        {% if mall and mall.slug %}
+          <a href="{% url 'contact_create' mall.slug %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+        {% endif %}
       </div>
 
       <div class="portal-service-card">
         <div class="portal-service-card__icon"><i class="fas fa-car"></i></div>
         <h3>Parking Smart</h3>
         <p>Parking gratuit et guidage en temps réel dans tous nos centres.</p>
-        <a href="{% url 'contact' %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+        {% if mall and mall.slug %}
+          <a href="{% url 'contact_create' mall.slug %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+        {% endif %}
       </div>
 
       <div class="portal-service-card">
         <div class="portal-service-card__icon"><i class="fas fa-concierge-bell"></i></div>
         <h3>Conciergerie</h3>
         <p>Notre équipe dédiée vous accueille et vous guide à chaque visite.</p>
-        <a href="{% url 'contact' %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+        {% if mall and mall.slug %}
+          <a href="{% url 'contact_create' mall.slug %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+        {% endif %}
       </div>
 
       <div class="portal-service-card">
         <div class="portal-service-card__icon"><i class="fas fa-mobile-alt"></i></div>
         <h3>App YES MALL</h3>
         <p>Commandez, explorez et profitez d'offres exclusives depuis votre téléphone.</p>
-        <a href="{% url 'contact' %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+        {% if mall and mall.slug %}
+          <a href="{% url 'contact_create' mall.slug %}" class="portal-service-card__link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+        {% endif %}
       </div>
 
     </div>
@@ -242,7 +235,7 @@
       <p class="ym-eyebrow" style="color:var(--color-accent);"><i class="fas fa-gem"></i> Rejoignez la famille</p>
       <h2 class="portal-cta__title">Ne ratez aucune <span>offre exclusive</span></h2>
       <p class="portal-cta__sub">Inscrivez-vous et recevez en avant-première les promotions, nouvelles ouvertures et événements de tous nos centres.</p>
-      <form class="portal-newsletter-form" method="post" action="{% url 'contact' %}">
+      <form class="portal-newsletter-form" method="post" action="">
         {% csrf_token %}
         <input type="email" name="email" placeholder="Votre adresse e-mail" required aria-label="E-mail">
         <button type="submit" class="ym-btn ym-btn--primary">
@@ -260,7 +253,7 @@
       <div>
         <div class="ym-footer__brand">
           <span class="ym-navbar__brand-icon"><i class="fas fa-gem fa-sm"></i></span>
-          <span class="ym-footer__brand-name">BB <span>MALLs</span></span>
+          <span class="ym-footer__brand-name">BB <span>Shopping</span></span>
         </div>
         <p class="ym-footer__tagline">Le réseau de centres commerciaux premium d'Algérie.</p>
         <div class="ym-footer__social">
@@ -273,11 +266,9 @@
       <div>
         <h3 class="ym-footer__heading">Nos Centres</h3>
         <ul class="ym-footer__links">
-          <li><a href="#">YES MALL Constantine</a></li>
-          <li><a href="#">YES MALL Alger Centre</a></li>
-          <li><a href="#">YES MALL Bab Ezzouar</a></li>
-          <li><a href="#">YES MALL Oran</a></li>
-          <li><a href="#">YES MALL Annaba</a></li>
+          {% for mall in malls %}
+          <li><a href="{% url 'mall' mall.slug %}">{{ mall.nom }}</a></li>
+          {% endfor %}
         </ul>
       </div>
       <div>
@@ -286,8 +277,8 @@
           <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
           <li><a href="{% url 'magasins_all' %}">Boutiques</a></li>
           <li><a href="{% url 'evenements_all' %}">Événements</a></li>
-          <li><a href="{% url 'blog_list' %}">Blog</a></li>
-          <li><a href="{% url 'contact' %}">Contact</a></li>
+          <li><a href="{% url 'blogs_all' %}">Blog</a></li>
+          <li><a href="{% url 'contacts_all' %}">Contact</a></li>
         </ul>
       </div>
       <div>
@@ -295,14 +286,15 @@
         <div class="ym-footer__hours">
           <p><strong>Service Client</strong><br>+213 776 47 16 46</p>
           <br>
-          <p><strong>Email</strong><br>contact@yesmall.dz</p>
+          <p><strong>Email</strong><br>bbshopping@mall.dz</p>
           <br>
           <p><strong>Horaires</strong><br>Lun–Dim : 10h – 23h</p>
         </div>
       </div>
     </div>
     <div class="ym-footer__bottom">
-      <p>© {% now "Y" %} BB MALLs Group. Tous droits réservés.</p>
+      <p>© {% now "Y" %} 
+        Shopping Group. Tous droits réservés.</p>
       <div class="ym-footer__legal">
         <a href="#">Mentions légales</a>
         <a href="#">Confidentialité</a>

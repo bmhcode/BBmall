@@ -44,7 +44,12 @@
     <!-- Stores Grid -->
     <div class="ym-stores-grid ym-reveal">
       {% for magasin in magasins %}
-      <a href="{{ magasin.get_absolute_url }}?mall={{mall.slug}}" class="ym-store-card">
+      
+        {% if mall %}
+          <a href="{% url 'magasin_detail' mall_slug=mall.slug slug=magasin.slug %}" class="ym-store-card">
+        {% endif %}
+
+
         <div class="ym-store-card__image-wrap">
           {% if magasin.image %}
           <img src="{{ magasin.image.url }}" alt="{{ magasin.nom }}">

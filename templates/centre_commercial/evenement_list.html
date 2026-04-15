@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Événements — YES MALL{% endblock %}
+{% block title %}Événements — {{ mall.nom }}{% endblock %}
 
 {% block content %}
 
@@ -19,7 +19,11 @@
 
     <div class="ym-events-row ym-reveal">
       {% for evenement in evenements %}
-      <a href="{{ evenement.get_absolute_url }}" class="ym-event-item">
+      {% if mall %}
+        <a href="{% url 'evenement_detail' mall.slug evenement.slug %}" class="ym-event-item">
+      {% else %}
+        <a href="{% url 'evenements_all'%}" class="ym-event-item">
+      {% endif %}
         <!-- Date -->
         <div class="ym-event-item__date">
           <span class="ym-event-item__day">{{ evenement.date|date:"d" }}</span>

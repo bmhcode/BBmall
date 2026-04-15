@@ -31,6 +31,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    
+    'jazzmin',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'centre_commercial',
+
+    'django_ckeditor_5',
 ]
 
 MIDDLEWARE = [
@@ -127,3 +132,28 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# -------------------------
+# CKEditor
+# -------------------------
+CKEDITOR_CONFIGS = {
+    "default": {
+        "toolbar": "Custom",
+        "toolbar_Custom": [
+            ["Bold", "Italic", "Underline"],
+            ["NumberedList", "BulletedList"],
+            ["Link", "Unlink"],
+            ["RemoveFormat", "Source"],
+        ],
+    }
+}
+
+
+# -------------------------
+# Jazzmin
+# -------------------------
+JAZZMIN_SETTINGS = {
+    "site_header": "BB Shopping",
+    "site_brand": "BB Shopping",
+}

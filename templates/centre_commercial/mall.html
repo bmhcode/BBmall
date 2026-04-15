@@ -23,14 +23,14 @@
       Vivez une<em>Expérience</em>Unique
     </h1>
     <p class="ym-hero__subtitle">
-      Plus de {{mall.nombre_boutiques}} boutiques, restaurants gastronomiques et espaces de divertissement — tout sous un même toit d'exception.
-    </p>
+      {{mall.description}}
+        </p>
     <div class="ym-hero__actions">
       <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--primary" id="hero-explore-btn">
         Explorer les boutiques
         <i class="fas fa-arrow-right ym-btn__icon"></i>
       </a>
-      <a href="{% url 'evenements_all' %}" class="ym-btn ym-btn--ghost" id="hero-events-btn">
+      <a href="{% url 'evenements_by_mall' mall.slug %}" class="ym-btn ym-btn--ghost" id="hero-events-btn">
         <i class="fas fa-calendar-alt"></i>
         Voir les événements
       </a>
@@ -192,7 +192,7 @@
     <div class="ym-stores-grid ym-reveal">
       {% for magasin in magasins_vedette %}
       <article class="ym-store-card" data-category="{{ magasin.categorie }}">
-        <a href="{{ magasin.get_absolute_url }}?mall={{mall.slug}}" aria-label="Voir {{ magasin.nom }}">
+        <a href="{% url 'magasin_detail' mall_slug=mall.slug slug=magasin.slug %}" aria-label="Voir {{ magasin.nom }}">
           <div class="ym-store-card__image-wrap">
             {% if magasin.image %}
             <img src="{{ magasin.image.url }}" alt="{{ magasin.nom }}" loading="lazy">
@@ -218,7 +218,7 @@
               <i class="fas fa-map-marker-alt fa-xs"></i>
               {{ magasin.localisation }}
             </span>
-            <a href="{{ magasin.get_absolute_url }}?mall={{mall.slug}}" class="ym-store-card__link">
+            <a href="{% url 'magasin_detail' mall_slug=mall.slug slug=magasin.slug %}" class="ym-store-card__link">
               Visiter <i class="fas fa-arrow-right fa-xs"></i>
             </a>
           </div>
@@ -228,7 +228,7 @@
       <div class="ym-empty" style="grid-column:1/-1">
         <i class="fas fa-store-slash"></i>
         <p>Aucune boutique en vedette pour le moment.</p>
-        <a href="{% url 'magasin_list_by_mall' slug=mall.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="margin-top:16px;display:inline-flex">
+        <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="margin-top:16px;display:inline-flex">
           Voir tous les magasins
         </a>
       </div>
@@ -350,7 +350,7 @@
 
     <div class="ym-events-row ym-reveal" style="border-color:rgba(255,255,255,0.1)">
       {% for evenement in evenements_prochains %}
-      <a href="{{ evenement.get_absolute_url }}"
+      <a href="{% url 'evenement_detail' mall.slug evenement.slug %}"
          class="ym-event-item"
          style="border-color:rgba(255,255,255,0.08)"
          aria-label="{{ evenement.titre }} — {{ evenement.date|date:'d F Y' }}">
@@ -441,7 +441,7 @@
     <div class="ym-blog-grid ym-reveal">
       {% for article in articles_blog %}
       <article class="ym-blog-card">
-        <a href="{{ article.get_absolute_url }}" aria-label="Lire: {{ article.titre }}">
+        <a href="{% url 'blog_detail' mall_slug=mall.slug slug=article.slug %}" aria-label="Lire: {{ article.titre }}">
           <div class="ym-blog-card__image-wrap">
             {% if article.image %}
             <img src="{{ article.image.url }}" alt="{{ article.titre }}" loading="lazy">
@@ -459,7 +459,7 @@
           </p>
           <h3 class="ym-blog-card__title">{{ article.titre }}</h3>
           <p class="ym-blog-card__excerpt">{{ article.contenu|truncatewords:25 }}</p>
-          <a href="{{ article.get_absolute_url }}" class="ym-blog-card__read-more">
+          <a href="{% url 'blog_detail' mall_slug=mall.slug slug=article.slug %}" class="ym-blog-card__read-more">
             Lire l'article <i class="fas fa-arrow-right fa-xs"></i>
           </a>
         </div>

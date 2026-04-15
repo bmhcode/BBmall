@@ -17,28 +17,34 @@ urlpatterns = [
     # Magasins
     path('magasins/', views.MagasinListView.as_view(), name='magasins_all'),
     path('mall/<slug:slug>/magasins/', views.MagasinListView.as_view(), name='magasins_by_mall'),
-    path('magasin/<slug:slug>/', views.MagasinDetailView.as_view(), name='magasin_detail'),
+    path('mall/<slug:mall_slug>/magasin/<slug:slug>/', views.MagasinDetailView.as_view(), name='magasin_detail'),
     
     # Promotions
     path('promotions/', views.PromotionListView.as_view(), name='promotions_all'),
     path('mall/<slug:slug>/promotions/', views.PromotionListView.as_view(), name='promotions_by_mall'),
-    
 
     # Événements
     path('evenements/', views.EvenementListView.as_view(), name='evenements_all'),
     path('mall/<slug:slug>/evenements/', views.EvenementListView.as_view(), name='evenements_by_mall'),
-
-    path('evenements/<slug:slug>/', views.EvenementDetailView.as_view(), name='evenement_detail'),
-
+    # path('evenement/<slug:slug>/', views.EvenementDetailView.as_view(), name='evenement_detail'),
+    path('mall/<slug:mall_slug>/evenement/<slug:slug>/', views.EvenementDetailView.as_view(), name='evenement_detail'),
+       
     # Blog
     path('blogs/', views.ArticleBlogListView.as_view(), name='blogs_all'),
     path('mall/<slug:slug>/blogs/', views.ArticleBlogListView.as_view(), name='blogs_by_mall'),
-
-    path('blog/<slug:slug>/', views.ArticleBlogDetailView.as_view(), name='blog_detail'),
+    path('mall/<slug:mall_slug>/blog/<slug:slug>/', views.ArticleBlogDetailView.as_view(), name='blog_detail'),
     
+
+
+
+
     # Contact
-    path('contacts/', views.ContactView.as_view(), name='contacts_all'),
-    path('mall/<slug:slug>/contacts/', views.ContactView.as_view(), name='contacts_by_mall'),
+    path('mall/<slug:mall_slug>/contact/', views.ContactCreateView.as_view(), name='contact_create'),
+    path('mall/<slug:mall_slug>/contacts/', views.ContactListView.as_view(), name='contacts_by_mall'),
+    path('contacts/', views.ContactListView.as_view(), name='contacts_all'),
+    path('mall/<slug:mall_slug>/contact/<int:id>/', views.ContactDetailView.as_view(), name='contact_detail'),
+    path('mall/<slug:mall_slug>/contact/<int:id>/delete/', views.ContactDeleteView.as_view(), name='contact_delete'),
+
 
 
 
