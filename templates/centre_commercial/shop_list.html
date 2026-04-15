@@ -20,12 +20,12 @@
     <!-- Filter Bar -->
     <div class="ym-filter-bar">
       {% if mall and mall.slug %}
-      <a href="{% url 'magasins_by_mall' mall.slug %}"
+      <a href="{% url 'shops_by_mall' mall.slug %}"
          class="ym-filter-btn {% if not request.GET.category %}active{% endif %}">
         Tous
       </a>
       {% else %}
-      <a href="{% url 'magasins_all' %}"
+      <a href="{% url 'shops_all' %}"
          class="ym-filter-btn {% if not request.GET.category %}active{% endif %}">
         Tous
       </a>
@@ -43,30 +43,30 @@
 
     <!-- Stores Grid -->
     <div class="ym-stores-grid ym-reveal">
-      {% for magasin in magasins %}
+      {% for shop in shops %}
       
         {% if mall %}
-          <a href="{% url 'magasin_detail' mall_slug=mall.slug slug=magasin.slug %}" class="ym-store-card">
+          <a href="{% url 'shop_detail' mall_slug=mall.slug slug=shop.slug %}" class="ym-store-card">
         {% endif %}
 
 
         <div class="ym-store-card__image-wrap">
-          {% if magasin.image %}
-          <img src="{{ magasin.image.url }}" alt="{{ magasin.nom }}">
+          {% if shop.coverURL %}
+          <img src="{{ shop.coverURL }}" alt="{{ shop.name }}">
           {% else %}
           <div class="ym-store-card__image-placeholder">
             <i class="fas fa-store"></i>
           </div>
           {% endif %}
-          <span class="ym-store-card__badge ym-store-card__badge--featured">{{ magasin.get_categorie_display }}</span>
+          <span class="ym-store-card__badge ym-store-card__badge--featured">{{ shop.get_category_display }}</span>
         </div>
         <div class="ym-store-card__body">
-          <p class="ym-store-card__category">{{ magasin.get_categorie_display }}</p>
-          <h2 class="ym-store-card__name">{{ magasin.nom }}</h2>
-          <p class="ym-store-card__desc">{{ magasin.description|truncatewords:18 }}</p>
+          <p class="ym-store-card__category">{{ shop.get_category_display }}</p>
+          <h2 class="ym-store-card__name">{{ shop.name }}</h2>
+          <p class="ym-store-card__desc">{{ shop.description|truncatewords:18 }}</p>
           <div class="ym-store-card__meta">
             <span class="ym-store-card__location">
-              <i class="fas fa-map-marker-alt"></i> {{ magasin.localisation }}
+              <i class="fas fa-map-marker-alt"></i> {{ shop.location }}
             </span>
             <span class="ym-store-card__link">
               Voir <i class="fas fa-arrow-right"></i>

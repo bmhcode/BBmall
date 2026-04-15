@@ -78,15 +78,15 @@
                             {% endif %} 
                         </td>
                         <td>
-                            <span class="mall-name">{{ mall.nom }}</span>
-                            <span class="mall-city">{{ mall.ville }}</span>
+                            <span class="mall-name">{{ mall.name }}</span>
+                            <span class="mall-city">{{ mall.city }}</span>
                         </td>
                         <!-- <td>{{ mall.get_region_display }}</td> -->
                         <td>{{ mall.region }}</td>
 
-                        <td>{{ mall.nombre_boutiques }}</td>
+                        <td>{{ mall.number_of_shops }}</td>
                         <td>
-                            {% if mall.est_ouvert %}
+                            {% if mall.is_open %}
                                 <span class="badge-status badge-open">Ouvert</span>
                             {% else %}
                                 <span class="badge-status badge-closed">Fermé</span>

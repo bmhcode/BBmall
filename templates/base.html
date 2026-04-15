@@ -34,7 +34,7 @@
   <div class="ym-search-overlay__inner">
     <p class="ym-search-overlay__label">Que recherchez-vous ?</p>
     {% if mall and mall.slug %}
-    <form class="ym-search-overlay__form" action="{% url 'magasins_by_mall' mall.slug %}" method="get">
+    <form class="ym-search-overlay__form" action="{% url 'shops_by_mall' mall.slug %}" method="get">
     {% endif %}
       <input id="ym-search-input" class="ym-search-overlay__input" type="search"
              name="q" placeholder="Magasins, marques, événements…" autocomplete="off">
@@ -58,8 +58,8 @@
     <ul class="ym-mobile-nav__links">
       <li><a href="{% url 'home' %}"><i class="fas fa-home me-2"></i>Accueil</a></li>
       <li><a href="{% url 'promotions_all' %}"><i class="fas fa-tag me-2"></i>Promotions</a></li>
-      <li><a href="{% url 'magasins_all' %}"><i class="fas fa-store me-2"></i>Magasins</a></li>
-      <li><a href="{% url 'evenements_all' %}"><i class="fas fa-calendar-alt me-2"></i>Événements</a></li>
+      <li><a href="{% url 'shops_all' %}"><i class="fas fa-store me-2"></i>Magasins</a></li>
+      <li><a href="{% url 'events_all' %}"><i class="fas fa-calendar-alt me-2"></i>Événements</a></li>
       <li><a href="{% url 'blogs_all' %}"><i class="fas fa-newspaper me-2"></i>Blog</a></li>
       <li><a href="{% url 'contact_create' mall.slug %}"><i class="fas fa-envelope me-2"></i>Contact</a></li>
       <li><a href="{% url 'contacts_by_mall' mall.slug %}"><i class="fas fa-envelope me-2"></i>Contacts list</a></li>
@@ -86,8 +86,8 @@
       {% if mall and mall.slug %}
         <li><a href="{% url 'mall' mall.slug %}">Accueil</a></li>
         <li><a href="{% url 'promotions_by_mall' mall.slug %}">Promotions</a></li>
-        <li><a href="{% url 'magasins_by_mall' mall.slug %}">Magasins</a></li>
-        <li><a href="{% url 'evenements_by_mall' mall.slug %}">Événements</a></li>
+        <li><a href="{% url 'shops_by_mall' mall.slug %}">Magasins</a></li>
+        <li><a href="{% url 'events_by_mall' mall.slug %}">Événements</a></li>
         <li><a href="{% url 'blogs_by_mall' mall.slug %}">Blog</a></li>
         <li><a href="{% url 'contact_create' mall.slug %}">Contact</a></li>
         <li><a href="{% url 'contacts_by_mall' mall.slug %}"><i class="fas fa-envelope me-2"></i>Messages</a></li>
@@ -95,8 +95,8 @@
       {% else %}
         <li><a href="{% url 'home' %}">Accueil</a></li>
         <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
-        <li><a href="{% url 'magasins_all' %}">Magasins</a></li>
-        <li><a href="{% url 'evenements_all' %}">Événements</a></li>
+        <li><a href="{% url 'shops_all' %}">Magasins</a></li>
+        <li><a href="{% url 'events_all' %}">Événements</a></li>
         <li><a href="{% url 'blogs_all' %}">Blog</a></li>
         <li><a href="{% url 'contact_create' mall.slug %}">Contact</a></li>
         <li><a href="{% url 'contacts_all' %}"><i class="fas fa-envelope me-2"></i>Messages</a></li>
@@ -157,10 +157,10 @@
       <div>
         <div class="ym-footer__brand">
           <span class="ym-navbar__brand-icon"><i class="fas fa-gem fa-sm"></i></span>
-          <span class="ym-footer__brand-name">{{mall.nom}} <span>MALL</span></span>
+          <span class="ym-footer__brand-name">{{mall.name}} <span>MALL</span></span>
         </div>
         <p class="ym-footer__tagline">
-          Votre destination shopping premium à {{mall.ville}}. Mode, gastronomie, divertissement — tout sous un même toit.
+          Votre destination shopping premium à {{mall.city}}. Mode, gastronomie, divertissement — tout sous un même toit.
         </p>
         <div class="ym-footer__social">
           <a href="#" class="ym-footer__social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
@@ -177,15 +177,15 @@
           {% if mall and mall.slug %}
         <li><a href="{% url 'mall' mall.slug %}">Accueil</a></li>
         <li><a href="{% url 'promotions_by_mall' mall.slug %}">Promotions</a></li>
-        <li><a href="{% url 'magasins_by_mall' mall.slug %}">Magasins</a></li>
-        <li><a href="{% url 'evenements_by_mall' mall.slug %}">Événements</a></li>
+        <li><a href="{% url 'shops_by_mall' mall.slug %}">Magasins</a></li>
+        <li><a href="{% url 'events_by_mall' mall.slug %}">Événements</a></li>
         <li><a href="{% url 'blogs_by_mall' mall.slug %}">Blog</a></li>
         <li><a href="{% url 'contact_create' mall.slug %}">Contact</a></li>
       {% else %}
         <li><a href="{% url 'home' %}">Accueil</a></li>
         <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
-        <li><a href="{% url 'magasins_all' %}">Magasins</a></li>
-        <li><a href="{% url 'evenements_all' %}">Événements</a></li>
+        <li><a href="{% url 'shops_all' %}">Magasins</a></li>
+        <li><a href="{% url 'events_all' %}">Événements</a></li>
         <li><a href="{% url 'blogs_all' %}">Blog</a></li>
         <li><a href="{% url 'contact_create' mall.slug %}">Contact</a></li>
       {% endif %}
@@ -196,11 +196,11 @@
       <div>
         <h3 class="ym-footer__heading">Catégories</h3>
         <ul class="ym-footer__links">
-          <li><a href="{% url 'magasins_all' %}?category=mode">Mode & Accessoires</a></li>
-          <li><a href="{% url 'magasins_all' %}?category=beaute">Beauté & Santé</a></li>
-          <li><a href="{% url 'magasins_all' %}?category=restauration">Restauration</a></li>
-          <li><a href="{% url 'magasins_all' %}?category=technologie">Technologie</a></li>
-          <li><a href="{% url 'magasins_all' %}?category=loisirs">Loisirs & Culture</a></li>
+          <li><a href="{% url 'shops_all' %}?category=mode">Mode & Accessoires</a></li>
+          <li><a href="{% url 'shops_all' %}?category=beaute">Beauté & Santé</a></li>
+          <li><a href="{% url 'shops_all' %}?category=restauration">Restauration</a></li>
+          <li><a href="{% url 'shops_all' %}?category=technologie">Technologie</a></li>
+          <li><a href="{% url 'shops_all' %}?category=loisirs">Loisirs & Culture</a></li>
         </ul>
       </div>
 
@@ -220,7 +220,7 @@
 
     <!-- Bottom Bar -->
     <div class="ym-footer__bottom">
-      <p>© {% now "Y" %} {{mall.nom}} . Tous droits réservés.</p>
+      <p>© {% now "Y" %} {{mall.name}} . Tous droits réservés.</p>
       <div class="ym-footer__legal">
         <a href="#">Mentions légales</a>
         <a href="#">Confidentialité</a>

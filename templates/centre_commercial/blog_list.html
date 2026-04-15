@@ -18,7 +18,7 @@
   <div class="ym-container">
 
     <div class="ym-blog-grid ym-reveal">
-      {% for article in articles %}
+      {% for article in blogs %}
 
         {% if mall %}
           <a href="{% url 'blog_detail' mall_slug=mall.slug slug=article.slug %}" class="ym-blog-card">
@@ -34,9 +34,9 @@
           {% endif %}
         </div>
         <div class="ym-blog-card__body">
-          <p class="ym-blog-card__date">{{ article.date_publication|date:"d M Y" }}</p>
-          <h2 class="ym-blog-card__title">{{ article.titre }}</h2>
-          <p class="ym-blog-card__excerpt">{{ article.contenu|truncatewords:20 }}</p>
+          <p class="ym-blog-card__date">{{ article.publication_date|date:"d M Y" }}</p>
+          <h2 class="ym-blog-card__title">{{ article.title }}</h2>
+          <p class="ym-blog-card__excerpt">{{ article.content|truncatewords:20 }}</p>
           <span class="ym-blog-card__read-more">
             Lire la suite <i class="fas fa-arrow-right"></i>
           </span>

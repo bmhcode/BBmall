@@ -26,11 +26,11 @@
       {{mall.description}}
         </p>
     <div class="ym-hero__actions">
-      <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--primary" id="hero-explore-btn">
+      <a href="{% url 'shops_by_mall' mall.slug %}" class="ym-btn ym-btn--primary" id="hero-explore-btn">
         Explorer les boutiques
         <i class="fas fa-arrow-right ym-btn__icon"></i>
       </a>
-      <a href="{% url 'evenements_by_mall' mall.slug %}" class="ym-btn ym-btn--ghost" id="hero-events-btn">
+      <a href="{% url 'events_by_mall' mall.slug %}" class="ym-btn ym-btn--ghost" id="hero-events-btn">
         <i class="fas fa-calendar-alt"></i>
         Voir les événements
       </a>
@@ -46,7 +46,7 @@
   <!-- Stats bar -->
   <div class="ym-hero__stats">
     <div class="ym-hero__stat">
-      <span class="ym-hero__stat-number" data-count="{{mall.nombre_boutiques}}" data-suffix="+">{{mall.nombre_boutiques}}+</span>
+      <span class="ym-hero__stat-number" data-count="{{mall.number_of_shops}}" data-suffix="+">{{mall.number_of_shops}}+</span>
       <span class="ym-hero__stat-label">Boutiques</span>
     </div>
     <div class="ym-hero__stat">
@@ -174,7 +174,7 @@
         <h2 class="ym-section-title" id="stores-heading">Boutiques à la Une</h2>
         <p class="ym-section-subtitle">Découvrez notre sélection de boutiques premium soigneusement choisies pour vous.</p>
       </div>
-      <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-view-all">
+      <a href="{% url 'shops_by_mall' mall.slug %}" class="ym-view-all">
         Voir toutes les boutiques <i class="fas fa-arrow-right fa-sm"></i>
       </a>
     </div>
@@ -190,12 +190,12 @@
     </div>
 
     <div class="ym-stores-grid ym-reveal">
-      {% for magasin in magasins_vedette %}
-      <article class="ym-store-card" data-category="{{ magasin.categorie }}">
-        <a href="{% url 'magasin_detail' mall_slug=mall.slug slug=magasin.slug %}" aria-label="Voir {{ magasin.nom }}">
+      {% for shop in shops_featured %}
+      <article class="ym-store-card" data-category="{{ shop.category }}">
+        <a href="{% url 'shop_detail' mall_slug=mall.slug slug=shop.slug %}" aria-label="Voir {{ shop.name }}">
           <div class="ym-store-card__image-wrap">
-            {% if magasin.image %}
-            <img src="{{ magasin.image.url }}" alt="{{ magasin.nom }}" loading="lazy">
+            {% if shop.coverURL %}
+            <img src="{{ shop.coverURL }}" alt="{{ shop.name }}" loading="lazy">
             {% else %}
             <div class="ym-store-card__image-placeholder">
               <i class="fas fa-store"></i>
@@ -210,15 +210,15 @@
           <i class="far fa-heart"></i>
         </button>
         <div class="ym-store-card__body">
-          <p class="ym-store-card__category">{{ magasin.get_categorie_display }}</p>
-          <h3 class="ym-store-card__name">{{ magasin.nom }}</h3>
-          <p class="ym-store-card__desc">{{ magasin.description }}</p>
+          <p class="ym-store-card__category">{{ shop.get_category_display }}</p>
+          <h3 class="ym-store-card__name">{{ shop.name }}</h3>
+          <p class="ym-store-card__desc">{{ shop.description }}</p>
           <div class="ym-store-card__meta">
             <span class="ym-store-card__location">
               <i class="fas fa-map-marker-alt fa-xs"></i>
-              {{ magasin.localisation }}
+              {{ shop.location }}
             </span>
-            <a href="{% url 'magasin_detail' mall_slug=mall.slug slug=magasin.slug %}" class="ym-store-card__link">
+            <a href="{% url 'shop_detail' mall_slug=mall.slug slug=shop.slug %}" class="ym-store-card__link">
               Visiter <i class="fas fa-arrow-right fa-xs"></i>
             </a>
           </div>
@@ -228,16 +228,16 @@
       <div class="ym-empty" style="grid-column:1/-1">
         <i class="fas fa-store-slash"></i>
         <p>Aucune boutique en vedette pour le moment.</p>
-        <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="margin-top:16px;display:inline-flex">
+        <a href="{% url 'shops_by_mall' mall.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="margin-top:16px;display:inline-flex">
           Voir tous les magasins
         </a>
       </div>
       {% endfor %}
     </div>
 
-    {% if magasins_vedette %}
+    {% if shops_featured %}
     <div style="text-align:center;margin-top:48px" class="ym-reveal">
-      <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--dark" id="all-stores-btn">
+      <a href="{% url 'shops_by_mall' mall.slug %}" class="ym-btn ym-btn--dark" id="all-stores-btn">
         Découvrir toutes les boutiques
         <i class="fas fa-arrow-right ym-btn__icon"></i>
       </a>
@@ -321,7 +321,7 @@
         </div>
 
         <div style="margin-top:40px">
-          <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--dark">
+          <a href="{% url 'shops_by_mall' mall.slug %}" class="ym-btn ym-btn--dark">
             Explorer le mall <i class="fas fa-arrow-right ym-btn__icon"></i>
           </a>
         </div>
@@ -343,26 +343,26 @@
         <p class="ym-eyebrow" style="color:var(--color-accent)">À ne pas manquer</p>
         <h2 class="ym-section-title" id="events-heading">Événements à Venir</h2>
       </div>
-      <a href="{% url 'evenements_all' %}" class="ym-view-all">
+      <a href="{% url 'events_all' %}" class="ym-view-all">
         Tous les événements <i class="fas fa-arrow-right fa-sm"></i>
       </a>
     </div>
 
     <div class="ym-events-row ym-reveal" style="border-color:rgba(255,255,255,0.1)">
-      {% for evenement in evenements_prochains %}
-      <a href="{% url 'evenement_detail' mall.slug evenement.slug %}"
+      {% for event in future_events %}
+      <a href="{% url 'event_detail' mall.slug event.slug %}"
          class="ym-event-item"
          style="border-color:rgba(255,255,255,0.08)"
-         aria-label="{{ evenement.titre }} — {{ evenement.date|date:'d F Y' }}">
+         aria-label="{{ event.title }} — {{ event.start_date|date:'d F Y' }}">
 
         <div class="ym-event-item__date">
-          <span class="ym-event-item__day" style="color:#fff">{{ evenement.date|date:"d" }}</span>
-          <div class="ym-event-item__month">{{ evenement.date|date:"M" }}</div>
+          <span class="ym-event-item__day" style="color:#fff">{{ evenement.start_date|date:"d" }}</span>
+          <div class="ym-event-item__month">{{ evenement.start_date|date:"M" }}</div>
         </div>
 
         <div style="width:90px;flex-shrink:0">
-          {% if evenement.image %}
-          <img class="ym-event-item__image" src="{{ evenement.image.url }}" alt="{{ evenement.titre }}" loading="lazy">
+          {% if event.image %}
+          <img class="ym-event-item__image" src="{{ event.image.url }}" alt="{{ event.title }}" loading="lazy">
           {% else %}
           <div class="ym-event-item__image-placeholder" style="background:rgba(255,255,255,0.08)">
             <i class="fas fa-calendar-star" style="color:rgba(255,255,255,0.3)"></i>
@@ -372,10 +372,10 @@
 
         <div class="ym-event-item__info">
           <p class="ym-event-item__category">Événement</p>
-          <h3 class="ym-event-item__title" style="color:#fff">{{ evenement.titre }}</h3>
+          <h3 class="ym-event-item__title" style="color:#fff">{{ event.title }}</h3>
           <p class="ym-event-item__location" style="color:rgba(255,255,255,0.5)">
             <i class="fas fa-map-marker-alt fa-xs"></i>
-            {{ evenement.lieu }}
+            {{ event.location }}
           </p>
         </div>
 
@@ -413,7 +413,7 @@
           <i class="fas fa-gem"></i>
           S'inscrire gratuitement
         </a>
-        <a href="{% url 'magasins_by_mall' mall.slug %}" class="ym-btn ym-btn--ghost" id="cta-discover-btn">
+        <a href="{% url 'shops_by_mall' mall.slug %}" class="ym-btn ym-btn--ghost" id="cta-discover-btn">
           En savoir plus
         </a>
       </div>

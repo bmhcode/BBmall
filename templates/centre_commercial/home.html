@@ -25,7 +25,7 @@
   <nav class="portal-nav__links">
     <a href="{% url 'mall_table_list' %}"><i class="fas fa-cog"></i> Gérer les Malls</a>
     <a href="{% url 'home' %}"><i class="fas fa-store"></i> Mon Mall</a>
-    <a href="{% url 'evenements_all' %}"><i class="fas fa-calendar-alt"></i> Événements</a>
+    <a href="{% url 'events_all' %}"><i class="fas fa-calendar-alt"></i> Événements</a>
   </nav>
 </header>
 
@@ -79,7 +79,7 @@
   </div>
 </section>
 
-<!-- ═══════════ TICKER ═══════════ -->
+<!-- ═══════════ TICKER ═══════════ --> Fil d'actualités
 <div class="ym-ticker" aria-hidden="true">
   <div class="ym-ticker__track">
     <span class="ym-ticker__item"><i class="fas fa-circle"></i>Nouvelles ouvertures 2026</span>
@@ -143,20 +143,20 @@
           {% endif %}
         </div>
         <div class="portal-mall-card__body">
-          <p class="portal-mall-card__city"><i class="fas fa-map-marker-alt"></i> {{ mall.ville }}</p>
-          <h3 class="portal-mall-card__name">{{ mall.nom }}</h3>
-          <p class="portal-mall-card__desc">{{ mall.description_courte|default:mall.description|truncatechars:180 }}</p>
+          <p class="portal-mall-card__city"><i class="fas fa-map-marker-alt"></i> {{ mall.city }}</p>
+          <h3 class="portal-mall-card__name">{{ mall.name }}</h3>
+          <p class="portal-mall-card__desc">{{ mall.description_short|truncatechars:180 }}</p>
           <div class="portal-mall-card__info">
-            <span><i class="fas fa-store"></i> {{ mall.nombre_boutiques }} boutiques</span>
-            <span><i class="fas fa-clock"></i> {{ mall.horaires }}</span>
+            <span><i class="fas fa-store"></i> {{ mall.number_of_shops }} boutiques</span>
+            <span><i class="fas fa-clock"></i> {{ mall.opening_time }} - {{ mall.closing_time }}</span>
           </div>
-          {% if mall.est_ouvert %}
+          {% if mall.is_open %}
             <a href="{% url 'mall' mall.slug %}" class="portal-mall-card__cta">
               Entrer dans le mall <i class="fas fa-arrow-right"></i>
             </a>
           {% else %}
             <button class="portal-mall-card__cta portal-mall-card__cta--disabled" disabled>
-              Ouverture {{ mall.ouverture_prevue|date:"Y"|default:"prochainement" }} <i class="fas fa-lock"></i>
+              Ouverture {{ mall.opening_date|date:"Y"|default:"prochainement" }} <i class="fas fa-lock"></i>
             </button>
           {% endif %}
         </div>
@@ -275,8 +275,8 @@
         <h3 class="ym-footer__heading">Services</h3>
         <ul class="ym-footer__links">
           <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
-          <li><a href="{% url 'magasins_all' %}">Boutiques</a></li>
-          <li><a href="{% url 'evenements_all' %}">Événements</a></li>
+          <li><a href="{% url 'shops_all' %}">Boutiques</a></li>
+          <li><a href="{% url 'events_all' %}">Événements</a></li>
           <li><a href="{% url 'blogs_all' %}">Blog</a></li>
           <li><a href="{% url 'contacts_all' %}">Contact</a></li>
         </ul>

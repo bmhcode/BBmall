@@ -18,21 +18,21 @@
   <div class="ym-container">
 
     <div class="ym-events-row ym-reveal">
-      {% for evenement in evenements %}
+      {% for event in events %}
       {% if mall %}
-        <a href="{% url 'evenement_detail' mall.slug evenement.slug %}" class="ym-event-item">
+        <a href="{% url 'event_detail' mall.slug event.slug %}" class="ym-event-item">
       {% else %}
-        <a href="{% url 'evenements_all'%}" class="ym-event-item">
+        <a href="{% url 'events_all'%}" class="ym-event-item">
       {% endif %}
         <!-- Date -->
         <div class="ym-event-item__date">
-          <span class="ym-event-item__day">{{ evenement.date|date:"d" }}</span>
-          <span class="ym-event-item__month">{{ evenement.date|date:"M" }}</span>
+          <span class="ym-event-item__day">{{ event.date|date:"d" }}</span>
+          <span class="ym-event-item__month">{{ event.date|date:"M" }}</span>
         </div>
 
         <!-- Image -->
-        {% if evenement.image %}
-        <img src="{{ evenement.image.url }}" class="ym-event-item__image" alt="{{ evenement.titre }}">
+        {% if event.image %}
+        <img src="{{ event.image.url }}" class="ym-event-item__image" alt="{{ event.title }}">
         {% else %}
         <div class="ym-event-item__image-placeholder">
           <i class="fas fa-calendar-star"></i>
@@ -42,10 +42,10 @@
         <!-- Info -->
         <div class="ym-event-item__info">
           <p class="ym-event-item__category">Événement</p>
-          <h2 class="ym-event-item__title">{{ evenement.titre }}</h2>
+          <h2 class="ym-event-item__title">{{ event.title }}</h2>
           <p class="ym-event-item__location">
-            <i class="fas fa-map-marker-alt"></i> {{ evenement.lieu }}
-            &nbsp;&nbsp;<i class="far fa-clock"></i> {{ evenement.date|date:"H:i" }}
+            <i class="fas fa-map-marker-alt"></i> {{ event.location }}
+            &nbsp;&nbsp;<i class="far fa-clock"></i> {{ event.date|date:"H:i" }}
           </p>
         </div>
 

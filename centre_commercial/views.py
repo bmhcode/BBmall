@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView, DeleteView
 from django.db.models import Q
-from .models import Mall,Magasin, Evenement, Promotion, ArticleBlog, ContactMessage
+from .models import Mall,Shop, Event, Promotion, ArticleBlog, ContactMessage
 from .forms import MallForm,ContactForm
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
@@ -15,11 +15,11 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['malls'] = Mall.objects.all()
-        context['magasins_vedette'] = Magasin.objects.filter(est_en_vedette=True)[:6]
-        context['evenements_prochains'] = Evenement.objects.all().order_by('date')[:3]
-        context['promotions_actives'] = Promotion.objects.all().order_by('-cree_le')[:3]
+        context['shops_featured'] = Shop.objects.filter(is_featured=True)[:6]
+        context['future_events'] = Event.objects.filter(end_event__gt=timezone.now()).order_by('start_event')[:3]
+        context['active_promotions'] = Promotion.objects.filter(end_date__gt=timezone.now()).order_by('-created_at')[:3]
         # Blog is global for now, but could be filtered too
-        context['articles_blog'] = ArticleBlog.objects.all().order_by('-date_publication')[:3]
+        context['blogs'] = ArticleBlog.objects.all().order_by('-date_publication')[:3]
         return context
 
 class MallTableListView(ListView):
@@ -38,14 +38,14 @@ class MallView(TemplateView):
         mall_slug = self.kwargs.get('slug')
         mall = get_object_or_404(Mall, slug=mall_slug)
         context['mall'] = mall
-        context['magasins_vedette'] = mall.magasins.all() #filter(est_en_vedette=True)[:6]
-        context['evenements_prochains'] = mall.evenements.all()#.order_by('date')[:3]
-        context['promotions_actives'] = Promotion.objects.filter(magasin__mall=mall).select_related('magasin')
+        context['shops_featured'] = mall.shops.all() #filter(is_featured=True)[:6]
+        context['future_events'] = mall.events.all()#.order_by('date')[:3]
+        context['promotions_actives'] = Promotion.objects.filter(shop__mall=mall).select_related('shop')
         context['articles_blog'] = mall.blogs.all() #ArticleBlog.objects.all().order_by('-date_publication')[:3]
 
-        restaurants_count = mall.magasins.filter(categorie='restauration').count()
+        restaurants_count = mall.shops.filter(category='restauration').count()
         context['restaurants_count'] = restaurants_count    
-        cinemas_count = mall.magasins.filter(categorie='cinema').count()
+        cinemas_count = mall.shops.filter(category='cinema').count()
         context['cinemas_count'] = cinemas_count    
 
         return context  
@@ -85,8 +85,8 @@ class PromotionListView(ListView):
         now = timezone.now()
 
         queryset = Promotion.objects.filter(
-            date_debut__lte=now,
-            date_fin__gte=now
+            start_date__lte=now,
+            end_date__gte=now
         )
 
         # 🎯 جلب slug من URL
@@ -95,9 +95,9 @@ class PromotionListView(ListView):
 
         if self.mall_slug:
             self.mall = get_object_or_404(Mall, slug=self.mall_slug)
-            queryset = queryset.filter(magasin__mall=self.mall)
+            queryset = queryset.filter(shop__mall=self.mall)
 
-        return queryset.select_related('magasin', 'magasin__mall').order_by('-cree_le')
+        return queryset.select_related('shop', 'shop__mall').order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -107,10 +107,10 @@ class PromotionListView(ListView):
 
 
 # ================ Start Magasin views ==========================
-class MagasinListView(ListView):
-    model = Magasin
-    template_name = 'centre_commercial/magasin_list.html'
-    context_object_name = 'magasins'
+class ShopListView(ListView):
+    model = Shop
+    template_name = 'centre_commercial/shop_list.html'
+    context_object_name = 'shops'
     paginate_by = 12
 
     def get_queryset(self):
@@ -119,7 +119,7 @@ class MagasinListView(ListView):
         #self.mall_slug = self.request.GET.get('mall')
         self.mall_slug = self.kwargs.get('slug')  # ✅ هنا الح
 
-        queryset = Magasin.objects.select_related('mall')
+        queryset = Shop.objects.select_related('mall')
 
         # ✅ filter by mall
         if self.mall_slug:
@@ -131,19 +131,19 @@ class MagasinListView(ListView):
         # ✅ search
         if self.query:
             queryset = queryset.filter(
-                Q(nom__icontains=self.query) |
+                Q(name__icontains=self.query) |
                 Q(description__icontains=self.query)
             )
         # ✅ category filter
         if self.category:
-            queryset = queryset.filter(categorie=self.category)
-        return queryset.order_by('nom')  # 👈 ترتيب أفضل
+            queryset = queryset.filter(category=self.category)
+        return queryset.order_by('name')  # 👈 ترتيب أفضل
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context.update({
-            'categories': Magasin.CATEGORIES,
+            'categories': Shop.CATEGORIES,
             'selected_category': self.category,
             'search_query': self.query,
             'mall': self.mall,
@@ -151,33 +151,33 @@ class MagasinListView(ListView):
         })
         return context
 
-class MagasinDetailView(DetailView):
-    model = Magasin
-    template_name = 'centre_commercial/magasin_detail.html'
-    context_object_name = 'magasin'
+class ShopDetailView(DetailView):
+    model = Shop
+    template_name = 'centre_commercial/shop_detail.html'
+    context_object_name = 'shop'
 
     def get_queryset(self):
         # ⚡ تحسين الأداء (join مع mall)
-        return Magasin.objects.select_related('mall')
+        return Shop.objects.select_related('mall')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        magasin = self.object
+        shop = self.object
 
         # ✅ المول مباشرة من العلاقة
-        mall = magasin.mall
+        mall = shop.mall
 
         # ✅ متاجر من نفس المول
-        related_magasins = (
-            Magasin.objects
+        related_shops = (
+            Shop.objects
             .filter(mall=mall)
-            .exclude(id=magasin.id)
+            .exclude(id=shop.id)
             .select_related('mall')[:4]
         )
 
         context.update({
             'mall': mall,  # 👈 الآن مضمون دائماً
-            'related_magasins': related_magasins,
+            'related_shops': related_shops,
         })
 
         return context
@@ -185,10 +185,10 @@ class MagasinDetailView(DetailView):
 
 
 # ================ Start Evenement views ==========================
-class EvenementListView(ListView):
-    model = Evenement
-    template_name = 'centre_commercial/evenement_list.html'
-    context_object_name = 'evenements'
+class EventListView(ListView):
+    model = Event
+    template_name = 'centre_commercial/event_list.html'
+    context_object_name = 'events'
     ordering = ['-date']
 
     def get_queryset(self):
@@ -197,23 +197,23 @@ class EvenementListView(ListView):
 
         if self.mall_slug:
             self.mall = get_object_or_404(Mall, slug=self.mall_slug)
-            return Evenement.objects.filter(mall=self.mall).order_by('-date')
+            return Event.objects.filter(mall=self.mall).order_by('-date')
 
-        return Evenement.objects.all().order_by('-date')
+        return Event.objects.all().order_by('-date')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['mall'] = self.mall
         return context
 
-class EvenementDetailView(DetailView):
-    model = Evenement
-    template_name = 'centre_commercial/evenement_detail.html'
-    context_object_name = 'evenement'
+class EventDetailView(DetailView):
+    model = Event
+    template_name = 'centre_commercial/event_detail.html'
+    context_object_name = 'event'
 
     def get_object(self):
         return get_object_or_404(
-            Evenement,
+            Event,
             slug=self.kwargs['slug'],
             mall__slug=self.kwargs['mall_slug']
         )
@@ -302,9 +302,9 @@ class ContactListView(ListView):
 
         if self.mall_slug:
             self.mall = get_object_or_404(Mall, slug=self.mall_slug)
-            return ContactMessage.objects.filter(mall=self.mall).order_by('-cree_le')
+            return ContactMessage.objects.filter(mall=self.mall).order_by('-created_at')
 
-        return ContactMessage.objects.all().order_by('-cree_le')
+        return ContactMessage.objects.all().order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

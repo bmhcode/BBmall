@@ -15,28 +15,24 @@ urlpatterns = [
     path('mall/<slug:slug>/', views.MallView.as_view(), name='mall'),
 
     # Magasins
-    path('magasins/', views.MagasinListView.as_view(), name='magasins_all'),
-    path('mall/<slug:slug>/magasins/', views.MagasinListView.as_view(), name='magasins_by_mall'),
-    path('mall/<slug:mall_slug>/magasin/<slug:slug>/', views.MagasinDetailView.as_view(), name='magasin_detail'),
+    path('shops/', views.ShopListView.as_view(), name='shops_all'),
+    path('mall/<slug:slug>/shops/', views.ShopListView.as_view(), name='shops_by_mall'),
+    path('mall/<slug:mall_slug>/shop/<slug:slug>/', views.ShopDetailView.as_view(), name='shop_detail'),
     
     # Promotions
     path('promotions/', views.PromotionListView.as_view(), name='promotions_all'),
     path('mall/<slug:slug>/promotions/', views.PromotionListView.as_view(), name='promotions_by_mall'),
 
     # Événements
-    path('evenements/', views.EvenementListView.as_view(), name='evenements_all'),
-    path('mall/<slug:slug>/evenements/', views.EvenementListView.as_view(), name='evenements_by_mall'),
+    path('events/', views.EventListView.as_view(), name='events_all'),
+    path('mall/<slug:slug>/events/', views.EventListView.as_view(), name='events_by_mall'),
     # path('evenement/<slug:slug>/', views.EvenementDetailView.as_view(), name='evenement_detail'),
-    path('mall/<slug:mall_slug>/evenement/<slug:slug>/', views.EvenementDetailView.as_view(), name='evenement_detail'),
+    path('mall/<slug:mall_slug>/event/<slug:slug>/', views.EventDetailView.as_view(), name='event_detail'),
        
     # Blog
     path('blogs/', views.ArticleBlogListView.as_view(), name='blogs_all'),
     path('mall/<slug:slug>/blogs/', views.ArticleBlogListView.as_view(), name='blogs_by_mall'),
     path('mall/<slug:mall_slug>/blog/<slug:slug>/', views.ArticleBlogDetailView.as_view(), name='blog_detail'),
-    
-
-
-
 
     # Contact
     path('mall/<slug:mall_slug>/contact/', views.ContactCreateView.as_view(), name='contact_create'),

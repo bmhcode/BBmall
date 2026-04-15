@@ -9,12 +9,12 @@
 <!-- Page Hero -->
 <section class="ym-page-hero">
   <div class="ym-container">
-    {% if evenement.mall and evenement.mall.slug %}
+    {% if event.mall and event.mall.slug %}
       <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'evenements_by_mall' evenement.mall.slug %}" style="color:inherit;">Événements</a></p>
     {% else %}
       <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'evenements_all' %}" style="color:inherit;">Événements</a></p>
     {% endif %}
-    <h1 class="ym-section-title">{{ evenement.titre }}</h1>
+    <h1 class="ym-section-title">{{ evenement.title }}</h1>
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
       <span class="ym-store-card__badge ym-store-card__badge--new" style="position:static; display:inline-flex; align-items:center; gap:6px;">
         <i class="far fa-calendar-alt"></i> {{ evenement.date|date:"l d F Y" }}

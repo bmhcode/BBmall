@@ -59,12 +59,12 @@
                     {% for message in contacts %}
                     <tr>
                         <td>
-                            <span class="mall-name">{{ message.nom }}</span>
+                            <span class="mall-name">{{ message.name }}</span>
                             <span class="mall-city">{{ message.email }}</span>
                         </td>
-                        <td style="font-weight: 600; color: #1a1a2e;">{{ message.sujet }}</td>
+                        <td style="font-weight: 600; color: #1a1a2e;">{{ message.subject }}</td>
                         <td style="color: #6b7280;">{{ message.message|truncatewords:10 }}</td>
-                        <td style="font-size: 0.9rem; color: #6b7280;">{{ message.cree_le|date:"d/m/Y H:i" }}</td>
+                        <td style="font-size: 0.9rem; color: #6b7280;">{{ message.created_at|date:"d/m/Y H:i" }}</td>
                         <td class="actions-cell">
                             <a href="{% url 'contact_detail' mall.slug message.id %}" class="btn-action btn-view" title="Voir les détails">
                                 <i class="fas fa-eye"></i>

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Offres &amp; Promotions — YES MALL{% endblock %}
+{% block title %}Offres &amp; Promotions — {{mall.name}} {% endblock %}
 
 {% block content %}
 
@@ -20,9 +20,9 @@
     <div class="ym-promos-grid ym-reveal">
       {% for promotion in promotions %}
       {% if mall %}
-        <a href="{% url 'magasin_detail' mall_slug=mall.slug slug=promotion.magasin.slug %}" class="ym-promo-card">
+        <a href="{% url 'shop_detail' mall_slug=mall.slug slug=promotion.shop.slug %}" class="ym-promo-card">
       {% else %}
-        <a href="{% url 'magasin_detail' slug=promotion.magasin.slug %}" class="ym-promo-card">
+        <a href="{% url 'shop_detail' slug=promotion.shop.slug %}" class="ym-promo-card">
       {% endif %}
         {% if promotion.image %}
         <div class="ym-promo-card__bg" style="background-image:url('{{ promotion.image.url }}');"></div>
@@ -32,10 +32,10 @@
         {% endif %}
         <div class="ym-promo-card__content">
           <span class="ym-promo-card__tag">Promo</span>
-          <p class="ym-promo-card__store">{{ promotion.magasin.nom }}</p>
-          <h2 class="ym-promo-card__title">{{ promotion.titre }}</h2>
+          <p class="ym-promo-card__store">{{ promotion.shop.name }}</p>
+          <h2 class="ym-promo-card__title">{{ promotion.title }}</h2>
           <p class="ym-promo-card__date">
-            <i class="far fa-clock"></i> Jusqu'au {{ promotion.date_fin|date:"d M Y" }}
+            <i class="far fa-clock"></i> Jusqu'au {{ promotion.end_date|date:"d M Y" }}
           </p>
         </div>
       </a>
