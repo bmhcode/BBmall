@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if object %}Modifier{% else %}Ajouter{% endif %} un Mall — BB Shopping</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/portal.css' %}">
+    <style>
+        .form-section {
+            padding: 120px 0;
+            background: #f7f5f2;
+            min-height: 100vh;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 48px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .form-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1a1a2e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            padding: 14px 18px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #e91e8c;
+            box-shadow: 0 0 0 4px rgba(233, 30, 140, 0.1);
+        }
+        .btn-submit {
+            grid-column: span 2;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 16px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .btn-submit:hover {
+            background: #e91e8c;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(233, 30, 140, 0.3);
+        }
+        .btn-cancel {
+            text-align: center;
+            display: block;
+            margin-top: 20px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<header class="portal-nav">
+    <a href="{% url 'home' %}" class="portal-nav__brand">
+        <span class="portal-nav__brand-icon"><i class="fas fa-gem"></i></span>
+        BB <span>Shopping</span>
+    </a>
+    <a href="{% url 'mall_table_list' %}" class="ym-btn ym-btn--sm ym-btn--ghost" style="color:#fff; border-color: rgba(255,255,255,0.2);">
+        <i class="fas fa-arrow-left"></i> Retour
+    </a>
+</header>
+
+<section class="form-section">
+    <div class="ym-container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>{% if object %}Editer{% else %}Créer{% endif %} un Mall</h1>
+                <p class="text-muted">Remplissez les informations ci-dessous pour gérer votre centre commercial.</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="form-grid">
+                {% csrf_token %}
+                
+                <div class="form-group full-width">
+                    <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                    {{ form.name }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.city.id_for_label }}">{{ form.city.label }}</label>
+                    {{ form.city }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.region.id_for_label }}">{{ form.region.label }}</label>
+                    {{ form.region }}
+                </div>
+
+
+                <div class="form-group full-width">
+                    <label for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
+                    {{ form.address }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+                    {{ form.image }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.bg_color.id_for_label }}">{{ form.bg_color.label }}</label>
+                    {{ form.bg_color }}
+                </div>
+
+                <div class="form-group full-width">
+                   <label for="{{ form.description_short.id_for_label }}">{{ form.description_short.label }}</label>
+                    {{ form.description_short }}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                    {{ form.description }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.number_of_shops.id_for_label }}">{{ form.number_of_shops.label }}</label>
+                    {{ form.number_of_shops }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.number_of_parking_spaces.id_for_label }}">{{ form.number_of_parking_spaces.label }}</label>
+                    {{ form.number_of_parking_spaces }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+                    {{ form.phone }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                    {{ form.email }}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+                    {{ form.website }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.opening_date.id_for_label }}">{{ form.opening_date.label }}</label>
+                    {{ form.opening_date }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.badge.id_for_label }}">{{ form.badge.label }}</label>
+                    {{ form.badge }}
+                </div>
+
+                <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px;">
+                    {{ form.is_open }}
+                    <label for="{{ form.is_open.id_for_label }}" style="margin-bottom: 0;">{{ form.is_open.label }}</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.opening_time.id_for_label }}">{{ form.opening_time.label }}</label>
+                    {{ form.opening_time }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.closing_time.id_for_label }}">{{ form.closing_time.label }}</label>
+                    {{ form.closing_time }}
+                </div>
+
+                <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px;">
+                    {{ form.is_featured }}
+                    <label for="{{ form.is_featured.id_for_label }}" style="margin-bottom: 0;">{{ form.is_featured.label }}</label>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    {% if object %} Enregistrer les modifications {% else %} Créer le Mall {% endif %}
+                </button>
+            </form>
+            
+            <a href="{% url 'home' %}" class="btn-cancel">Annuler et retourner au portail</a>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

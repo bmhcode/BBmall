@@ -2,6 +2,9 @@
    YES MALL — Main JavaScript
    ============================================================ */
 
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ── 1. Navbar scroll effect ── */

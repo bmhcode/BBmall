@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if mall %}Products in {{ mall.name }}{% else %}Discover Products{% endif %} — BB Shopping
+{% endblock %}
+
+{% block content %}
+product_list.html 
+<!-- Page Hero -->
+<section class="ym-page-hero">
+    <div class="ym-container">
+        <p class="ym-eyebrow">
+            <i class="fas fa-shopping-bag"></i> 
+            {% if mall %}{{ mall.name }}{% else %}Global Collection{% endif %}
+        </p>
+        <h1 class="ym-section-title">
+            {% if mall %}Shop local at {{ mall.name }}{% else %}Discover everything{% endif %}
+        </h1>
+        <p class="ym-section-subtitle">
+            Explore products from the finest shops. Quality and style, just a click away.
+        </p>
+    </div>
+</section>
+
+<!-- Discovery Area -->
+<section class="ym-section ym-section--gray">
+    <div class="ym-container">
+        
+        <!-- Action & Filter Bar -->
+        <div class="ym-filter-bar" style="display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 48px; flex-wrap: wrap;">
+            
+            <div class="ym-search-box" style="flex: 1; max-width: 400px;">
+                <form method="get" action="." style="position: relative;">
+                    <input type="text" name="q" value="{{ search_query|default:'' }}" 
+                           placeholder="Search products or shops..." 
+                           style="width: 100%; padding: 12px 20px 12px 45px; border-radius: 50px; border: 1px solid var(--border); font-family: inherit;">
+                    <i class="fas fa-search" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    {% if selected_category %}
+                        <input type="hidden" name="category" value="{{ selected_category }}">
+                    {% endif %}
+                </form>
+            </div>
+
+            <div class="ym-filter-group" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px;">
+                <a href="?q={{ search_query|default:'' }}" 
+                   class="ym-filter-btn {% if not selected_category %}active{% endif %}">
+                   All
+                </a>
+                {% for cat in categories %}
+                <a href="?category={{ cat.slug }}&q={{ search_query|default:'' }}" 
+                   class="ym-filter-btn {% if selected_category == cat.slug %}active{% endif %}">
+                   {{ cat.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="ym-stores-grid">
+            {% for product in products %}
+            <div class="ym-product-card" style="background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.3s ease; position: relative;">
+                <a href="{{ product.get_absolute_url }}" style="text-decoration: none; color: inherit;">
+                    <div class="ym-product-card__image" style="height: 280px; position: relative; overflow: hidden; background: #f9f9f9;">
+                        {% if product.main_image %}
+                            <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+                        {% elif product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+                        {% else %}
+                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ddd;">
+                                <i class="fas fa-image fa-3x"></i>
+                            </div>
+                        {% endif %}
+                        
+                        {% if product.old_price %}
+                            <span style="position: absolute; top: 15px; left: 15px; background: var(--accent); color: #fff; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">
+                                -{{ product.get_discount_percentage|floatformat:0 }}%
+                            </span>
+                        {% endif %}
+
+                        {% if product.is_new %}
+                            <span style="position: absolute; top: 15px; right: 15px; background: #10b981; color: #fff; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">
+                                NEW
+                            </span>
+                        {% endif %}
+                    </div>
+                </a>
+
+                <div class="ym-product-card__body" style="padding: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); font-weight: 700;">
+                            {{ product.category.name }}
+                        </p>
+                        <div style="font-weight: 700; color: var(--primary);">
+                            {{ product.price }} DZD
+                            {% if product.old_price %}
+                                <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.85rem; font-weight: 400; margin-left: 5px;">
+                                    {{ product.old_price }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <h3 style="font-size: 1.15rem; margin-bottom: 12px; font-weight: 600;">
+                        <a href="{{ product.get_absolute_url }}" style="text-decoration: none; color: inherit;">
+                            {{ product.name }}
+                        </a>
+                    </h3>
+
+                    <div style="display: flex; align-items: center; gap: 10px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
+                        {% if product.shop.logo %}
+                            <img src="{{ product.shop.logo.url }}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                        {% endif %}
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">
+                            Sold by <a href="{{ product.get_absolute_url }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">{{ product.shop.name }}</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="ym-empty" style="grid-column: 1/-1; text-align: center; padding: 80px 0;">
+                <i class="fas fa-search-minus fa-3x" style="color: var(--text-muted); margin-bottom: 20px;"></i>
+                <p style="font-size: 1.2rem; color: var(--text-muted);">We couldn't find any products matching your criteria.</p>
+                <a href="?" class="ym-btn ym-btn--dark" style="margin-top: 20px;">Clear all filters</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav class="ym-pagination" style="margin-top: 56px; display: flex; justify-content: center; gap: 10px;">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="ym-filter-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            {% endif %}
+            
+            <span class="ym-filter-btn active">{{ page_obj.number }}</span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="ym-filter-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+    </div>
+</section>
+
+<style>
+    .ym-product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    }
+    .ym-product-card:hover .ym-product-card__image img {
+        transform: scale(1.05);
+    }
+</style>
+
+{% endblock %}

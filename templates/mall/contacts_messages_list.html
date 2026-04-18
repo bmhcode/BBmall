@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Messages — {{ mall.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+    .dashboard-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
+    .dashboard-table { width: 100%; border-collapse: collapse; }
+    .dashboard-table th { background: #1a1a2e; color: #fff; text-align: left; padding: 18px 24px; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+    .dashboard-table td { padding: 20px 24px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    .mall-name { font-weight: 600; color: #1a1a2e; display: block; }
+    .mall-city { font-size: 0.8rem; color: #6b7280; }
+    .actions-cell { display: flex; gap: 10px; }
+    .btn-action { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; border: none; cursor: pointer; text-decoration: none; }
+    .btn-delete { background: #fee2e2; color: #ef4444; }
+    .btn-delete:hover { background: #fecaca; color: #dc2626; }
+    .btn-view { background: #e0f2fe; color: #0284c7; }
+    .btn-view:hover { background: #bae6fd; color: #0369a1; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    <p class="ym-eyebrow"><i class="fas fa-envelope"></i> Centre Administratif</p>
+    <h1 class="ym-section-title">Gestion des Messages</h1>
+    <p class="ym-section-subtitle">Consultez et gérez les messages des contacts pour <strong>{{ mall.name }}</strong>.</p>
+  </div>
+</section>
+
+<!-- Dashboard Section -->
+<section class="ym-section ym-section--light">
+    <div class="ym-container">
+        <div class="dashboard-header ym-reveal">
+            <div>
+                <p style="color: #6b7280;">{{ contacts|length }} message{{ contacts|pluralize:"s" }} trouvé{{ contacts|pluralize:"s" }}</p>
+            </div>
+            {% if mall and mall.slug %}
+            <a href="{% url 'contact_message_create' mall.slug %}" class="ym-btn ym-btn--primary">
+                <i class="fas fa-plus"></i> Nouveau message
+            </a>
+            {% else %}
+                <!-- fallback -->
+                <span>all malls messages</span>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-card ym-reveal">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Expéditeur</th>
+                        <th>Sujet</th>
+                        <th>Aperçu</th>
+                        <th>Mall</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in contacts %}
+                    <tr>
+                        <td>
+                            <span class="mall-name">{{ message.name }}</span>
+                            <span class="mall-city">{{ message.email }}</span>
+                        </td>
+                        <td style="font-weight: 600; color: #1a1a2e;">{{ message.subject }}</td>
+                        <td style="color: #6b7280;">{{ message.message|truncatewords:10 }}</td>
+                        <td style="font-weight: 600; color: #1a1a2e;">{{ message.mall.name }}</td>
+                        <td style="font-size: 0.9rem; color: #6b7280;">{{ message.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="actions-cell">
+
+                         
+ {% if message.mall and message.mall.slug %}
+    <a href="{% url 'contact_message_detail' message.mall.slug message.id %}" class="btn-action btn-view" title="Voir les détails">
+        <i class="fas fa-eye"></i>
+    </a>
+    <a href="{% url 'contact_message_delete' message.mall.slug message.id %}" class="btn-action btn-delete" title="Supprimer">
+        <i class="fas fa-trash"></i>
+    </a>
+{% endif %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 80px 40px;">
+                            <div style="font-size: 3rem; color: #e5e7eb; margin-bottom: 20px;"><i class="fas fa-envelope-open"></i></div>
+                            <p style="color: #6b7280; font-size: 1.2rem;">Aucun message reçu pour le moment.</p>
+                            <a href="{% url 'contact_message_create' mall.slug %}" class="ym-btn ym-btn--primary" style="margin-top: 20px; display: inline-block;">
+                                Simuler un premier message
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} {{ product.shop.name }} - {{ product.name }} {% endblock %}
+
+{% block content %}
+
+<!-- Product Header Area -->
+<section class="ym-section ym-section--light" style="padding: 120px 0 80px;">
+    <div class="ym-container">
+        
+        <nav style="margin-bottom: 32px; font-size: 0.9rem; color: var(--text-muted);">
+            <a href="{% url 'home' %}" style="text-decoration: none; color: inherit;">Home</a>
+            <span style="margin: 0 8px;">/</span>
+            <a href="{% url 'mall' product.shop.mall.slug %}" style="text-decoration: none; color: inherit;">{{ product.shop.mall.name }}</a>
+            <span style="margin: 0 8px;">/</span>
+            <a href="{% url 'shop_detail' mall_slug=product.shop.mall.slug slug=product.shop.slug %}" style="text-decoration: none; color: inherit;">{{ product.shop.name }}</a>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: var(--primary); font-weight: 600;">{{ product.name }}</span>
+        </nav>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;">
+            
+            <!-- Product Imagery -->
+            <div class="ym-product-gallery" style="position: sticky; top: 120px;">
+                <div style="background: #f9f9f9; border-radius: 30px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.05);">
+                    {% if product.main_image %}
+                        <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" style="width: 100%; height: auto; display: block;">
+                    {% elif product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: auto; display: block;">
+                    {% else %}
+                        <div style="padding: 100px; text-align: center; color: #ddd;">
+                            <i class="fas fa-image fa-6x"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Secondary images if any -->
+                {% if product.images.all %}
+                <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
+                    {% for img in product.images.all %}
+                    <div style="position: relative; width: 80px; height: 80px; border-radius: 12px; overflow: hidden; border: 2px solid {% if img.is_main %}var(--accent){% else %}transparent{% endif %}; transition: border-color 0.3s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='{% if img.is_main %}var(--accent){% else %}transparent{% endif %}'">
+                        <img src="{{ img.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        
+                        {% if request.user.is_authenticated %}
+                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                            {% if not img.is_main %}
+                            <!-- Set Main Action -->
+                            <form method="post" action="{% url 'product_image_set_main' img.id %}" style="margin:0; padding:0; line-height: 1;">
+                                {% csrf_token %}
+                                <button type="submit" title="Set as Main" style="background: none; border: none; color: #fff; cursor: pointer; padding: 2px; margin-bottom: 5px;">
+                                    <i class="fas fa-star" style="font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+                                </button>
+                            </form>
+                            {% else %}
+                            <i class="fas fa-star" style="color: var(--accent); font-size: 1.1rem; margin-bottom: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+                            {% endif %}
+                            
+                            <!-- Delete Action -->
+                            <form method="post" action="{% url 'product_image_delete' img.id %}" style="margin:0; padding:0; line-height: 1;">
+                                {% csrf_token %}
+                                <button type="submit" title="Delete Image" style="background: none; border: none; color: #ff4d4d; cursor: pointer; padding: 2px;" onclick="return confirm('Are you sure you want to delete this image?');">
+                                    <i class="fas fa-trash-alt" style="font-size: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Product Info -->
+            <div class="ym-product-info">
+                <p style="font-size: 0.9rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;">
+                    {{ product.category.name }}
+                </p>
+                
+                <h1 style="font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 24px; color: var(--primary); line-height: 1.1;">
+                    {{ product.name }}
+                </h1>
+
+                <div style="display: flex; align-items: baseline; gap: 15px; margin-bottom: 32px;">
+                    <span style="font-size: 2.5rem; font-weight: 800; color: var(--primary);">{{ product.price }} DZD</span>
+                    {% if product.old_price %}
+                        <span style="font-size: 1.5rem; text-decoration: line-through; color: var(--text-muted);">{{ product.old_price }}</span>
+                        <span style="background: var(--accent); color: #fff; padding: 4px 12px; border-radius: 50px; font-weight: 700; font-size: 0.9rem; margin-left: 10px;">
+                            SAVE {{ product.get_discount_percentage|floatformat:0 }}%
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div style="background: #fff; border: 1.5px solid var(--border); border-radius: 20px; padding: 30px; margin-bottom: 40px;">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 15px; font-weight: 700;">Availability</h3>
+                    <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 25px;">
+                        This item is currently available at <strong>{{ product.shop.name }}</strong> in {{ product.shop.mall.name }}.
+                        Prices and availability may vary in store.
+                    </p>
+                    
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <a href="#" class="ym-btn ym-btn--accent" style="padding: 16px 40px;">
+                            Contact Store
+                        </a>
+                        <a href="{% url 'shop_detail' mall_slug=product.shop.mall.slug slug=product.shop.slug %}" class="ym-btn ym-btn--dark" style="padding: 16px 40px;">
+                            View Shop Details
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Shop Identity Section -->
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    {% if product.shop.logo %}
+                        <img src="{{ product.shop.logo.url }}" style="width: 60px; height: 60px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                    {% endif %}
+                    <div>
+                        <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px;">Verified Vendor</p>
+                        <h4 style="font-size: 1.2rem; font-weight: 700;">{{ product.shop.name }}</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">{{ product.shop.location }} — {{ product.shop.mall.name }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Products Section -->
+{% if related_products %}
+<section class="ym-section ym-section--gray">
+    <div class="ym-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px;">
+            <h2 class="ym-section-title" style="margin: 0;">You may also like</h2>
+            <a href="{% url 'products_all' %}?category={{ product.category.slug }}" class="ym-btn ym-btn--ghost ym-btn--sm">View all</a>
+        </div>
+        
+        <div class="ym-stores-grid">
+            {% for item in related_products %}
+            <div class="ym-product-card" style="background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.3s ease;">
+                <a href="{{ item.get_absolute_url }}" style="text-decoration: none; color: inherit;">
+                    <div style="height: 240px; background: #f9f9f9; overflow: hidden;">
+                        {% if item.main_image %}
+                            <img src="{{ item.main_image.image.url }}" alt="{{ item.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ddd;">
+                                <i class="fas fa-image fa-3x"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                </a>
+                <div style="padding: 24px;">
+                    <h4 style="margin-bottom: 8px; font-weight: 600;">{{ item.name }}</h4>
+                    <p style="font-weight: 700; color: var(--primary);">{{ item.price }} DZD</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}

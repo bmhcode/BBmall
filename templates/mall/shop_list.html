@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Our shops — {{mall.name}}{% endblock %}
+
+{% block content %}
+
+shop_list.html
+<!-- Page Hero -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    <p class="ym-eyebrow"><i class="fas fa-store"></i> Shops</p>
+    <h1 class="ym-section-title">Our Shops</h1>
+    <p class="ym-section-subtitle">Explorez une vaste sélection de boutiques allant de la haute couture à la technologie de pointe.</p>
+  </div>
+</section>
+
+
+<!-- Filter + Grid -->
+<section class="ym-section ym-section--gray">
+  <div class="ym-container">
+
+    <!-- Filter Bar -->
+    <div class="ym-filter-bar" style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        {% if mall and mall.slug %}
+        <a href="{% url 'shops_by_mall' mall.slug %}"
+           class="ym-filter-btn {% if not request.GET.category %}active{% endif %}">
+          Tous
+        </a>
+        {% else %}
+        <a href="{% url 'shops_all' %}"
+           class="ym-filter-btn {% if not request.GET.category %}active{% endif %}">
+          Tous
+        </a>
+        {% endif %}
+     
+        {% for code, label in categories %}
+        <a href="?category={{ code }}"
+           class="ym-filter-btn {% if request.GET.category == code %}active{% endif %}">
+          {{ label }}
+        </a>
+        {% endfor %}
+      </div>
+      
+      {% if mall and mall.slug %}
+      <a href="{% url 'shop_create' mall.slug %}" class="ym-btn ym-btn--accent ym-btn--sm" style="white-space:nowrap;">
+        <i class="fas fa-plus"></i> Add Shop
+      </a>
+      {% endif %}
+    </div>      
+
+    <!-- Stores Grid -->
+    <div class="ym-stores-grid ym-reveal">
+      {% for shop in shops %}
+      <article class="ym-store-card" data-category="{{ shop.category }}">
+        <a href="{% url 'shop_detail' mall_slug=shop.mall.slug slug=shop.slug %}" aria-label="Voir {{ shop.name }}">
+          <div class="ym-store-card__image-wrap">
+            {% if shop.coverURL %}
+            <img src="{{ shop.coverURL }}" alt="{{ shop.name }}" loading="lazy">
+            {% else %}
+            <div class="ym-store-card__image-placeholder">
+              <i class="fas fa-store"></i>
+            </div>
+            {% endif %}
+            <span class="ym-store-card__badge ym-store-card__badge--featured">
+              <i class="fas fa-star fa-xs me-1"></i>Vedette
+            </span>
+          </div>
+        </a>
+        <button class="ym-store-card__fav" aria-label="Ajouter aux favoris">
+          <i class="far fa-heart"></i>
+        </button>
+        <div class="ym-store-card__body">
+          <p class="ym-store-card__category">{{ shop.get_category_display }}</p>
+          <h3 class="ym-store-card__name">{{ shop.name }} </h3>
+          <p class="ym-store-card__desc">{{ shop.description }}</p>
+          <div class="ym-store-card__meta">
+            <span class="ym-store-card__location">
+              <i class="fas fa-map-marker-alt fa-xs"></i>
+              {{ shop.location }}
+            </span>
+            <a href="{% url 'shop_detail' mall_slug=shop.mall.slug slug=shop.slug %}" class="ym-store-card__link">
+              Visiter <i class="fas fa-arrow-right fa-xs"></i>
+            </a>
+          </div>  
+          <h6 style="color: var(--text-muted); font-size:0.75rem; margin-top:8px;">{{shop.mall.name}} - {{shop.mall.city}} </h6>  
+        </div>
+      </article>
+
+      {% empty %}
+      <div class="ym-empty" style="grid-column:1/-1">
+        <i class="fas fa-store-slash"></i>
+        <p>Aucune boutique pour le moment.</p>
+        <a href="{% url 'shop_create' mall.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="margin-top:16px;display:inline-flex">
+          Add a shop
+        </a>
+      </div>
+      {% endfor %}
+      
+    </div>
+
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="ym-pagination" aria-label="Pagination" style="margin-top:56px; display:flex; justify-content:center; gap:8px;">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="ym-filter-btn">
+        <i class="fas fa-arrow-left"></i> Précédent
+      </a>
+      {% endif %}
+      <span class="ym-filter-btn active">{{ page_obj.number }}</span>
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="ym-filter-btn">
+        Suivant <i class="fas fa-arrow-right"></i>
+      </a>
+      {% endif %}
+    </nav>
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock %}

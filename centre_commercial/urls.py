@@ -1,10 +1,31 @@
-from django.urls import path
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+from django.urls import path, include
 from . import views
 
 urlpatterns = [
     # Portal — choose your mall (root page)
     path('', views.HomeView.as_view(), name='home'),
-    
+
+
+
+
+    # ============================================================================
+    # AUTHENTICATION & ACCOUNT MANAGEMENT
+    # ============================================================================
+  
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('signup/', views.signup, name='signup'),
+    path('update-profile/<str:username>/',views.update_profile, name="update_profile"),
+    #--------------------- / Auth -------------------------
+  
+
+
+
+
+
     # Mall Management BBMalls
     path('malls/', views.MallTableListView.as_view(), name='mall_table_list'),
     path('malls/add/', views.MallCreateView.as_view(), name='mall_create'),
@@ -14,10 +35,11 @@ urlpatterns = [
     # Mall
     path('mall/<slug:slug>/', views.MallView.as_view(), name='mall'),
 
-    # Magasins
+    # Shops
+    path('mall/<slug:slug>/shop/add/', views.ShopCreateView.as_view(), name='shop_create'),
+    path('mall/<slug:mall_slug>/shop/<slug:slug>/', views.ShopDetailView.as_view(), name='shop_detail'),
     path('shops/', views.ShopListView.as_view(), name='shops_all'),
     path('mall/<slug:slug>/shops/', views.ShopListView.as_view(), name='shops_by_mall'),
-    path('mall/<slug:mall_slug>/shop/<slug:slug>/', views.ShopDetailView.as_view(), name='shop_detail'),
     
     # Promotions
     path('promotions/', views.PromotionListView.as_view(), name='promotions_all'),
@@ -34,23 +56,23 @@ urlpatterns = [
     path('mall/<slug:slug>/blogs/', views.ArticleBlogListView.as_view(), name='blogs_by_mall'),
     path('mall/<slug:mall_slug>/blog/<slug:slug>/', views.ArticleBlogDetailView.as_view(), name='blog_detail'),
 
-    # Contact
-    path('mall/<slug:mall_slug>/contact/', views.ContactCreateView.as_view(), name='contact_create'),
-    path('mall/<slug:mall_slug>/contacts/', views.ContactListView.as_view(), name='contacts_by_mall'),
-    path('contacts/', views.ContactListView.as_view(), name='contacts_all'),
-    path('mall/<slug:mall_slug>/contact/<int:id>/', views.ContactDetailView.as_view(), name='contact_detail'),
-    path('mall/<slug:mall_slug>/contact/<int:id>/delete/', views.ContactDeleteView.as_view(), name='contact_delete'),
+    # Contact messages
+    path('mall/<slug:slug>/contact/', views.ContactMessageCreateView.as_view(), name='contact_message_create'),
+   
+    path('mall/<slug:slug>/contacts/', views.ContactMessageListView.as_view(), name='contacts_messages_by_mall'),
+    path('contacts/', views.ContactMessageListView.as_view(), name='contacts_messages_all'),
+    path('mall/<slug:mall_slug>/contact/<int:id>/', views.ContactMessageDetailView.as_view(), name='contact_message_detail'),
+    path('mall/<slug:mall_slug>/contact/<int:id>/delete/', views.ContactMessageDeleteView.as_view(), name='contact_message_delete'),
 
+    # Product
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/add/', views.ProductCreateView.as_view(), name='product_create'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/<slug:slug>/', views.ProductDetailView.as_view(), name='product_detail'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/<slug:slug>/edit/', views.ProductUpdateView.as_view(), name='product_update'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/<slug:slug>/delete/', views.ProductDeleteView.as_view(), name='product_delete'),
+    path('mall/<slug:slug>/products/', views.ProductListView.as_view(), name='products_by_mall'),
+    path('products/', views.ProductListView.as_view(), name='products_all'),
 
-
-
-    # Individual mall homepage (the "Entered" mall experience)
-    # path('magasins/', views.MagasinListView.as_view(), name='magasin_list'),
-    # path('magasin/<slug:slug>/', views.MagasinDetailView.as_view(), name='magasin_detail'),
-    # path('evenements/', views.EvenementListView.as_view(), name='evenement_list'),
-    # path('evenements/<slug:slug>/', views.EvenementDetailView.as_view(), name='evenement_detail'),
-    # path('promotions/', views.PromotionListView.as_view(), name='promotion_list'),
-    # path('blog/', views.ArticleBlogListView.as_view(), name='blog_list'),
-    # path('blog/<slug:slug>/', views.ArticleBlogDetailView.as_view(), name='blog_detail'),
-    # path('contact/', views.ContactView.as_view(), name='contact'),
+    # Product Images (AJAX / Actions)
+    path('product-image/<int:id>/delete/', views.product_image_delete, name='product_image_delete'),
+    path('product-image/<int:id>/set-main/', views.product_image_set_main, name='product_image_set_main'),
 ]

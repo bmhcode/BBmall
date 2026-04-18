@@ -1,5 +1,6 @@
 from django.utils.translation.template import endblock_re
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from django.urls import reverse
@@ -7,8 +8,14 @@ from django.utils import timezone
 from datetime import timedelta
 import uuid
 from django_ckeditor_5.fields import CKEditor5Field
+
 from django.conf import settings
 from django.utils.html import mark_safe
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
 
 # =========================================
 # HELPERS
@@ -190,13 +197,12 @@ class Mall(models.Model):
                                   help_text="Ex: linear-gradient(135deg,#1a1a2e,#e91e8c)")
 
     # ── Description ──
+    description_short = models.CharField(max_length=180, blank=True)
     description = models.TextField()
-    short_description = models.CharField(max_length=180, blank=True)
     
     # ── Statut ──
     is_open = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
-    opening_date = models.DateField(blank=True, null=True, verbose_name="Opening date (if future)")
     badge           = models.CharField(max_length=40, blank=True, verbose_name="Badge (ex: New, Phare)")
     observation     = models.TextField(blank=True, null=True, verbose_name="Observation") # En cas de fermeture ou autre
     
@@ -214,6 +220,7 @@ class Mall(models.Model):
     # ── Date ──
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    opening_date = models.DateField(blank=True, null=True, verbose_name="Opening date (if future)")
     
     class Meta:
         verbose_name = "Centre Commercial (Mall)"
@@ -229,19 +236,27 @@ class Mall(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('mall_detail', kwargs={'slug': self.slug})
-    
+        return reverse(
+            'mall_detail',
+            kwargs={
+                'slug': self.slug
+            }
+        )
+
     @property
     def is_open_now(self):
         if not self.is_open:
             return False
-
         now = timezone.localtime().time()
 
         if self.opening_time < self.closing_time:
             return self.opening_time <= now <= self.closing_time
         return now >= self.opening_time or now <= self.closing_time
 
+    @property
+    def imageURL(self):
+        return self.image.url if self.image else ""
+        
 class MallImage(models.Model):
     mall = models.ForeignKey(Mall, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='malls/images/')
@@ -287,6 +302,10 @@ class Event(models.Model):
 
     def get_absolute_url(self):
         return reverse('event_detail', kwargs={'slug': self.slug})
+
+    @property
+    def imageURL(self):
+        return self.image.url if self.image else ""
 
 class ArticleBlog(models.Model):
     # ── Relation ──
@@ -418,7 +437,6 @@ class Shop(models.Model):
     is_closed = models.BooleanField(default=False, verbose_name="Is closed ?")
     observation = models.TextField(blank=True, null=True, verbose_name="Observation") # En cas de fermeture ou autre
 
-
     class Meta:
         verbose_name = "Shop"
         verbose_name_plural = "Shops"
@@ -431,9 +449,21 @@ class Shop(models.Model):
             self.slug = generate_unique_slug(Shop, self.name)
         super().save(*args, **kwargs)
 
+    # def get_absolute_url(self):
+    #     return reverse('magasin_detail', kwargs={'slug': self.slug})
+    #     # return reverse('magasin_detail_by_mall', kwargs={'mall_slug': self.mall.slug, 'slug': self.slug})
+    
     def get_absolute_url(self):
-        return reverse('magasin_detail', kwargs={'slug': self.slug})
-        # return reverse('magasin_detail_by_mall', kwargs={'mall_slug': self.mall.slug, 'slug': self.slug})
+        return reverse(
+            'magasin_detail',
+            kwargs={
+                'mall_slug': self.mall.slug,
+                'slug': self.slug
+                }
+            )
+
+
+
 
     @property
     def logoURL(self):
@@ -582,6 +612,10 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+    def main_image(self):
+        return self.images.filter(is_main=True).first()
+
+
     @property
     def is_new(self):
         return (timezone.now() - self.created_at) <= timedelta(days=1)
@@ -589,13 +623,25 @@ class Product(models.Model):
     def get_discount_percentage(self):
         if self.old_price:
             return ((self.old_price - self.price) / self.old_price) * 100
-        return 0
+        return 
+    
+    def get_absolute_url(self):
+        return reverse(
+            'product_detail',
+            kwargs={
+                'mall_slug': self.shop.mall.slug,
+                'shop_slug': self.shop.slug,
+                'slug': self.slug
+            }
+        )
 
 class ProductImages(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True,related_name='images', verbose_name=_("Product images"))
     caption = models.CharField(max_length=128, blank=True, null=True)
     image = models.ImageField(upload_to="products/images/", blank=True, null=True)
     # image   = CloudinaryField('image', blank=True, null=True)
+
+    is_main = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     order = models.PositiveIntegerField(default=0) 
@@ -607,13 +653,8 @@ class ProductImages(models.Model):
     def __str__(self):
         return f"Image of {self.product.name} - {self.id}"
       
-    @property
-    def imageURL(self):
-        try:
-            url = self.image.url
-        except:
-            url = ''
-        return url
+
+      
 
 class Wishlist(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist')
@@ -681,28 +722,32 @@ class OrderHistory(models.Model):
 # =========================================
 # PROFILE
 # =========================================
+
 class Profile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    USER_ROLES = (
+        ('user', 'User'),
+        ('manager', 'Mall Manager'),
+        ('owner', 'Store Owner'),
+    )
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    full_name = models.CharField(max_length=255, blank=True, null=True)
+    role = models.CharField(max_length=20, choices=USER_ROLES, default='user')
+    image = models.ImageField(upload_to='profiles/', default='profiles/default.png')
     phone = models.CharField(max_length=20, blank=True, null=True)
-    # photo = CloudinaryField("image", blank=True, null=True)
-    photo = models.ImageField(upload_to="profile/", blank=True, null=True)
-    is_seller = models.BooleanField(default=False)
-    is_validated = models.BooleanField(default=False)
-    is_rejected = models.BooleanField(default=False)
-    observation = models.TextField(blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.user.username
 
     @property
-    def photoURL(self):
-        return self.photo.url if self.photo else ""
+    def imageURL(self):
+        return self.image.url if self.image else ""
 
 # =========================================
 # SIGNAL (AUTO CREATE PROFILE)
 # =========================================
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_profile(sender, instance, created, **kwargs):

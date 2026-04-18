@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Offres &amp; Promotions — {{mall.name}} {% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    <p class="ym-eyebrow"><i class="fas fa-tag"></i> Promotions</p>
+    <h1 class="ym-section-title">Offres &amp; Promotions</h1>
+    <p class="ym-section-subtitle">Profitez de réductions exceptionnelles dans vos boutiques préférées. Ne manquez pas nos offres limitées !</p>
+  </div>
+</section>
+
+<!-- Promos Grid -->
+<section class="ym-section ym-section--light">
+  <div class="ym-container">
+
+    <div class="ym-promos-grid ym-reveal">
+      {% for promotion in promotions %}
+    
+        <a href="{% url 'shop_detail' mall_slug=promotion.shop.mall.slug slug=promotion.shop.slug %}" class="ym-promo-card">
+     
+        {% if promotion.image %}
+        <div class="ym-promo-card__bg" style="background-image:url('{{ promotion.image.url }}');"></div>
+        <div class="ym-promo-card__overlay"></div>
+        {% else %}
+        <div class="ym-promo-card__bg ym-promo-card--gradient-{{ forloop.counter|divisibleby:3|yesno:'3,1,2' }}" style="opacity:.6;"></div>
+        {% endif %}
+        <div class="ym-promo-card__content">
+          <span class="ym-promo-card__tag">Promo</span>
+          <p class="ym-promo-card__store">{{ promotion.shop.name }}</p>
+          <h2 class="ym-promo-card__title">{{ promotion.title }}</h2>
+          <p class="ym-promo-card__date">
+            <i class="far fa-clock"></i> Jusqu'au {{ promotion.end_date|date:"d M Y" }}
+          </p>
+        </div>
+      </a>
+      {% empty %}
+      <div class="ym-empty" style="grid-column: 1/-1;">
+        <i class="fas fa-tag"></i>
+        <p>Aucune promotion en cours. Revenez bientôt !</p>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

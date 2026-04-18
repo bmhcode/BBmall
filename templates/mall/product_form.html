@@ -1,0 +1,333 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if object %}Update{% else %}Add{% endif %} Product — {{ shop.name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/portal.css' %}">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --accent: #e91e8c;
+            --bg-soft: #fbfbfb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-soft);
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .form-section {
+            padding: 120px 0;
+            min-height: 100vh;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 48px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+        }
+
+        .form-group input, 
+        .form-group select {
+            padding: 14px 18px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(233, 30, 140, 0.1);
+        }
+
+        .preview-area {
+            grid-column: span 2;
+            margin-top: 20px;
+            background: var(--bg-soft);
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            min-height: 200px;
+        }
+        
+        .preview-placeholder {
+            text-align: center;
+            position: absolute;
+            top: 50%; width: 100%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+
+        .btn-submit {
+            grid-column: span 2;
+            background: var(--primary);
+            color: #fff;
+            padding: 18px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(233, 30, 140, 0.3);
+        }
+
+        .btn-back {
+            text-align: center;
+            display: block;
+            margin-top: 24px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .btn-back:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<header class="portal-nav" style="position: absolute; width: 100%; top: 0; background: transparent;">
+    <div class="ym-container" style="display: flex; justify-content: space-between; align-items: center; padding: 24px 0;">
+        <a href="{% url 'home' %}" class="portal-nav__brand" style="color: var(--primary);">
+            <span class="portal-nav__brand-icon" style="background: var(--primary); color: #fff;"><i class="fas fa-gem"></i></span>
+            BB <span>Shopping</span>
+        </a>
+    </div>
+</header>
+
+<section class="form-section">
+    <div class="ym-container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>{% if object %}Edit{% else %}New{% endif %} Product</h1>
+                <p>Registering to <strong>{{ shop.name }}</strong> ({{ shop.mall.name }})</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="form-grid" id="productForm">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <div style="background: #fee2e2; color: #b91c1c; padding: 16px; border-radius: 12px; margin-bottom: 32px; grid-column: span 2;">
+                    <p style="font-weight: 600; margin-bottom: 8px;">Please correct the errors below:</p>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="form-group full-width">
+                    <label for="{{ form.name.id_for_label }}">Product Name</label>
+                    {{ form.name }}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.category.id_for_label }}">Category</label>
+                    {{ form.category }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.price.id_for_label }}">Current Price (DZD)</label>
+                    {{ form.price }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.old_price.id_for_label }}">Old Price (Sale - Optional)</label>
+                    {{ form.old_price }}
+                </div>
+
+                <!-- Custom Multi-Image Upload Area -->
+                <div class="form-group full-width" style="margin-top: 15px;">
+                    <label>Product Images</label>
+                    <input type="file" id="imagesInput" name="images" multiple accept="image/*" style="width: 100%; box-sizing: border-box; background: white;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">
+                        <i class="fas fa-info-circle me-1"></i> You can upload multiple files at once. Click an image in the preview to mark it as the main image.
+                    </div>
+                </div>
+
+                <div class="preview-area" id="previewArea">
+                    <div id="previewPlaceholder" class="preview-placeholder">
+                        <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--text-muted); margin-bottom: 12px;"></i>
+                        <p style="color: var(--text-muted); margin: 0;">Selected image previews will appear here</p>
+                    </div>
+                    <div id="imagePreviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; position: relative; z-index: 2;">
+                        <!-- JS generated previews go here -->
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    {% if object %}Save Product Changes{% else %}Add to Inventory{% endif %}
+                </button>
+            </form>
+            
+            <a href="{% if product %}{{ product.get_absolute_url }}{% else %}{% url 'shop_detail' shop.mall.slug shop.slug %}{% endif %}" class="btn-back">
+                Cancel and return to store
+            </a>
+        </div>
+    </div>
+</section>
+
+<script>
+    const imagesInput = document.getElementById('imagesInput');
+    const previewGrid = document.getElementById('imagePreviewGrid');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+
+    imagesInput.addEventListener('change', function() {
+        previewGrid.innerHTML = ''; // clear grid
+        if (this.files && this.files.length > 0) {
+            previewPlaceholder.style.display = 'none';
+            
+            Array.from(this.files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.style.position = 'relative';
+                    div.style.borderRadius = '12px';
+                    div.style.overflow = 'hidden';
+                    div.style.boxShadow = '0 4px 10px rgba(0,0,0,0.1)';
+                    div.style.aspectRatio = '1 / 1';
+                    div.style.backgroundColor = '#fff';
+                    div.style.border = '2px solid transparent';
+                    div.style.transition = 'all 0.2s ease';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.cursor = 'pointer';
+                    
+                    const label = document.createElement('label');
+                    label.style.position = 'absolute';
+                    label.style.top = '8px';
+                    label.style.left = '8px';
+                    label.style.background = 'rgba(255, 255, 255, 0.95)';
+                    label.style.padding = '6px 10px';
+                    label.style.borderRadius = '20px';
+                    label.style.fontSize = '0.75rem';
+                    label.style.fontWeight = '700';
+                    label.style.cursor = 'pointer';
+                    label.style.display = 'flex';
+                    label.style.alignItems = 'center';
+                    label.style.gap = '6px';
+                    label.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+                    label.style.color = 'var(--primary)';
+                    
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = 'main_index';
+                    radio.value = index;
+                    
+                    if (index === 0) {
+                        radio.checked = true;
+                        div.style.borderColor = 'var(--accent)';
+                    }
+                    
+                    // Allow clicking anywhere to check the radio
+                    const selectAsMain = () => {
+                        radio.checked = true;
+                        // Reset all borders
+                        Array.from(previewGrid.children).forEach(child => {
+                            child.style.borderColor = 'transparent';
+                        });
+                        div.style.borderColor = 'var(--accent)';
+                    };
+
+                    img.addEventListener('click', selectAsMain);
+                    label.addEventListener('click', (ev) => {
+                        ev.stopPropagation(); // let the internal radio handle it
+                        selectAsMain();
+                    });
+                    
+                    label.appendChild(radio);
+                    label.appendChild(document.createTextNode('Main'));
+                    
+                    div.appendChild(img);
+                    div.appendChild(label);
+                    
+                    previewGrid.appendChild(div);
+                }
+                reader.readAsDataURL(file);
+            });
+        } else {
+            previewPlaceholder.style.display = 'block';
+        }
+    });
+
+    {% if object %}
+        // If editing an existing object, you might want to fetch and display existing ProductImages here
+        // The implementation depends on whether you plan to build a separate management screen for existing images.
+    {% endif %}
+</script>
+
+</body>
+</html>
