@@ -49,7 +49,8 @@
         <div class="dashboard-header">
             <div>
                 <h1 style="font-family: 'Playfair Display', serif; font-size: 2rem;">Gestion des Centres</h1>
-                <p style="color: #6b7280;">{{ malls|length }} centre(s) commercial(iaux) enregistré(s)</p>
+                <p style="color: #6b7280;">{{ malls|length }} mall{{ malls|pluralize:"s" }} enregistré{{ malls|pluralize:"s" }}</p>
+
             </div>
             <a href="{% url 'mall_create' %}" class="ym-btn ym-btn--primary">
                 <i class="fas fa-plus"></i> Ajouter un Mall
@@ -86,7 +87,7 @@
 
                         <td>{{ mall.number_of_shops }}</td>
                         <td>
-                            {% if mall.is_open %}
+                            {% if mall.is_open_now %}
                                 <span class="badge-status badge-open">Ouvert</span>
                             {% else %}
                                 <span class="badge-status badge-closed">Fermé</span>

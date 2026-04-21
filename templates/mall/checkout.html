@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout — BB Shopping{% endblock %}
+
+{% block content %}
+<section class="ym-page-hero" style="background-color: var(--primary); color: white; padding: 100px 0 60px;">
+    <div class="ym-container">
+        <h1 class="ym-section-title" style="color: white; font-size: 2.5rem;">Secure Checkout</h1>
+    </div>
+</section>
+
+<section class="ym-section ym-section--gray">
+    <div class="ym-container" style="max-width: 600px;">
+        <div style="background: #fff; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.05);">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <i class="fas fa-lock fa-3x" style="color: var(--accent); margin-bottom: 15px;"></i>
+                <h2 style="font-weight: 800;">Confirm Your Order</h2>
+                <p style="color: var(--text-muted);">You are about to complete your purchase of {{ order.items.count }} items.</p>
+            </div>
+            
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800;">
+                    <span>Total to pay:</span>
+                    <span style="color: var(--accent);">{{ order.total_price }} DZD</span>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="ym-btn ym-btn--dark" style="width: 100%; padding: 20px; font-size: 1.15rem; font-weight: 800;">
+                    Complete Payment <i class="fas fa-check-circle ms-2"></i>
+                </button>
+            </form>
+            
+            <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 20px;">
+                By clicking Complete Payment, you agree to our Terms of Sale.
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

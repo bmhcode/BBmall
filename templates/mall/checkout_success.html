@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Successful — BB Shopping{% endblock %}
+
+{% block content %}
+<section class="ym-section ym-section--gray" style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
+    <div class="ym-container" style="text-align: center;">
+        <div style="background: #fff; border-radius: 30px; padding: 60px 40px; box-shadow: 0 10px 50px rgba(0,0,0,0.05); max-width: 600px; margin: 0 auto;">
+            <div style="width: 100px; height: 100px; background: #10b981; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 3rem; margin: 0 auto 30px; box-shadow: 0 10px 30px rgba(16,185,129,0.3);">
+                <i class="fas fa-check"></i>
+            </div>
+            
+            <h1 style="font-weight: 800; color: var(--primary); font-size: 2.2rem; margin-bottom: 20px;">Order Successful!</h1>
+            <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px;">
+                Thank you for your purchase. We have received your order and it is now being processed. You can view it in your order history at any time.
+            </p>
+            
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'order_history' %}" class="ym-btn ym-btn--dark" style="padding: 16px 30px;">
+                    View Order History
+                </a>
+                <a href="{% url 'home' %}" class="ym-btn ym-btn--ghost" style="padding: 16px 30px;">
+                    Return to Portal
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

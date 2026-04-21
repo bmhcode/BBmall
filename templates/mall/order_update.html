@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Modifier Commande #{{ order.id|stringformat:"04d" }} — BB Shopping{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════ PAGE HERO ═══════════ -->
+<section class="ym-page-hero" style="background: var(--color-primary); color: white; padding: 100px 0 60px;">
+  <div class="ym-container">
+    <p class="ym-eyebrow" style="color: var(--color-accent);">
+      <a href="{% url 'order_list_all' %}" style="color: var(--color-accent); text-decoration: none; opacity: 0.8;">Commandes</a>
+      <i class="fas fa-chevron-right mx-2" style="font-size: 0.6rem;"></i>
+      <a href="{% url 'order_detail' order.pk %}" style="color: var(--color-accent); text-decoration: none; opacity: 0.8;">
+        Commande #{{ order.id|stringformat:"04d" }}
+      </a>
+      <i class="fas fa-chevron-right mx-2" style="font-size: 0.6rem;"></i> Modifier
+    </p>
+    <h1 class="ym-section-title" style="color: white; margin-bottom: 8px;">
+      Modifier la <em style="color: var(--color-accent);">Commande</em>
+    </h1>
+    <p style="color: rgba(255,255,255,0.7); margin: 0;">
+      Client : <strong style="color: white;">{{ order.user.username }}</strong> &nbsp;·&nbsp; Passée le {{ order.created_at|date:"d F Y" }}
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════ FORM SECTION ═══════════ -->
+<section class="ym-section ym-section--gray">
+  <div class="ym-container">
+    <form method="post" id="orderUpdateForm">
+      {% csrf_token %}
+      {{ formset.management_form }}
+
+      <div style="display: grid; grid-template-columns: 1fr 360px; gap: 32px; align-items: start;">
+
+        <!-- LEFT: Order Items Formset -->
+        <div>
+          <div class="ym-detail-card" style="padding: 0; overflow: hidden; margin-bottom: 24px;">
+            <div style="padding: 28px 32px; border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between;">
+              <h2 style="font-family: var(--font-display); font-size: 1.4rem; margin: 0;">Articles de la commande</h2>
+              <span style="font-size: 0.85rem; color: var(--color-muted);">Modifiez les quantités, prix et statuts</span>
+            </div>
+
+            <div id="formset-wrapper">
+              {% for item_form in formset %}
+              <div class="item-form-row" data-item-index="{{ forloop.counter0 }}" data-product-name="{{ item_form.instance.product.name|truncatechars:22 }}" style="border-bottom: 1px solid var(--color-border); padding: 24px 32px;">
+                
+                {% for hidden in item_form.hidden_fields %}{{ hidden }}{% endfor %}
+                {# product must be in POST data even though it's displayed as read-only text #}
+                {{ item_form.product.as_hidden }}
+
+                {% if item_form.instance.pk %}
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                  {% if item_form.instance.product.image %}
+                  <img src="{{ item_form.instance.product.image.url }}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover;">
+                  {% endif %}
+                  <div style="font-weight: 700; color: var(--color-primary); font-size: 1rem;">
+                    {{ item_form.instance.product.name }}
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--color-muted);">
+                    <i class="fas fa-store" style="font-size: 0.65rem;"></i> {{ item_form.instance.product.shop.name }}
+                  </div>
+                </div>
+                {% endif %}
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 16px; align-items: end;">
+                  <div class="ym-form-group">
+                    <label class="ym-form-label">Quantité</label>
+                    {{ item_form.quantity }}
+                  </div>
+                  <div class="ym-form-group">
+                    <label class="ym-form-label">Prix unit. (DA)</label>
+                    {{ item_form.price }}
+                  </div>
+                  <div class="ym-form-group">
+                    <label class="ym-form-label">Statut</label>
+                    {{ item_form.status }}
+                  </div>
+                  <div class="ym-form-group" style="display: flex; align-items: flex-end; padding-bottom: 2px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #ef4444; font-size: 0.85rem; font-weight: 600; white-space: nowrap;">
+                      {{ item_form.DELETE }}
+                      <i class="fas fa-trash-alt"></i> Supprimer
+                    </label>
+                  </div>
+                </div>
+
+                {% if item_form.instance.pk %}
+                <div style="margin-top: 12px; padding: 8px 12px; background: #f9fafb; border-radius: 8px; font-size: 0.8rem; color: var(--color-muted);">
+                  Sous-total : <strong class="item-subtotal" style="color: var(--color-primary);">{{ item_form.instance.get_total|intcomma }} DA</strong>
+                </div>
+                {% endif %}
+
+                {% if item_form.notes %}
+                <div class="ym-form-group" style="margin-top: 14px;">
+                  <label class="ym-form-label">Notes sur l'article</label>
+                  {{ item_form.notes }}
+                </div>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Order Meta Form -->
+        <div>
+          <!-- Order Details -->
+          <div class="ym-detail-card" style="margin-bottom: 24px;">
+            <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border);">
+              <i class="fas fa-clipboard me-2" style="color: var(--color-pink);"></i> Détails de la commande
+            </h3>
+
+            <div class="ym-contact-form" style="display: flex; flex-direction: column; gap: 20px;">
+              <div class="ym-form-group">
+                <label class="ym-form-label" for="{{ form.status.id_for_label }}">Statut de la commande</label>
+                {{ form.status }}
+                {% if form.status.errors %}<div class="ym-form-error">{{ form.status.errors.0 }}</div>{% endif %}
+              </div>
+
+              <div class="ym-form-group">
+                <label class="ym-form-label" for="{{ form.address.id_for_label }}">Adresse de livraison</label>
+                {{ form.address }}
+                {% if form.address.errors %}<div class="ym-form-error">{{ form.address.errors.0 }}</div>{% endif %}
+              </div>
+
+              <div class="ym-form-group">
+                <label class="ym-form-label" for="{{ form.payment_method.id_for_label }}">Mode de paiement</label>
+                {{ form.payment_method }}
+                {% if form.payment_method.errors %}<div class="ym-form-error">{{ form.payment_method.errors.0 }}</div>{% endif %}
+              </div>
+
+              <div class="ym-form-group">
+                <label class="ym-form-label" for="{{ form.notes.id_for_label }}">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}<div class="ym-form-error">{{ form.notes.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Financial Summary -->
+          <div class="ym-detail-card" style="margin-bottom: 24px; background: var(--color-primary); color: white;">
+            <h3 style="font-family: var(--font-display); font-size: 1.1rem; color: white; margin-bottom: 20px;">Résumé financier</h3>
+            <div id="live-summary" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Populated dynamically by JS -->
+            </div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.2); margin-top: 12px; padding-top: 12px; display: flex; justify-content: space-between; font-weight: 900; font-size: 1.2rem;">
+              <span style="color: var(--color-accent);">TOTAL</span>
+              <span id="live-grand-total" style="color: var(--color-accent);">{{ order.total_price }} DA</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button type="submit" class="ym-btn ym-btn--primary" style="width: 100%; justify-content: center;">
+              <i class="fas fa-save me-2"></i> Enregistrer les modifications
+            </button>
+            <a href="{% url 'order_detail' order.pk %}" class="ym-btn ym-btn--ghost" style="width: 100%; justify-content: center; color: var(--color-text); border-color: var(--color-border);">
+              Annuler
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+  /* Style Django's form-select and form-control to match design system */
+  .form-select, .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    background: #fff;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 0.93rem;
+    color: var(--color-text);
+    font-family: var(--font-body);
+    transition: border-color var(--transition);
+    outline: none;
+  }
+  .form-select:focus, .form-control:focus {
+    border-color: var(--color-pink);
+    box-shadow: 0 0 0 4px rgba(233, 30, 140, 0.1);
+  }
+  textarea.form-control {
+    resize: vertical;
+    min-height: 88px;
+  }
+  /* Delete checkbox row */
+  .item-form-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #ef4444;
+    cursor: pointer;
+  }
+  @media (max-width: 900px) {
+    form > div[style*="grid-template-columns"] {
+      grid-template-columns: 1fr !important;
+    }
+    .item-form-row > div[style*="grid-template-columns"] {
+      grid-template-columns: 1fr 1fr !important;
+    }
+  }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const fmt = n => n.toLocaleString('fr-DZ', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+  function calcRow(row) {
+    const deleteCheckbox = row.querySelector('input[type="checkbox"][id*="DELETE"]');
+    if (deleteCheckbox && deleteCheckbox.checked) return 0;
+
+    const qtyInput   = row.querySelector('input[id*="quantity"]');
+    const priceInput = row.querySelector('input[id*="price"]');
+    if (!qtyInput || !priceInput) return 0;
+
+    const qty   = parseFloat(qtyInput.value)   || 0;
+    const price = parseFloat(priceInput.value) || 0;
+    return qty * price;
+  }
+
+  function updateSubtotal(row, subtotal) {
+    const el = row.querySelector('.item-subtotal');
+    if (el) el.textContent = fmt(subtotal) + ' DA';
+  }
+
+  function rebuildSummary() {
+    const rows    = document.querySelectorAll('.item-form-row');
+    const summary = document.getElementById('live-summary');
+    const grandEl = document.getElementById('live-grand-total');
+    if (!summary || !grandEl) return;
+
+    let grand = 0;
+    summary.innerHTML = '';
+
+    rows.forEach(row => {
+      const subtotal = calcRow(row);
+      updateSubtotal(row, subtotal);
+      grand += subtotal;
+
+      const name = row.dataset.productName || 'Article';
+      const deleteCheckbox = row.querySelector('input[type="checkbox"][id*="DELETE"]');
+      const deleted = deleteCheckbox && deleteCheckbox.checked;
+
+      const line = document.createElement('div');
+      line.style.cssText = 'display:flex; justify-content:space-between; font-size:0.85rem;';
+      line.style.color   = deleted ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.75)';
+      line.innerHTML = `
+        <span>${deleted ? '<s>' + name + '</s>' : name}</span>
+        <span>${deleted ? '<s>' + fmt(subtotal) + ' DA</s>' : fmt(subtotal) + ' DA'}</span>
+      `;
+      summary.appendChild(line);
+    });
+
+    grandEl.textContent = fmt(grand) + ' DA';
+
+    /* Flash animation on total change */
+    grandEl.style.transition = 'opacity 0.15s';
+    grandEl.style.opacity = '0.4';
+    setTimeout(() => { grandEl.style.opacity = '1'; }, 150);
+  }
+
+  /* Attach listeners to every row */
+  document.querySelectorAll('.item-form-row').forEach(row => {
+    row.querySelectorAll('input[id*="quantity"], input[id*="price"]').forEach(input => {
+      input.addEventListener('input',  rebuildSummary);
+      input.addEventListener('change', rebuildSummary);
+    });
+    const del = row.querySelector('input[type="checkbox"][id*="DELETE"]');
+    if (del) del.addEventListener('change', rebuildSummary);
+  });
+
+  /* Initial render on page load */
+  rebuildSummary();
+})();
+</script>
+{% endblock %}

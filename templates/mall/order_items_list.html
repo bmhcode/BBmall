@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Journal des Ventes — BB Shopping
+{% endblock title %}
+
+{% block content %}
+
+<!-- ═══════════ PAGE HERO ═══════════ -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    <p class="ym-eyebrow">Gestion Commerciale</p>
+    <h1 class="ym-section-title">Journal des <em>Ventes</em></h1>
+    <p class="ym-section-subtitle">Liste détaillée de tous les articles vendus. Filtrez par magasin et suivez l'état de préparation.</p>
+  </div>
+</section>
+
+<!-- ═══════════ TABLE SECTION ═══════════ -->
+<section class="ym-section ym-section--gray">
+  <div class="ym-container">
+    
+    <div class="portal-section__header" style="margin-bottom: 32px;">
+      <div>
+        <h2 class="ym-section-title" style="font-size: 1.8rem;">Magasin : {{ shop }}</h2>
+        <p class="ym-section-subtitle">Affichage de {{ items.count }} article{{ items.count|pluralize }}</p>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <a href="{% url 'order_list_all' %}" class="ym-btn ym-btn--ghost ym-btn--sm" style="color: var(--color-text); border-color: var(--color-border);">
+          <i class="fas fa-list-ul me-2"></i> Voir les Commandes
+        </a>
+      </div>
+    </div>
+
+    <div class="ym-detail-card" style="padding: 0; overflow: hidden; border-radius: var(--radius-lg);">
+      <div class="table-responsive">
+        <table class="ym-table" style="width: 100%; border-collapse: collapse;">
+          <thead style="background: var(--color-primary); color: #fff;">
+            <tr>
+              <th style="padding: 20px 24px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">ID</th>
+              <th style="padding: 20px 24px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Produit</th>
+              <th style="padding: 20px 24px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Magasin</th>
+              <th style="padding: 20px 24px; text-align: center; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Qte</th>
+              <th style="padding: 20px 24px; text-align: right; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Prix Unit.</th>
+              <th style="padding: 20px 24px; text-align: center; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Statut</th>
+              <th style="padding: 20px 24px; text-align: center; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody style="background: #fff;">
+            {% for item in items %}
+            <tr style="border-bottom: 1px solid var(--color-border); transition: background 0.3s ease;">
+              <td style="padding: 20px 24px; font-weight: 700; color: var(--color-primary);">
+                #{{ item.order.id|stringformat:"04d" }}
+              </td>
+              <td style="padding: 20px 24px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  {% if item.product.image %}
+                  <img src="{{ item.product.image.url }}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
+                  {% endif %}
+                  <div>
+                    <span style="display: block; font-weight: 600; color: var(--color-text);">{{ item.product.name }}</span>
+                    <span style="font-size: 0.75rem; color: var(--color-muted);">Réf: {{ item.product.id }}</span>
+                  </div>
+                </div>
+              </td>
+              <td style="padding: 20px 24px; font-size: 0.9rem; color: var(--color-muted);">
+                <i class="fas fa-store me-1" style="font-size: 0.7rem;"></i> {{ item.product.shop.name }}
+              </td>
+              <td style="padding: 20px 24px; text-align: center; font-weight: 600;">
+                {{ item.quantity }}
+              </td>
+              <td style="padding: 20px 24px; text-align: right; font-weight: 700; color: var(--color-pink);">
+                {{ item.price }} DA
+              </td>
+              <td style="padding: 20px 24px; text-align: center;">
+                <span class="status-badge status-{{ item.status }}" style="
+                  padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+                  {% if item.status == 'delivered' %} background: rgba(34, 197, 94, 0.1); color: #16a34a;
+                  {% elif item.status == 'shipped' %} background: rgba(59, 130, 246, 0.1); color: #2563eb;
+                  {% elif item.status == 'processing' %} background: rgba(234, 179, 8, 0.1); color: #ca8a04;
+                  {% else %} background: rgba(107, 114, 128, 0.1); color: #4b5563; {% endif %}
+                ">
+                  {{ item.get_status_display }}
+                </span>
+              </td>
+              <td style="padding: 20px 24px; text-align: center;">
+                <div class="dropdown">
+                  <button class="ym-btn ym-btn--ghost ym-btn--sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 5px 10px;">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+
+                  <ul class="dropdown-menu shadow border-0" style="border-radius: 12px; padding: 8px;">
+                    <li><h6 class="dropdown-header" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Changer le statut</h6></li>
+                    {% for code, label in status_choices %}
+                      <li><a class="dropdown-item" href="{% url 'order_item_status' item.pk code %}" style="border-radius: 6px; font-size: 0.85rem;">{{ label }}</a></li>
+                    {% endfor %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'order_detail' item.order.pk %}" style="border-radius: 6px; font-size: 0.85rem;"><i class="fas fa-eye me-2"></i> Voir la commande</a></li>
+                  </ul>
+
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" style="padding: 60px; text-align: center; color: var(--color-muted);">
+                <i class="fas fa-box-open fa-3x mb-3" style="opacity: 0.3;"></i>
+                <p>Aucune vente enregistrée pour le moment.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if items.has_other_pages %}
+    <div style="display: flex; justify-content: center; margin-top: 40px;">
+      <nav class="ym-pagination" aria-label="Navigation des ventes">
+        <ul style="display: flex; gap: 8px; list-style: none;">
+          {% if items.has_previous %}
+          <li><a href="?page={{ items.previous_page_number }}" class="ym-btn ym-btn--ghost ym-btn--sm"><i class="fas fa-chevron-left"></i></a></li>
+          {% endif %}
+          
+          {% for i in items.paginator.page_range %}
+            {% if items.number == i %}
+            <li><span class="ym-btn ym-btn--primary ym-btn--sm">{{ i }}</span></li>
+            {% else %}
+            <li><a href="?page={{ i }}" class="ym-btn ym-btn--ghost ym-btn--sm">{{ i }}</a></li>
+            {% endif %}
+          {% endfor %}
+
+          {% if items.has_next %}
+          <li><a href="?page={{ items.next_page_number }}" class="ym-btn ym-btn--ghost ym-btn--sm"><i class="fas fa-chevron-right"></i></a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+  .ym-table tr:hover {
+    background-color: rgba(26, 26, 46, 0.02);
+  }
+  .dropdown-item:hover {
+    background-color: var(--color-bg);
+    color: var(--color-pink);
+  }
+</style>
+
+{% endblock %}

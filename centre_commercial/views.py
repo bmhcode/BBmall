@@ -1,23 +1,29 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView, DeleteView
 from django.db.models import Q,Sum
-from .models import Profile, Mall,Shop, Event, Promotion, ArticleBlog, ContactMessage, Product, ProductImages
+from .models import Profile, Mall,Shop, Event, Promotion, ArticleBlog, ContactMessage, Product, ProductImages, Order,OrderHistory, OrderItem, OrderItemHistory, Wishlist
 from .forms import UserUpdateForm, ProfileUpdateForm,MallForm, ShopForm, ContactForm, ProductForm
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.utils import timezone
 
-
 from django.contrib.auth.forms import UserCreationForm
-# from .forms import OrderUpdateForm, OrderItemFormSet
+from .forms import OrderUpdateForm, OrderItemFormSet
+from django.core.paginator import Paginator
 
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 
-#--------------------- Auth --------------------------------
+# ============================================================================
+# AUTH VIEWS
+# ============================================================================
+
 def signup(request): # signup
     
     if request.method == 'POST':
@@ -59,10 +65,14 @@ def update_profile(request, username):
         'p_form': p_form
     }
     return render(request, 'registration/update_profile.html', context)
-#--------------------- / Auth --------------------------------
+
+# ================ End Auth views ==========================
 
 
-# ================ Start Home views ==========================
+# ============================================================================
+# HOME VIEWS
+# ============================================================================
+
 class HomeView(TemplateView):
     """Landing portal — display all malls."""
     template_name = 'mall/home.html'
@@ -82,9 +92,18 @@ class MallTableListView(ListView):
     model = Mall
     template_name = 'mall/mall_table_list.html'
     context_object_name = 'malls'
-# ================ End Start Home views =======================
 
-# ================ Start Mall views ==========================
+class MallListView(ListView):
+    model = Mall
+    template_name = 'mall/mall_list.html'
+    context_object_name = 'malls'
+
+# ================ End Home views ==========================
+
+# ============================================================================
+# MALL VIEWS
+# ============================================================================
+
 class MallView(TemplateView):
     """Specific Mall Homepage — shows featured stores/events for a mall."""
     template_name = 'mall/mall.html'
@@ -130,7 +149,10 @@ class MallDeleteView(DeleteView):
 
 # ================ End Mall views ==========================
 
-# ================ Start Promotion views ==========================
+# ============================================================================
+# PROMOTION VIEWS
+# ============================================================================
+
 class PromotionListView(ListView):
     model = Promotion
     template_name = 'mall/promotion_list.html'
@@ -159,10 +181,11 @@ class PromotionListView(ListView):
         context = super().get_context_data(**kwargs)
         context['mall'] = self.mall
         return context
-# ================ End Promotion views ==========================
+# ================ End P    romotion views ==========================
 
-
-# ================ Start Magasin views ==========================
+# ============================================================================
+# SHOP VIEWS
+# ============================================================================
 
 class ShopCreateView(CreateView):
     model = Shop
@@ -252,17 +275,27 @@ class ShopDetailView(DetailView):
             .exclude(id=shop.id)
             .select_related('mall')[:4]
         )
+        
+        user_wishlist_ids = []
+        if self.request.user.is_authenticated:
+            from .models import Wishlist
+            wishlist, _ = Wishlist.objects.get_or_create(user=self.request.user)
+            user_wishlist_ids = wishlist.products.values_list('id', flat=True)
 
         context.update({
             'mall': mall,  # 👈 الآن مضمون دائماً
             'related_shops': related_shops,
+            'user_wishlist_ids': user_wishlist_ids,
         })
 
         return context
-# ================ End Magasin views ==========================
+# ================   End Shop views ==========================
 
 
-# ================ Start Evenement views ==========================
+# ============================================================================
+# EVENT VIEWS
+# ============================================================================
+
 class EventListView(ListView):
     model = Event
     template_name = 'mall/event_list.html'
@@ -300,10 +333,13 @@ class EventDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['mall'] = self.object.mall
         return context
-# ================ End Evenement views ==========================
+# ================ End Event views ==========================
 
 
-# ================ Start ArticleBlog views ==========================
+# ============================================================================
+# BLOG VIEWS
+# ============================================================================
+
 class ArticleBlogListView(ListView):
     model = ArticleBlog
     template_name = 'mall/blog_list.html'
@@ -344,7 +380,9 @@ class ArticleBlogDetailView(DetailView):
 # ================ End ArticleBlog views ==========================
 
 
-# ================ Start Contact views ==========================
+# ============================================================================
+# CONTACT VIEWS
+# ============================================================================
 
 class ContactMessageCreateView(CreateView):
     model = ContactMessage
@@ -352,20 +390,32 @@ class ContactMessageCreateView(CreateView):
     template_name = 'mall/contact_message.html'
 
     def dispatch(self, request, *args, **kwargs):
-        self.mall = get_object_or_404(Mall, slug=self.kwargs.get('slug'))  # ✅
+        # 👇 نخليها optional
+        self.mall = None
+        mall_slug = self.kwargs.get('slug')
+
+        if mall_slug:
+            self.mall = get_object_or_404(Mall, slug=mall_slug)
+
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        form.instance.mall = self.mall
+        # ✅ اربط بالمول إذا موجود
+        if self.mall:
+            form.instance.mall = self.mall
+
         form.save()
 
         messages.success(self.request, "Message envoyé avec succès")
 
-        return redirect('mall', self.mall.slug)
+        # ✅ redirect ذكي
+        if self.mall:
+            return redirect('mall', self.mall.slug)
+        return redirect('home')  # 👈 أو أي صفحة عامة
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['mall'] = self.mall  # ✅ أفضل
+        context['mall'] = self.mall  # ممكن تكون None
         return context
 
 class ContactMessageListView(ListView):
@@ -422,7 +472,10 @@ class ContactMessageDeleteView(DeleteView):
                         })
 
 # ================ End Contact views ==========================
-# ================ Start Product views ==========================
+
+# ============================================================================
+# PRODUCT VIEWS
+# ============================================================================
 
 class ProductListView(ListView):
     model = Product
@@ -456,12 +509,19 @@ class ProductListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from .models import ProductCategory
+        from .models import ProductCategory, Wishlist
+        
+        user_wishlist_ids = []
+        if self.request.user.is_authenticated:
+            wishlist, _ = Wishlist.objects.get_or_create(user=self.request.user)
+            user_wishlist_ids = wishlist.products.values_list('id', flat=True)
+
         context.update({
             'mall': self.mall,
             'categories': ProductCategory.objects.all(),
             'selected_category': self.category_slug,
             'search_query': self.query,
+            'user_wishlist_ids': user_wishlist_ids,
         })
         return context
 
@@ -473,7 +533,16 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['related_products'] = Product.objects.filter(category=self.object.category).exclude(id=self.object.id)[:4]
+        
+        is_in_wishlist = False
+        if self.request.user.is_authenticated:
+            from .models import Wishlist
+            wishlist, _ = Wishlist.objects.get_or_create(user=self.request.user)
+            is_in_wishlist = self.object in wishlist.products.all()
+            
+        context['is_in_wishlist'] = is_in_wishlist
         return context
+
 class ProductCreateView(CreateView):
     model = Product
     form_class = ProductForm
@@ -520,7 +589,6 @@ class ProductCreateView(CreateView):
         context['shop'] = self.shop
         return context
 
-
 class ProductUpdateView(UpdateView):
     model = Product
     form_class = ProductForm
@@ -559,10 +627,6 @@ class ProductDeleteView(DeleteView):
     def get_success_url(self):
         return reverse('shop_detail', kwargs={'mall_slug': self.object.shop.mall.slug, 'slug': self.object.shop.slug})
 
-# ================ End Product views ==========================
-
-from django.views.decorators.http import require_POST
-
 @login_required
 @require_POST
 def product_image_delete(request, id):
@@ -586,3 +650,356 @@ def product_image_set_main(request, id):
     
     return redirect(product.get_absolute_url())
 
+# ================ End Product views ==========================
+
+# ============================================================================
+# WISHLIST VIEWS
+# ============================================================================
+
+@login_required
+@require_POST
+def wishlist_toggle(request, id):
+    product = get_object_or_404(Product, id=id)
+    wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+    
+    if product in wishlist.products.all():
+        wishlist.products.remove(product)
+        status = 'removed'
+    else:
+        wishlist.products.add(product)
+        status = 'added'
+        
+    return JsonResponse({'status': status})
+
+@login_required
+def wishlist_list(request):
+    wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+    products = wishlist.products.all()
+    
+    context = {
+        'products': products,
+    }
+    return render(request, 'mall/wishlist.html', context)
+
+
+@login_required
+@require_POST
+def wishlist_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Remove from wishlist
+    wishlist = getattr(request.user, 'wishlist', None)
+    if wishlist and product in wishlist.products.all():
+        wishlist.products.remove(product)
+        
+    # Add to cart
+    order, created = Order.objects.get_or_create(user=request.user, status='pending')
+    order_item, item_created = OrderItem.objects.get_or_create(
+        order=order, 
+        product=product,
+        defaults={'quantity': 1, 'price': product.price}
+    )
+    if not item_created:
+        order_item.quantity += 1
+        order_item.save()
+        
+    order.update_total_price()
+    return JsonResponse({'status': 'success'})
+
+# ================ End Wishlist views ==========================
+
+# ============================================================================
+# CART & CHECKOUT VIEWS
+# ============================================================================
+
+@login_required
+def cart_view(request):
+    order, created = Order.objects.get_or_create(user=request.user, status='pending')
+    order.update_total_price() # ensure total is fresh
+    context = {
+        'order': order,
+        'items': order.items.all().order_by('id')
+    }
+    return render(request, 'mall/cart.html', context)
+
+@login_required
+@require_POST
+def cart_add(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    order, created = Order.objects.get_or_create(user=request.user, status='pending')
+    
+    order_item, item_created = OrderItem.objects.get_or_create(
+        order=order, 
+        product=product,
+        defaults={'quantity': 1, 'price': product.price}
+    )
+    
+    if not item_created:
+        order_item.quantity += 1
+        order_item.save()
+        
+    order.update_total_price()
+    return JsonResponse({'status': 'success', 'cart_count': sum(item.quantity for item in order.items.all())})
+
+@login_required
+@require_POST
+def cart_remove(request, item_id):
+    order_item = get_object_or_404(OrderItem, id=item_id, order__user=request.user, order__status='pending')
+    order = order_item.order
+    order_item.delete()
+    order.update_total_price()
+    return JsonResponse({'status': 'success'})
+
+@login_required
+@require_POST
+def cart_update(request, item_id):
+    order_item = get_object_or_404(OrderItem, id=item_id, order__user=request.user, order__status='pending')
+    
+    try:
+        data = json.loads(request.body)
+        action = data.get('action')
+    except:
+        action = None
+        
+    if action == 'increment':
+        order_item.quantity += 1
+    elif action == 'decrement':
+        order_item.quantity -= 1
+        
+    if order_item.quantity <= 0:
+        order_item.delete()
+    else:
+        order_item.save()
+        
+    order_item.order.update_total_price()
+    return JsonResponse({'status': 'success'})
+
+@login_required
+def checkout(request):
+    order = get_object_or_404(Order, user=request.user, status='pending')
+    if order.items.count() == 0:
+        messages.warning(request, "Your cart is empty.")
+        return redirect('cart')
+        
+    if request.method == 'POST':
+        order.status = 'delivered' # As requested, treating this as checkout completion
+        order.save()
+        messages.success(request, "Your order has been placed successfully!")
+        return redirect('checkout_success')
+        
+    return render(request, 'mall/checkout.html', {'order': order})
+
+@login_required
+def checkout_success(request):
+    return render(request, 'mall/checkout_success.html')
+
+# ================ End Cart & Checkout views ==========================
+
+# ============================================================================
+# ORDER HISTORY VIEWS
+# ============================================================================
+
+@login_required # order_history
+def order_history(request):     
+    orders = Order.objects.filter(user=request.user, status='delivered').order_by('-id')
+    return render(request, 'mall/order_history.html', {'orders': orders})
+
+@login_required # order_list
+def order_list(request, userid=None):  # orders list (All / User)
+    if userid:
+        orders = Order.objects.filter(user_id=userid).select_related('user') \
+                      .prefetch_related('items', 'items__product', 'history').order_by('-created_at')
+    else:    
+        orders = Order.objects.select_related('user') \
+                      .prefetch_related('items', 'items__product', 'history').order_by('-created_at')
+
+    search = request.GET.get('search', '')
+    if search:
+        orders = orders.filter(
+            Q(id__icontains=search) |
+            Q(status__icontains=search) |
+            Q(user__username__icontains=search)
+        )
+     
+    # pagination
+    paginator = Paginator(orders, 10)
+    page_number = request.GET.get('page')
+    order_pages = paginator.get_page(page_number)
+
+    return render(request, 'mall/order_list.html', {
+        'search': search,
+        'orders': order_pages,
+        'status': Order.STATUS_CHOICES,  
+    })
+
+@login_required # orders items list (all / shop)
+def orders_items_list(request, shop_slug = None): 
+
+    if shop_slug:
+        shop  = get_object_or_404(Shop, slug=shop_slug)
+        items = OrderItem.objects.filter(product__shop=shop).select_related('order', 'product').order_by('-order_id')
+    else:
+        shop  = "Tous les Magasins" #None
+        items = OrderItem.objects.all().select_related('order', 'product', 'product__shop').order_by('-order_id')
+
+    # ---------- pagination
+    paginator = Paginator(items, 15)
+    page_number = request.GET.get('page')
+    item_pages = paginator.get_page(page_number)
+    
+    return render(request, 'mall/order_items_list.html', {
+        'shop' : shop,
+        'items': item_pages,
+        'item_pages': item_pages,
+        'status_choices': OrderItem.STATUS_CHOICES,
+    })
+
+@login_required # order detail 
+def order_detail(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    return render(request, 'mall/order_detail.html', {'order': order})
+
+@login_required # order update0 
+def order_update0(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    if order.user != request.user and not request.user.is_superuser:
+        messages.error(request, "You cannot edit this order")
+        return redirect('order_list')
+
+    if request.method == 'POST':
+        old_status = order.status
+        form = OrderUpdateForm(request.POST, instance=order)
+        if form.is_valid():
+            order = form.save()
+            if order.status != old_status:
+                OrderHistory.objects.create(
+                    order=order,
+                    old_status=old_status,
+                    new_status=order.status,
+                    changed_by=request.user if request.user.is_authenticated else None
+                )
+                order.propagate_status_to_items(user=request.user if request.user.is_authenticated else None)
+
+            return redirect('order_detail', pk=pk)
+    else:
+        form = OrderUpdateForm(instance=order)
+    return render(request, 'app/order_update.html', {'form': form, 'order': order})
+
+@login_required # order update 
+def order_update(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+
+    # Permission check
+    if order.user != request.user and not request.user.is_superuser:
+        messages.error(request, "You cannot edit this order")
+        return redirect('order_list_all')
+
+    old_status = order.status
+
+    if request.method == 'POST':
+        form = OrderUpdateForm(request.POST, instance=order)
+        formset = OrderItemFormSet(request.POST, instance=order)
+
+        if form.is_valid() and formset.is_valid():
+            order = form.save(commit=True)
+
+            # Save formset: this handles both updates and marked-for-deletion items
+            instances = formset.save(commit=False)
+            for obj in instances:
+                obj.save()
+            for obj in formset.deleted_objects:
+                obj.delete()
+
+            # Refresh from DB so update_total_price sees the current items
+            order.refresh_from_db()
+
+            # Recompute totals and derive order status from item statuses
+            order.update_total_price()
+            order.update_status_from_items()
+
+            # Refresh again after status may have changed
+            order.refresh_from_db()
+
+            # Save history if status changed
+            if order.status != old_status:
+                OrderHistory.objects.create(
+                    order=order,
+                    old_status=old_status,
+                    new_status=order.status,
+                    changed_by=request.user if request.user.is_authenticated else None
+                )
+
+            messages.success(request, "Commande mise à jour avec succès.")
+            return redirect('order_detail', pk=order.pk)
+    else:
+        form = OrderUpdateForm(instance=order)
+        formset = OrderItemFormSet(instance=order)
+
+    return render(request, 'mall/order_update.html', {
+        'form': form,
+        'formset': formset,
+        'order': order
+    })
+
+@login_required # order delete 
+def order_delete(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    if order.user != request.user and not request.user.is_superuser:
+        messages.error(request, "You cannot delete this order")
+        return redirect('order_list')
+
+    if request.method == 'POST':
+        order.delete()
+        messages.success(request, "Order deleted")
+        return redirect('order_list')
+    return render(request, 'mall/order_confirm_delete.html', {'order': order})
+
+@login_required # order item status
+def order_item_status(request, pk, status):
+    item = get_object_or_404(OrderItem, pk=pk)
+
+    # تحقق أن الحالة صالحة
+    valid_statuses = [s[0] for s in OrderItem.STATUS_CHOICES]
+    if status in valid_statuses:
+        old = item.status
+        item.status = status
+        item.save(update_fields=['status'])
+
+        # حفظ التاريخ
+        OrderItemHistory.objects.create(
+            order_item=item,
+            old_status=old,
+            new_status=status,
+            changed_by=request.user if request.user.is_authenticated else None
+        )
+
+        # تحديث حالة الطلب
+        item.order.update_status_from_items()
+
+    if request.user.is_superuser:
+        return redirect('orders_items_list_all')   # مهم لإعادة تحميل الصفحة
+    return redirect('orders_items_list_shop', item.product.shop.slug) # مهم لإعادة تحميل الصفحة    
+
+@login_required # order status
+def order_status(request, pk, status):
+    order = get_object_or_404(Order, pk=pk)
+
+    valid_statuses = [s[0] for s in Order.STATUS]
+
+    if status in valid_statuses:
+        old = order.status
+        order.status = status
+        order.save(update_fields=['status'])
+
+        OrderHistory.objects.create(
+            order=order,
+            old_status=old,
+            new_status=status,
+            changed_by=request.user if request.user.is_authenticated else None
+        )
+        
+        order.propagate_status_to_items(user=request.user if request.user.is_authenticated else None)
+
+    return redirect('order_list_all')
+
+# ================ End Order History views ==========================

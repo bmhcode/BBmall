@@ -1,7 +1,21 @@
 from django import forms
-from .models import Profile, Mall, Shop, ContactMessage, Product 
+from .models import Profile, Mall, Shop, ContactMessage, Product, Order, OrderItem, ShopReview, ShopSocial, ShopValidation, WorkingHours, ShopHoliday
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.forms.models import inlineformset_factory
+from django.contrib.auth.forms import AuthenticationForm,UserCreationForm
+
+
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Enter username'
+    }))
+    
+    password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Enter password'
+    }))
 
 
 class UserUpdateForm(forms.ModelForm):
@@ -14,7 +28,28 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['image', 'phone', 'address']
+        fields = ['phone','image'] #,'first_name','last_name','is_vender']
+        widgets = {
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'image': forms.ClearableFileInput(
+                    attrs={
+                        'class': 'd-none',
+                        'accept': 'image/*',
+                        'id': 'imageUpload'
+                    }
+                    )
+        }
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
 
 
 
@@ -102,3 +137,146 @@ class ContactForm(forms.ModelForm):
             'subject':   forms.TextInput(attrs={'placeholder': 'Subject'}),
             'message': forms.Textarea(attrs={'placeholder': 'Your message', 'rows': 5}),
         }
+
+#----------------------------- Order Form ----------------------------------
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['address', 'payment_method', 'notes']
+
+        widgets = {
+            'address': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter delivery address'
+            }),
+            'payment_method': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'notes': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Optional notes'
+            }),
+        }
+
+        labels = {
+            'address': 'Delivery Address',
+            'payment_method': 'Payment Method',
+            'notes': 'Notes',
+        }
+
+class OrderUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['status', 'address', 'payment_method', 'notes']
+
+        widgets = {
+            'status': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'address': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter delivery address'
+            }),
+            'payment_method': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'notes': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Optional notes'
+            }),
+        }
+
+        labels = {
+            'status': 'Order Status',
+            'address': 'Delivery Address',
+            'payment_method': 'Payment Method',
+            'notes': 'Notes',
+        }
+
+#----------------------------- Order Item Form ----------------------------------
+class OrderItemForm(forms.ModelForm):
+    class Meta:
+        model = OrderItem
+        fields = ['product', 'quantity', 'price', 'notes']
+        widgets = {
+            'product': forms.Select(attrs={'class': 'form-control'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+OrderItemFormSet = inlineformset_factory(
+    Order,
+    OrderItem,
+    fields=['product', 'quantity', 'price', 'status', 'notes'],
+    extra=0,
+    can_delete=True
+)
+
+#----------------------------- Shop Review Form ----------------------------------
+class ShopReviewForm(forms.ModelForm):
+    class Meta:
+        model = ShopReview
+        fields = ['rating', 'comment']
+        widgets = {
+            'rating': forms.Select(choices=[(i, f'{i} Stars') for i in range(5, 0, -1)], attrs={'class': 'form-select'}),
+            'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Write your review here...'}),
+        }
+
+#----------------------------- Shop Social Form ----------------------------------
+class ShopSocialForm(forms.ModelForm):
+    class Meta:
+        model = ShopSocial
+        fields = ['facebook', 'instagram', 'twitter', 'tiktok', 'whatsapp', 'telegram', 'youtube']
+        widgets = {
+            'facebook': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://facebook.com/...'}),
+            'instagram': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://instagram.com/...'}),
+            'twitter': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://twitter.com/...'}),
+            'tiktok': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://tiktok.com/@...'}),
+            'whatsapp': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://wa.me/...'}),
+            'telegram': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://t.me/...'}),
+            'youtube': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://youtube.com/...'}),
+        }
+
+#----------------------------- Shop Validation Form ----------------------------------
+class ShopValidationForm(forms.ModelForm):
+    class Meta:
+        model = ShopValidation
+        fields = ['is_validated', 'observation', 'start_date', 'period']
+        widgets = {
+            'is_validated': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'observation': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
+            'period': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+#----------------------------- Inline Formsets ----------------------------------
+WorkingHoursFormSet = inlineformset_factory(
+    Shop, 
+    WorkingHours, 
+    fields=['day', 'open_time', 'close_time','is_closed'], 
+    extra=7, 
+    max_num=7,
+    can_delete=False,
+    widgets={
+        'day': forms.HiddenInput(),
+        'open_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        'close_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        'is_closed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+    }
+)
+
+ShopHolidayFormSet = inlineformset_factory(
+    Shop,
+    ShopHoliday,
+    fields=['shop', 'start_date', 'end_date'],
+    extra=1,
+    widgets={
+        'shop': forms.HiddenInput(),
+        'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+    }
+)
+

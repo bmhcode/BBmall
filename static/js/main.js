@@ -142,4 +142,27 @@ document.addEventListener('DOMContentLoaded', () => {
       link.classList.add('active');
     }
   });
+
+  /* ── 12. Account Dropdown Toggle ── */
+  const accountToggle = document.getElementById('ym-account-toggle');
+  const accountMenu   = document.getElementById('ym-account-menu');
+
+  if (accountToggle && accountMenu) {
+    accountToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      accountMenu.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!accountToggle.contains(e.target) && !accountMenu.contains(e.target)) {
+        accountMenu.classList.remove('active');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') accountMenu.classList.remove('active');
+    });
+  }
 });
+
+

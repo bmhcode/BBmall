@@ -60,6 +60,16 @@ product_list.html
         <div class="ym-stores-grid">
             {% for product in products %}
             <div class="ym-product-card" style="background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.3s ease; position: relative;">
+                
+                <!-- Wishlist Toggle Button -->
+                {% if request.user.is_authenticated %}
+                <button onclick="toggleWishlistGrid(this, {{ product.id }})" 
+                        class="wishlist-toggle-btn {% if product.id in user_wishlist_ids %}active{% endif %}"
+                        style="position: absolute; top: 15px; right: 15px; z-index: 10; background: white; border: none; width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 8px 25px rgba(0,0,0,0.15); cursor: pointer; display: flex; align-items: center; justify-content: center; color: {% if product.id in user_wishlist_ids %}var(--accent){% else %}var(--text-muted){% endif %}; transition: transform 0.2s;">
+                    <i class="{% if product.id in user_wishlist_ids %}fas{% else %}far{% endif %} fa-heart fa-lg" style="margin-top: 1px;"></i>
+                </button>
+                {% endif %}
+
                 <a href="{{ product.get_absolute_url }}" style="text-decoration: none; color: inherit;">
                     <div class="ym-product-card__image" style="height: 280px; position: relative; overflow: hidden; background: #f9f9f9;">
                         {% if product.main_image %}
@@ -79,7 +89,7 @@ product_list.html
                         {% endif %}
 
                         {% if product.is_new %}
-                            <span style="position: absolute; top: 15px; right: 15px; background: #10b981; color: #fff; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">
+                            <span style="position: absolute; top: {% if product.old_price %}45px{% else %}15px{% endif %}; left: 15px; background: #10b981; color: #fff; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">
                                 NEW
                             </span>
                         {% endif %}
@@ -156,6 +166,34 @@ product_list.html
     .ym-product-card:hover .ym-product-card__image img {
         transform: scale(1.05);
     }
+    .wishlist-toggle-btn:hover { transform: scale(1.15) !important; color: var(--accent) !important; }
+    .wishlist-toggle-btn:active { transform: scale(0.9) !important; }
 </style>
+
+<script>
+    function toggleWishlistGrid(btnElement, productId) {
+        fetch(`/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const icon = btnElement.querySelector('i');
+            if (data.status === 'added') {
+                btnElement.style.color = 'var(--accent)';
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+            } else if (data.status === 'removed') {
+                btnElement.style.color = 'var(--text-muted)';
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+            }
+        })
+        .catch(err => console.error(err));
+    }
+</script>
 
 {% endblock %}

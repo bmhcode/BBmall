@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supprimer la Commande #{{ order.id }} — BB Shopping{% endblock %}
+
+{% block content %}
+
+<section class="ym-page-hero">
+  <div class="ym-container">
+    <p class="ym-eyebrow">Gestion des Commandes</p>
+    <h1 class="ym-section-title">Supprimer la <em>Commande</em></h1>
+    <p class="ym-section-subtitle">Cette action est irréversible. Veuillez confirmer votre choix.</p>
+  </div>
+</section>
+
+<section class="ym-section ym-section--gray">
+  <div class="ym-container">
+    <div class="ym-detail-layout" style="grid-template-columns: 1fr; max-width: 600px; margin: 0 auto; text-align: center;">
+      <div class="ym-detail-card">
+        
+        <div style="width: 80px; height: 80px; background: rgba(239,68,68,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 2rem; color: #ef4444;">
+          <i class="fas fa-trash-alt"></i>
+        </div>
+
+        <h3 style="font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 12px;">Confirmer la suppression</h3>
+        <p style="color: var(--color-muted); margin-bottom: 8px;">Êtes-vous sûr de vouloir supprimer la commande</p>
+        <p style="font-size: 1.2rem; font-weight: 800; color: var(--color-primary); margin-bottom: 8px;">
+          Commande #{{ order.id }} &mdash; {{ order.user.username }}
+        </p>
+        <p style="font-size: 0.85rem; color: var(--color-muted); margin-bottom: 32px;">Montant total : <strong>{{ order.total_price }} DA</strong></p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="ym-btn" style="width: 100%; justify-content: center; background: #ef4444; color: white; border-color: #ef4444;">
+              <i class="fas fa-trash-alt me-2"></i> Oui, supprimer définitivement
+            </button>
+          </form>
+          <a href="{% url 'order_detail' order.pk %}" class="ym-btn ym-btn--ghost" style="width: 100%; justify-content: center; color: var(--color-text); border-color: var(--color-border);">
+            Annuler
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

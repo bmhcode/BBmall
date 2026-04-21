@@ -9,9 +9,6 @@ urlpatterns = [
     # Portal — choose your mall (root page)
     path('', views.HomeView.as_view(), name='home'),
 
-
-
-
     # ============================================================================
     # AUTHENTICATION & ACCOUNT MANAGEMENT
     # ============================================================================
@@ -21,18 +18,13 @@ urlpatterns = [
     path('update-profile/<str:username>/',views.update_profile, name="update_profile"),
     #--------------------- / Auth -------------------------
   
-
-
-
-
-
     # Mall Management BBMalls
     path('malls/', views.MallTableListView.as_view(), name='mall_table_list'),
+    path('malls/list/', views.MallListView.as_view(), name='mall_list'),
     path('malls/add/', views.MallCreateView.as_view(), name='mall_create'),
     path('malls/<slug:slug>/edit/', views.MallUpdateView.as_view(), name='mall_update'),
     path('malls/<slug:slug>/delete/', views.MallDeleteView.as_view(), name='mall_delete'),
     
-    # Mall
     path('mall/<slug:slug>/', views.MallView.as_view(), name='mall'),
 
     # Shops
@@ -57,8 +49,10 @@ urlpatterns = [
     path('mall/<slug:mall_slug>/blog/<slug:slug>/', views.ArticleBlogDetailView.as_view(), name='blog_detail'),
 
     # Contact messages
-    path('mall/<slug:slug>/contact/', views.ContactMessageCreateView.as_view(), name='contact_message_create'),
-   
+    path('contact/', views.ContactMessageCreateView.as_view(), name='contact_message_create'),
+    path('mall/<slug:slug>/contact/', views.ContactMessageCreateView.as_view(), name='contact_message_create_by_mall'),
+
+
     path('mall/<slug:slug>/contacts/', views.ContactMessageListView.as_view(), name='contacts_messages_by_mall'),
     path('contacts/', views.ContactMessageListView.as_view(), name='contacts_messages_all'),
     path('mall/<slug:mall_slug>/contact/<int:id>/', views.ContactMessageDetailView.as_view(), name='contact_message_detail'),
@@ -75,4 +69,43 @@ urlpatterns = [
     # Product Images (AJAX / Actions)
     path('product-image/<int:id>/delete/', views.product_image_delete, name='product_image_delete'),
     path('product-image/<int:id>/set-main/', views.product_image_set_main, name='product_image_set_main'),
-]
+
+    # Wishlist
+    path('wishlist/', views.wishlist_list, name='wishlist'),
+    path('wishlist/toggle/<int:id>/', views.wishlist_toggle, name='wishlist_toggle'),
+    path('wishlist/to-cart/<int:product_id>/', views.wishlist_to_cart, name='wishlist_to_cart'),
+
+
+    # Cart & Checkout
+    path('cart/', views.cart_view, name='cart'),
+    path('cart/add/<int:product_id>/', views.cart_add, name='cart_add'),
+    path('cart/remove/<int:item_id>/', views.cart_remove, name='cart_remove'),
+    path('cart/update/<int:item_id>/', views.cart_update, name='cart_update'),
+    path('checkout/', views.checkout, name='checkout'),
+    path('checkout/success/', views.checkout_success, name='checkout_success'),
+    
+    # Order History
+    path('history/', views.order_history, name='order_history'),
+    
+
+    # path('order/create/', views.order_create, name='order_create'),
+
+    path('order/detail/<int:pk>/', views.order_detail, name='order_detail'),
+    path('order/update/<int:pk>/', views.order_update, name='order_update'),
+    path('order/delete/<int:pk>/', views.order_delete, name='order_delete'),
+
+    path('order-item/<int:pk>/status/<str:status>/', views.order_item_status, name='order_item_status'),
+    path('order/<int:pk>/status/<str:status>/', views.order_status, name='order_status'),
+
+    path('orders/', views.order_list, name='order_list_all'),
+    path('orders/<int:userid>', views.order_list, name='order_list_user'),
+
+    path('orders/items/', views.orders_items_list, name='orders_items_list_all'),
+    path('orders/items/<slug:shop_slug>/', views.orders_items_list, name='orders_items_list_shop'),
+
+
+
+
+
+]  
+

@@ -25,6 +25,7 @@
 </head>
 <body>
 
+  
 <!-- ═══════════════════════════════════════
      SEARCH OVERLAY
 ═══════════════════════════════════════ -->
@@ -64,7 +65,7 @@
       <li><a href="{% url 'events_by_mall' mall.slug %}"><i class="fas fa-calendar-alt me-2"></i>Événements</a></li>
       <li><a href="{% url 'blogs_by_mall' mall.slug %}"><i class="fas fa-newspaper me-2"></i>Blog</a></li>
       
-      <li><a href="{% url 'contact_message_create' mall.slug %}"><i class="fas fa-envelope me-2"></i>Contact</a></li>
+      <li><a href="{% url 'contact_message_create_by_mall' mall.slug %}"><i class="fas fa-envelope me-2"></i>Contact</a></li>
       <li><a href="{% url 'contacts_messages_by_mall' mall.slug %}"><i class="fas fa-envelope me-2"></i>Contacts list</a></li>
     {% else %}
       <li><a href="{% url 'home' %}"><i class="fas fa-home me-2"></i>Accueil</a></li>
@@ -82,55 +83,93 @@
      NAVBAR
 ═══════════════════════════════════════ -->
 <header id="ym-navbar" class="ym-navbar" role="banner">
+
   <!-- Brand -->
-  <a href="{% url 'home' %}" class="ym-navbar__brand" aria-label="{{mall.name}} — Accueil">
+  <a href="{% url 'home' %}" class="ym-navbar__brand">
     <span class="ym-navbar__brand-icon">
       <i class="fas fa-gem fa-sm"></i>
     </span>
-    {% if mall %}{{mall.name}} <span>MALL</span>{% else %}BB <span>Shopping</span>{% endif %}
+    {% if mall %}{{ mall.name }} <span>MALL</span>{% else %}BB <span>Shopping</span>{% endif %}
   </a>
 
-  <!-- Main Nav -->
-  <nav aria-label="Navigation principale">
+  <!-- NAV -->
+  <nav>
     <ul class="ym-navbar__nav">
 
-      {% if mall and mall.slug %}
-        <li><a href="{% url 'mall' mall.slug %}">Accueil</a></li>
-        <li><a href="{% url 'promotions_by_mall' mall.slug %}">Promotions</a></li>
-        <li><a href="{% url 'shops_by_mall' mall.slug %}">Magasins</a></li>
-        <li><a href="{% url 'events_by_mall' mall.slug %}">Événements</a></li>
-        <li><a href="{% url 'blogs_by_mall' mall.slug %}">Blog</a></li>
-        <li><a href="{% url 'contact_message_create' mall.slug %}">Contact</a></li>
-        <li><a href="{% url 'contacts_messages_by_mall' mall.slug %}"><i class="fas fa-envelope me-2"></i>Messages by mall</a></li>
-      {% else %}
-        <li><a href="{% url 'home' %}">Accueil</a></li>
-        <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
-        <li><a href="{% url 'shops_all' %}">Magasins</a></li>
-        <li><a href="{% url 'events_all' %}">Événements</a></li>
-        <li><a href="{% url 'blogs_all' %}">Blog</a></li>
-        <li><a href="{% url 'contacts_messages_all' %}"><i class="fas fa-envelope me-2"></i>Messages all</a></li>
+      <!-- MAIN LINKS -->
+      <li><a href="{% if mall %}{% url 'mall' mall.slug %}{% else %}{% url 'home' %}{% endif %}">Accueil</a></li>
+
+      <li><a href="{% if mall %}{% url 'shops_by_mall' mall.slug %}{% else %}{% url 'shops_all' %}{% endif %}">Magasins</a></li>
+
+      <li><a href="{% if mall %}{% url 'products_by_mall' mall.slug %}{% else %}{% url 'products_all' %}{% endif %}">Produits</a></li>
+
+      <li><a href="{% if mall %}{% url 'promotions_by_mall' mall.slug %}{% else %}{% url 'promotions_all' %}{% endif %}">Promotions</a></li>
+
+      <li><a href="{% if mall %}{% url 'events_by_mall' mall.slug %}{% else %}{% url 'events_all' %}{% endif %}">Événements</a></li>
+
+      <li><a href="{% if mall %}{% url 'blogs_by_mall' mall.slug %}{% else %}{% url 'blogs_all' %}{% endif %}">Blog</a></li>
+
+      <!-- USER (ONLY IF LOGGED) -->
+      {% if user.is_authenticated %}
+          <li><a href="{% url 'order_list_all' %}"><i class="fas fa-list"></i> My Orders</a></li>
+
+          <li><a href="{% url 'order_history' %}"><i class="fas fa-history"></i> History</a></li>
+          {% if user.is_superuser %}
+            <li><a href="{% url 'contacts_messages_all' %}"><i class="fas fa-envelope"></i> Contacts messages</a></li>
+          {% endif %}
       {% endif %}
 
-    </ul>
+     <li> 
+      {% if mall %}
+      <a href="{% url 'contact_message_create_by_mall' mall.slug %}" >Contact </a>
+      <li><a href="{% url 'orders_items_list_all' %}"><i class="fas fa-list"></i> Orders items all</a></li>
+      {% else %}
+      <a href="{% url 'contact_message_create' %}" >Contact </a>
+      {% endif %}
+     </li>
+      
 
-    
+    </ul>
   </nav>
 
-  <!-- Actions -->
+  <!-- ACTIONS -->
   <div class="ym-navbar__actions">
-    <button class="ym-navbar__search-btn" aria-label="Ouvrir la recherche" id="ym-nav-search">
+
+    <button class="ym-navbar__search-btn">
       <i class="fas fa-search"></i>
     </button>
-    {% if mall and mall.slug %}
-    <a href="{% url 'contact_message_create' mall.slug %}" class="ym-btn ym-btn--dark ym-btn--sm ym-navbar__cta">
-      Nous visiter <i class="fas fa-arrow-right ym-btn__icon"></i>
-    </a>
+
+    {% if user.is_authenticated %}
+      <a href="{% url 'wishlist' %}"><i class="fas fa-heart"></i></a>
+
+      <a href="{% url 'cart' %}" class="cart-link">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="badge">{{ cart_count|default:"0" }}</span>
+      </a>
+
+      <a href="{% url 'update_profile' user.username %}" class="ym-split-btn-main">
+        <i class="fas fa-user-circle"></i> {{ user.username }}
+      </a>
+      
+      <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="ym-split-btn-main">Logout</button>
+      </form>
     {% endif %}
-    <button id="ym-hamburger" class="ym-navbar__hamburger" aria-label="Ouvrir le menu mobile"
-            aria-expanded="false" aria-controls="ym-mobile-nav">
+
+
+ <!-- CTA -->
+    {% if mall %}
+    <a href="" class="ym-btn ym-btn--dark ym-btn--sm"> Nous visiter </a>
+    {% endif %}
+
+    <!-- MOBILE -->
+    <button id="ym-hamburger" class="ym-navbar__hamburger">
       <span></span><span></span><span></span>
     </button>
+
   </div>
+
 </header>
 
 <!-- ═══════════════════════════════════════
@@ -192,7 +231,7 @@
             <li><a href="{% url 'shops_by_mall' mall.slug %}">Magasins</a></li>
             <li><a href="{% url 'events_by_mall' mall.slug %}">Événements</a></li>
             <li><a href="{% url 'blogs_by_mall' mall.slug %}">Blog</a></li>
-            <li><a href="{% url 'contact_message_create' mall.slug %}">Contact</a></li>
+            <li><a href="{% url 'contact_message_create_by_mall' mall.slug %}">Contact</a></li>
           {% else %}
             <li><a href="{% url 'home' %}">Accueil</a></li>
             <li><a href="{% url 'promotions_all' %}">Promotions</a></li>
@@ -220,9 +259,9 @@
       <div>
         <h3 class="ym-footer__heading">Horaires</h3>
         <div class="ym-footer__hours">
-          <p><strong>Lun – Ven</strong><br>{{mall.opening_time}} – {{mall.closing_time}}</p>
+          <p><strong>Samedi – Jeudi</strong><br>{{mall.opening_time}} – {{mall.closing_time}}</p>
           <br>
-          <p><strong>Sam – Dim</strong><br>{{mall.opening_time}} – {{mall.closing_time}}</p>
+          <p><strong>Vendredi</strong><br>{{mall.opening_time}} – {{mall.closing_time}}</p>
           <br>
           <p><strong>Jours fériés</strong><br>{{mall.opening_time}} – {{mall.closing_time}}</p>
         </div>

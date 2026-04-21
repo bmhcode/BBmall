@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Orders Dashboard — BB Shopping{% endblock %}
+
+{% block content %}
+<!-- Page Hero -->
+<section class="ym-page-hero" style="background: var(--color-primary); color: white; padding: 100px 0 60px;">
+    <div class="ym-container">
+        <p class="ym-eyebrow" style="color: var(--color-accent);">
+            <i class="fas fa-clipboard-list me-2"></i> Administration
+        </p>
+        <h1 class="ym-section-title" style="color: white; margin-bottom: 8px;">Order Inventory</h1>
+        <p class="ym-section-subtitle" style="color: rgba(255,255,255,0.7); max-width: 600px;">
+            Manage and track all customer transactions. Currently viewing {{ orders.paginator.count }} active order{{ orders.paginator.count|pluralize }}.
+        </p>
+    </div>
+</section>
+
+<!-- Main Inventory Section -->
+<section class="ym-section ym-section--gray" style="min-height: 70vh; padding: 48px 0;">
+    <div class="ym-container">
+        
+        <!-- Search & Filter Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 24px;">
+            <div style="flex: 1; max-width: 480px;">
+                <form method="GET" style="position: relative;">
+                    <input type="text" name="search" value="{{ search|default:'' }}" 
+                           placeholder="Search by ID, Customer, or Status..." 
+                           style="width: 100%; padding: 14px 24px 14px 50px; border-radius: 50px; border: 1px solid var(--color-border); background: white; font-family: inherit; box-shadow: var(--shadow-sm);">
+                    <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--color-muted);"></i>
+                    
+                    {% if search %}
+                    <a href="{% url 'order_list' %}" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--color-muted);">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+            
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <a href="{% url 'orders_items_list_all' %}" class="ym-btn ym-btn--dark ym-btn--sm" style="height: 48px; border-radius: 50px;">
+                    <i class="fas fa-file-invoice me-2"></i> Sales Journal
+                </a>
+                <div style="display: flex; gap: 8px; align-items: center; background: white; padding: 6px 16px; border-radius: 50px; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm);">
+                    <span style="font-size: 0.85rem; color: var(--color-muted); font-weight: 500;">Status:</span>
+                    <a href="?status=pending" class="ym-badge-pill" style="--bg: #fff7ed; --color: #c2410c;">Pending</a>
+                    <a href="?status=delivered" class="ym-badge-pill" style="--bg: #f0fdf4; --color: #15803d;">Delivered</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Table Container -->
+        <div style="background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); overflow: hidden; border: 1px solid var(--color-border);">
+            <div class="table-responsive">
+                <table class="ym-order-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #fafafa; border-bottom: 1px solid var(--color-border);">
+                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Reference</th>
+                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Customer Detail</th>
+                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Placement Date</th>
+                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Quantity</th>
+                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Financials</th>
+                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Current Status</th>
+                            <th style="padding: 20px 24px; text-align: right; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr style="border-bottom: 1px solid #f3f4f6; transition: background 0.2s;" onmouseover="this.style.background='#fcfcfc'" onmouseout="this.style.background='transparent'">
+                            <!-- Reference -->
+                            <td style="padding: 24px;">
+                                <a href="{% url 'order_detail' order.id %}" style="font-weight: 700; color: var(--color-primary); font-family: var(--font-display); font-size: 1.1rem;">
+                                    #{{ order.id }}
+                                </a>
+                            </td>
+
+                            <!-- Customer -->
+                            <td style="padding: 24px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--color-primary); font-size: 0.8rem;">
+                                        {{ order.user.username|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.95rem;">{{ order.user.username }}</div>
+                                        <div style="font-size: 0.75rem; color: var(--color-muted);">{{ order.user.email|default:"No email provided" }}</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Date -->
+                            <td style="padding: 24px;">
+                                <div style="font-size: 0.9rem; color: var(--color-text);">{{ order.created_at|date:"d M, Y" }}</div>
+                                <div style="font-size: 0.75rem; color: var(--color-muted);">at {{ order.created_at|date:"H:i" }}</div>
+                            </td>
+
+                            <!-- Items -->
+                            <td style="padding: 24px;">
+                                <details class="ym-details">
+                                    <summary style="font-size: 0.85rem; font-weight: 600; color: var(--color-pink); cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        {{ order.items.count }} Item{{ order.items.count|pluralize }} <i class="fas fa-chevron-down fa-xs"></i>
+                                    </summary>
+                                    <div style="padding-top: 10px; font-size: 0.8rem; color: var(--color-muted);">
+                                        {% for item in order.items.all %}
+                                        <div style="margin-bottom: 4px; display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding-bottom: 2px;">
+                                            <span>{{ item.product.name|truncatechars:20 }} × {{ item.quantity }}</span>
+                                            <span style="color: var(--color-primary); font-weight: 500;">{{ item.get_status_display }}</span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                            </td>
+
+                            <!-- Financials -->
+                            <td style="padding: 24px;">
+                                <div style="font-weight: 800; color: var(--color-primary); font-size: 1rem;">{{ order.total_price|intcomma }} DA</div>
+                                <div style="font-size: 0.7rem; color: var(--color-muted); text-transform: uppercase; font-weight: 600;">{{ order.get_payment_method_display }}</div>
+                            </td>
+
+                            <!-- Status -->
+                            <td style="padding: 24px;">
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                    <span class="status-badge" style="background: 
+                                        {% if order.status == 'pending' %}#fff7ed; color: #c2410c; 
+                                        {% elif order.status == 'processing' %}#eff6ff; color: #1d4ed8;
+                                        {% elif order.status == 'shipped' %}#f5f3ff; color: #6d28d9;
+                                        {% elif order.status == 'delivered' %}#f0fdf4; color: #15803d;
+                                        {% else %}#fef2f2; color: #b91c1c;{% endif %};
+                                        padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-align: center; border: 1px solid currentColor; border-opacity: 0.1;">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                    
+                                    {% if request.user.is_superuser %}
+                                    <div class="dropdown">
+                                        <button class="status-change-btn" id="dropdown{{order.id}}" data-bs-toggle="dropdown" aria-expanded="false" 
+                                                style="background: transparent; border: none; color: var(--color-muted); font-size: 0.7rem; font-weight: 600; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                            Quick Change <i class="fas fa-caret-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" aria-labelledby="dropdown{{order.id}}" style="border-radius: 12px;">
+                                            {% for key, label in status %}
+                                            {% if key != order.status %}
+                                            <li>
+                                                <a class="dropdown-item py-2" href="{% url 'order_status' order.id key %}" style="border-radius: 8px; font-size: 0.85rem; font-weight: 500;">
+                                                    Mark as {{ label }}
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- Actions -->
+                            <td style="padding: 24px; text-align: right;">
+                                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                    <a href="{% url 'order_detail' order.id %}" class="ym-btn-action" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if request.user.is_superuser %}
+                                    <a href="{% url 'order_update' order.id %}" class="ym-btn-action" title="Edit Order" style="color: var(--color-primary);">
+                                        <i class="fas fa-pen-fancy"></i>
+                                    </a>
+                                    <a href="{% url 'order_delete' order.id %}" class="ym-btn-action" title="Delete Permanent" style="color: #ef4444;">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" style="padding: 80px 24px; text-align: center;">
+                                <div style="color: #e5e7eb; margin-bottom: 24px;"><i class="fas fa-shopping-basket fa-4x"></i></div>
+                                <h3 style="font-weight: 700; color: var(--color-primary); margin-bottom: 8px;">No orders matched</h3>
+                                <p style="color: var(--color-muted); font-size: 0.95rem;">Try adjusting your search criteria or checking back later.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if orders.has_other_pages %}
+        <div style="margin-top: 48px; display: flex; justify-content: center;">
+            <div style="display: flex; background: white; border-radius: 50px; padding: 6px; box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); gap: 4px;">
+                {% if orders.has_previous %}
+                <a href="?page={{ orders.previous_page_number }}&search={{ search|default:'' }}" class="pagination-link"><i class="fas fa-chevron-left"></i></a>
+                {% endif %}
+
+                {% for i in orders.paginator.page_range %}
+                {% if orders.number == i %}
+                <span class="pagination-link active">{{ i }}</span>
+                {% else %}
+                <a href="?page={{ i }}&search={{ search|default:'' }}" class="pagination-link">{{ i }}</a>
+                {% endif %}
+                {% endfor %}
+
+                {% if orders.has_next %}
+                <a href="?page={{ orders.next_page_number }}&search={{ search|default:'' }}" class="pagination-link"><i class="fas fa-chevron-right"></i></a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<style>
+    .ym-badge-pill {
+        background: var(--bg);
+        color: var(--color);
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform 0.2s;
+    }
+    .ym-badge-pill:hover {
+        transform: translateY(-2px);
+        filter: brightness(0.95);
+    }
+    .ym-btn-action {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-muted);
+        transition: all 0.2s;
+        border: 1px solid #e2e8f0;
+    }
+    .ym-btn-action:hover {
+        background: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        transform: translateY(-2px);
+    }
+    .pagination-link {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: var(--color-text);
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    .pagination-link:hover:not(.active) {
+        background: #f8fafc;
+    }
+    .pagination-link.active {
+        background: var(--color-primary);
+        color: white;
+        box-shadow: 0 5px 15px rgba(26, 26, 46, 0.3);
+    }
+    .ym-details summary::-webkit-details-marker {
+        display: none;
+    }
+    .status-change-btn:hover {
+        color: var(--color-pink) !important;
+    }
+</style>
+{% endblock %}

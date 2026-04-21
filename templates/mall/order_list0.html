@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Orders — BB Shopping{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .dashboard-card {
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+    }
+
+    .dashboard-table { width: 100%; border-collapse: collapse; }
+
+    .dashboard-table th {
+        background: #1a1a2e;
+        color: #fff;
+        padding: 18px 24px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .dashboard-table td {
+        padding: 18px 24px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .badge-status {
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .pending { background: #fef3c7; color: #92400e; }
+    .processing { background: #dbeafe; color: #1e40af; }
+    .shipped { background: #e0e7ff; color: #3730a3; }
+    .delivered { background: #dcfce7; color: #166534; }
+
+    .actions-cell {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .btn-action {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-view { background: #e0f2fe; color: #0284c7; }
+    .btn-edit { background: #ede9fe; color: #6d28d9; }
+    .btn-delete { background: #fee2e2; color: #dc2626; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="ym-page-hero" style="background-color: var(--primary); color: white; padding: 100px 0 60px;">
+    <div class="ym-container">
+        <p class="ym-eyebrow" style="color: var(--accent);">
+            <i class="fas fa-history"></i> Your Account
+        </p>
+        <h1 class="ym-section-title" style="color: white;">Orders</h1>
+        <p class="ym-section-subtitle" style="color: rgba(255,255,255,0.8);">
+            Review past purchases and access your orders.
+        </p>
+    </div>
+</section>
+
+
+
+
+<section class="ym-section ym-section--light">
+<div class="ym-container">
+
+    <!-- Header -->
+    <div class="dashboard-header">
+        <p style="color:#6b7280;">
+            {{ orders.paginator.count|intcomma }} order{{ orders.paginator.count|pluralize }}
+        </p>
+
+        <a href="" class="ym-btn ym-btn--primary">
+            <i class="fas fa-plus"></i> New Order
+        </a>
+    </div>
+
+    <div class="dashboard-card">
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Items</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for order in orders %}
+                <tr>
+
+                    <!-- ID -->
+                    <td>
+                        <strong>#{{ order.id|stringformat:"05d" }}</strong>
+                    </td>
+
+                    <!-- Items -->
+                    <td>
+                        {% for item in order.items.all|slice:":2" %}
+                            <span style="background:#eee;padding:4px 8px;border-radius:5px;font-size:0.75rem;">
+                                {{ item.product.name|truncatechars:15 }} ×{{ item.quantity }}
+                            </span>
+                        {% endfor %}
+
+                        {% if order.items.count > 2 %}
+                            <small class="text-muted">+{{ order.items.count|add:"-2" }} more</small>
+                        {% endif %}
+                    </td>
+
+                    <!-- Status -->
+                    <td>
+                        <span class="badge-status {{ order.status }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+
+                    <!-- Total -->
+                    <td>
+                        <strong>{{ order.total_price|intcomma }} DA</strong>
+                    </td>
+
+                    <!-- Date -->
+                    <td>
+                        {{ order.created_at|date:"d M Y" }}<br>
+                        <small>{{ order.created_at|naturaltime }}</small>
+                    </td>
+
+                    <!-- ACTIONS 🔥 -->
+                    <td class="actions-cell">
+
+                        <!-- View -->
+                        <a href="{% url 'order_detail' order.id %}"
+                           class="btn-action btn-view"
+                           title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+
+                        <!-- Edit -->
+                        <a href="{% url 'order_update' order.id %}"
+                           class="btn-action btn-edit"
+                           title="Edit">
+                            <i class="fas fa-pen"></i>
+                        </a>
+
+                        <!-- Delete -->
+                        <button onclick="deleteOrder({{ order.id }}, this)"
+                                class="btn-action btn-delete"
+                                title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+
+                        <!-- Status dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light dropdown-toggle"
+                                    data-bs-toggle="dropdown">
+                                Status
+                            </button>
+
+                            <ul class="dropdown-menu">
+                                {% for key, label in status_choices %}
+                                <li>
+                                    <button class="dropdown-item"
+                                            onclick="changeStatus({{ order.id }}, '{{ key }}')">
+                                        {{ label }}
+                                    </button>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                    </td>
+
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:60px;">
+                        <i class="fas fa-box-open fa-2x text-muted"></i>
+                        <p class="text-muted mt-2">No orders yet</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</section>
+
+<!-- JS -->
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    document.cookie.split(';').forEach(c => {
+        c = c.trim();
+        if (c.startsWith(name + '=')) {
+            cookieValue = decodeURIComponent(c.slice(name.length + 1));
+        }
+    });
+    return cookieValue;
+}
+
+function deleteOrder(id, btn) {
+    if (!confirm("Delete this order?")) return;
+
+    fetch(`/orders/${id}/delete/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            btn.closest('tr').remove();
+        }
+    });
+}
+
+function changeStatus(id, status) {
+    fetch(`/orders/${id}/status/${status}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) location.reload();
+    });
+}
+</script>
+
+{% endblock %}

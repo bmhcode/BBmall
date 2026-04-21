@@ -10,6 +10,64 @@
 /* ────────────────────────────────
    PORTAL NAVBAR
 ──────────────────────────────── */
+/* bmh add */
+/* USER DROPDOWN */
+.user-dropdown {
+  position: relative;
+}
+
+.user-dropdown__toggle {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 18px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-dropdown__toggle:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.08);
+}
+
+.user-dropdown__menu {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  min-width: 180px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  display: none;
+  z-index: 99999;
+  overflow: hidden;
+}
+
+.user-dropdown__menu.show {
+  display: block;
+}
+
+.user-dropdown__item {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.user-dropdown__item:hover {
+  background: #f5f5f5;
+}
+
+/* end bmh add */
+
 
 
 

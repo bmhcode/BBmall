@@ -2,73 +2,160 @@
 {% load static %}
 
 {% block title %}
-Update Profile {{ user.username }}
+Mon Profil — BB Shopping
 {% endblock title %}
 
-{% block body %}
+{% block content %}
 
-<!-- Profil -->
-<div class="container mt-5" style="max-width:700px;">
-    <div class="card shadow-lg border-0">
-        <div class="card-header bg-primary text-white text-center">
-            <h4 class="mb-0">Update - {{ user.username }} - Profile</h4>
-        </div>
-        <div class="card-body">
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <!-- Image -->
-                <div class="text-center mb-4">
+<!-- ═══════════ PAGE HERO ═══════════ -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    <p class="ym-eyebrow">Compte Personnel</p>
+    <h1 class="ym-section-title">Gérer mon <em>Profil</em></h1>
+    <p class="ym-section-subtitle">Mettez à jour vos informations personnelles et votre photo de profil.</p>
+  </div>
+</section>
 
-                    <label for="id_image" style="cursor:pointer">
-                        {% if user.profile.image %}
-                        <img id="preview" src="{{ user.profile.image.url }}" class="rounded-circle shadow" width="150"
-                            height="150" style="object-fit:cover;">
-                        {% else %}
-                        <img id="preview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                            class="rounded-circle shadow" width="150" height="150">
-                        {% endif %}
-                    </label>
+<!-- ═══════════ PROFILE SECTION ═══════════ -->
+<section class="ym-section ym-section--gray">
+  <div class="ym-container">
+    <div class="ym-detail-layout" style="grid-template-columns: 1fr; max-width: 800px; margin: 0 auto;">
+      
+      <div class="ym-detail-card">
+        <form method="POST" enctype="multipart/form-data" class="ym-contact-form">
+          {% csrf_token %}
 
-                    <p class="text-muted mt-2">Click the image to change it</p>
+          <!-- Avatar Section -->
+          <div class="text-center mb-5">
+            <div class="profile-avatar-wrapper" style="position: relative; display: inline-block;">
+                <label for="imageUpload" style="cursor:pointer; display: block;">
+                  {% if user.profile.image %}
+                    <img id="preview" src="{{ user.profile.image.url }}" class="profile-avatar-img shadow-lg" 
+                         style="width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; transition: all 0.3s ease;">
+                  {% else %}
+                    <img id="preview" src="https://ui-avatars.com/api/?name={{ user.username }}&background=1a1a2e&color=e8c547&size=160" 
+                         class="profile-avatar-img shadow-lg" 
+                         style="width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; transition: all 0.3s ease;">
+                  {% endif %}
+                  
+                  <div class="profile-avatar-overlay">
+                    <i class="fas fa-camera"></i>
+                    <span>Changer</span>
+                  </div>
+                </label>
+                {{ p_form.image }}
+            </div>
+            <p class="mt-3" style="font-size: 0.85rem; color: var(--color-muted); font-weight: 500;">
+              Cliquez pour mettre à jour votre photo
+            </p>
+          </div>
 
-                    <!-- ✅ REAL INPUT -->
-                    <input type="file" name="image" id="id_image" hidden>
+          <!-- Basic Info Grid -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="ym-form-group">
+              <label class="ym-form-label" for="{{ u_form.first_name.id_for_label }}">Prénom</label>
+              {{ u_form.first_name }}
+              {% if u_form.first_name.errors %}<span class="ym-form-error">{{ u_form.first_name.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="ym-form-group">
+              <label class="ym-form-label" for="{{ u_form.last_name.id_for_label }}">Nom</label>
+              {{ u_form.last_name }}
+              {% if u_form.last_name.errors %}<span class="ym-form-error">{{ u_form.last_name.errors.0 }}</span>{% endif %}
+            </div>
+          </div>
 
-                </div>
-                <!-- / Image -->
-                <div class="mb-3">
-                    {{ u_form.username.label_tag }}
-                    {{ u_form.username }}
-                </div>
-                <div class="mb-3">
-                    {{ u_form.email.label_tag }}
-                    {{ u_form.email }}
-                </div>
-                <div class="mb-3">
-                    {{ p_form.phone.label_tag }}
-                    {{ p_form.phone }}
-                </div>
-                <button class="btn btn-primary w-100 mb-2">
-                    Update Profile
-                </button>
-                <a href="{% url 'password_change' %}" class="btn btn-outline-secondary w-100">
-                    Change Password
-                </a>
-            </form>
-        </div>
+          <div class="ym-form-group">
+            <label class="ym-form-label" for="{{ u_form.username.id_for_label }}">Nom d'utilisateur</label>
+            {{ u_form.username }}
+            {% if u_form.username.errors %}<span class="ym-form-error">{{ u_form.username.errors.0 }}</span>{% endif %}
+          </div>
+
+          <div class="ym-form-group">
+            <label class="ym-form-label" for="{{ u_form.email.id_for_label }}">Adresse e-mail</label>
+            {{ u_form.email }}
+            {% if u_form.email.errors %}<span class="ym-form-error">{{ u_form.email.errors.0 }}</span>{% endif %}
+          </div>
+
+          <div class="ym-form-group">
+            <label class="ym-form-label" for="{{ p_form.phone.id_for_label }}">Téléphone</label>
+            {{ p_form.phone }}
+            {% if p_form.phone.errors %}<span class="ym-form-error">{{ p_form.phone.errors.0 }}</span>{% endif %}
+          </div>
+
+          <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 12px;">
+            <button type="submit" class="ym-btn ym-btn--primary" style="width: 100%; justify-content: center;">
+              Enregistrer les modifications <i class="fas fa-save ms-2"></i>
+            </button>
+            
+            <a href="{% url 'password_change' %}" class="ym-btn ym-btn--ghost" style="width: 100%; justify-content: center; color: var(--color-text); border-color: var(--color-border);">
+              <i class="fas fa-lock me-2"></i> Modifier le mot de passe
+            </a>
+          </div>
+        </form>
+      </div>
+
     </div>
-</div>
-<!-- / Profile -->
+  </div>
+</section>
 
+<style>
+  .profile-avatar-wrapper:hover .profile-avatar-overlay {
+    opacity: 1;
+  }
+  .profile-avatar-wrapper:hover .profile-avatar-img {
+    filter: brightness(0.7);
+    transform: scale(1.02);
+  }
+  .profile-avatar-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+  }
+  .profile-avatar-overlay i {
+    font-size: 1.5rem;
+  }
+  .profile-avatar-overlay span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Map standard classes to design system for existing form tags if needed */
+  .ym-contact-form input:not([type="file"]) {
+    background: #fff;
+  }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
 <script>
-    const imageUpload = document.getElementById("id_image");
+    const imageUpload = document.getElementById("imageUpload");
     const preview = document.getElementById("preview");
 
-    imageUpload.addEventListener("change", function () {
-        const file = this.files[0];
-        if (file) {
-            preview.src = URL.createObjectURL(file);
-        }
-    });
+    if (imageUpload) {
+        imageUpload.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                // Add a little pop effect
+                preview.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    preview.style.transform = 'scale(1)';
+                }, 300);
+            }
+        });
+    }
 </script>
-{% endblock body %}
+{% endblock %}

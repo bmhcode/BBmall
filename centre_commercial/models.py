@@ -1,3 +1,4 @@
+import email
 from django.utils.translation.template import endblock_re
 from django.db import models
 from django.contrib.auth.models import User
@@ -7,6 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 import uuid
+
 from django_ckeditor_5.fields import CKEditor5Field
 
 from django.conf import settings
@@ -334,8 +336,7 @@ class ArticleBlog(models.Model):
 
 class ContactMessage(models.Model):
     # ── Relation ──
-    mall = models.ForeignKey(Mall, on_delete=models.SET_NULL, null=True, blank=True, related_name='contacts')
-
+    mall = models.ForeignKey(Mall, null=True, blank=True, on_delete=models.SET_NULL,  related_name='contacts')
     name = models.CharField(max_length=100, verbose_name="Name")
     email = models.EmailField(verbose_name="Email")
     subject = models.CharField(max_length=200, verbose_name="Subject")
@@ -503,6 +504,28 @@ class Shop(models.Model):
         if working:
             return working.open_time <= time_now <= working.close_time
         return False
+      
+class WorkingHours(models.Model):
+    DAYS = [
+        (0, 'Monday'),
+        (1, 'Tuesday'),
+        (2, 'Wednesday'),
+        (3, 'Thursday'),
+        (4, 'Friday'),
+        (5, 'Saturday'),
+        (6, 'Sunday'),
+    ]
+
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='working_hours')
+    day = models.IntegerField(choices=DAYS)
+
+    open_time = models.TimeField()
+    close_time = models.TimeField() 
+
+    is_closed = models.BooleanField(default=False)  
+    
+    class Meta:
+        unique_together = ('shop', 'day')
 
 class ShopHoliday(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='holidays')
@@ -573,44 +596,80 @@ class Promotion(models.Model):
     class Meta:
         verbose_name = "Promotion"
         verbose_name_plural = "Promotions"
-#============== End Shop ==============
+ #============== End Shop ==============
 
 # =========================================
 # PRODUCT
 # =========================================
 class ProductCategory(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(unique=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = generate_unique_slug(ProductCategory, self.name)
-        super().save(*args, **kwargs)
+    name   = models.CharField(unique=True, max_length=100, verbose_name=_("Category")) #,default='name of the category', help_text='name of catygory')
+    slug   = models.SlugField(blank=True,null=True, unique=True)
+    image  = models.ImageField(upload_to='products/category',default='category.jpg')
+    # image = CloudinaryField('image', blank=True, null=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['name']
+        verbose_name_plural= 'Categories'
+      
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name) + "-" + str(uuid.uuid4())[:8]
+        super().save(*args, **kwargs)            
+      
+    def get_absolute_url(self):
+        return reverse('index')
+        # return 'https://www.google.fr'
+    
+    @property
+    def imageURL(self):
+        try:
+            url = self.image.url
+        except:
+            url = ''
+        return url
+    
+    def category_image(self):
+        if self.image:
+            return mark_safe(f'<img src="{self.image.url}" width="50" height="50" />')
+        return "-"    
 
 class Product(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=200)
+    description = CKEditor5Field('Content', config_name='default')
+
     slug = models.SlugField(unique=True, blank=True)
 
-    price = models.DecimalField(max_digits=10, decimal_places=2)
     old_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
 
     image = models.ImageField(upload_to='products/', blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at', '-updated_at']
+        verbose_name = _("Product")
+        # verbose_name_plural = _("Products")
+
+    def __str__(self):
+        return self.name
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = generate_unique_slug(Product, self.name)
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
 
     def main_image(self):
         return self.images.filter(is_main=True).first()
@@ -653,9 +712,6 @@ class ProductImages(models.Model):
     def __str__(self):
         return f"Image of {self.product.name} - {self.id}"
       
-
-      
-
 class Wishlist(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist')
 
@@ -670,29 +726,119 @@ class Wishlist(models.Model):
 # ORDER
 # =========================================
 class Order(models.Model):
-    STATUS = [
+
+    STATUS_CHOICES = [
         ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
         ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
     ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=STATUS, default='pending')
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Cash on Delivery'),
+        ('card', 'Card'),
+        ('transfer', 'Bank Transfer'),
+    ]   
 
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name=_("Status"), db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"), db_index=True)
+    updated_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Updated at"), db_index=True)
 
-    def update_total(self):
-        self.total_price = sum(item.get_total for item in self.items.all())
-        self.save()
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_("Total price"))
+
+    address = models.CharField(max_length=255, verbose_name=_("Address"))
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='cash', verbose_name=_("Payment method"))
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    class Meta:
+        ordering = ['-created_at']  
 
     def __str__(self):
-        return f"Order #{self.id}"
+        return f"Order #{self.id} - {self.user.username}"
 
+      # -----------------------------
+    # حساب السعر الإجمالي
+    # -----------------------------
+    def update_total_price(self):
+        total = sum(
+            item.quantity * item.price
+            for item in self.items.all()
+        )
+        self.total_price = total
+        self.save(update_fields=['total_price'])
+
+    # -----------------------------
+    # تحديث الحالة من العناصر
+    # -----------------------------
+
+    def update_status_from_items(self):
+        statuses = list(self.items.values_list('status', flat=True))
+
+        if not statuses:
+            return
+
+        if all(s == 'received' for s in statuses):
+            new_status = 'delivered'
+
+        elif all(s == 'cancelled' for s in statuses):
+            new_status = 'cancelled'
+
+        elif any(s == 'processing' for s in statuses):
+            new_status = 'processing'
+
+        elif any(s == 'available' for s in statuses):
+            new_status = 'shipped'
+
+        else:
+            new_status = 'pending'
+
+        if self.status != new_status:
+            self.status = new_status
+            self.save(update_fields=['status'])
+
+    def propagate_status_to_items(self, user=None):
+        item_status_map = {
+            'pending': 'processing',
+            'processing': 'processing',
+            'shipped': 'available',
+            'delivered': 'received',
+            'cancelled': 'cancelled'
+        }
+        new_item_status = item_status_map.get(self.status)
+        if new_item_status:
+            for item in self.items.all():
+                if item.status != new_item_status:
+                    old_item_status = item.status
+                    item.status = new_item_status
+                    item.save(update_fields=['status'])
+                    OrderItemHistory.objects.create(
+                        order_item=item,
+                        old_status=old_item_status,
+                        new_status=new_item_status,
+                        changed_by=user
+                    )
+   
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
-    quantity = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    STATUS_CHOICES = [
+        ('processing', 'Processing'),
+        ('available', 'Available'),
+        ('received', 'Received'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    order    = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product  = models.ForeignKey('Product', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    price    = models.DecimalField(max_digits=10, decimal_places=2)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='processing')
+    notes = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.product} x {self.quantity}"
 
     @property
     def get_total(self):
@@ -702,7 +848,7 @@ class OrderItemHistory(models.Model):
     order_item = models.ForeignKey('OrderItem', on_delete=models.CASCADE, related_name='history')
     old_status = models.CharField(max_length=20)
     new_status = models.CharField(max_length=20)
-    changed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     changed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -712,12 +858,27 @@ class OrderHistory(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='history')
     old_status = models.CharField(max_length=20)
     new_status = models.CharField(max_length=20)
-    changed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+    changed_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     changed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Order #{self.order.id}: {self.old_status} → {self.new_status}"
-#============== End Order ==============
+# =========================END ORDER MODEL =========================
+
+# =========================
+#  Shop Review Model
+# =========================
+class ShopReview(models.Model): # Shop Review Model
+    shop = models.ForeignKey('Shop', on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    rating = models.IntegerField(default=5)  # من 1 إلى 5
+    comment = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('shop', 'user')  # user يقيّم مرة واحدة فقط
 
 # =========================================
 # PROFILE

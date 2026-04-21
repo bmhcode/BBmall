@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'centre_commercial',
 
     'django_ckeditor_5',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
@@ -68,6 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'centre_commercial.context_processors.cart_processor',
             ],
         },
     },
@@ -162,3 +164,8 @@ JAZZMIN_SETTINGS = {
     "site_header": "BB Shopping",
     "site_brand": "BB Shopping",
 }
+
+# -------------------------
+# Cart Session
+# -------------------------
+CART_SESSION_ID = 'cart'

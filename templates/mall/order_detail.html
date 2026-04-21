@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Commande #{{ order.id|stringformat:"04d" }} — BB Shopping{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════ PAGE HERO ═══════════ -->
+<section class="ym-page-hero" style="background: var(--color-primary); color: white; padding: 100px 0 60px;">
+  <div class="ym-container">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px;">
+      <div>
+        <p class="ym-eyebrow" style="color: var(--color-accent);">
+          <a href="{% url 'order_list_all' %}" style="color: var(--color-accent); text-decoration: none; opacity: 0.8;">Commandes</a>
+          <i class="fas fa-chevron-right mx-2" style="font-size: 0.6rem;"></i> Détail
+        </p>
+        <h1 class="ym-section-title" style="color: white; margin-bottom: 8px;">
+          Commande <em style="color: var(--color-accent);">#{{ order.id|stringformat:"04d" }}</em>
+        </h1>
+        <p style="color: rgba(255,255,255,0.7); margin: 0;">Passée le {{ order.created_at|date:"d F Y à H:i" }}</p>
+      </div>
+
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <!-- Status Badge -->
+        <span style="
+          padding: 10px 22px; border-radius: 50px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px;
+          {% if order.status == 'delivered' %} background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3);
+          {% elif order.status == 'shipped' %} background: rgba(96, 165, 250, 0.15); color: #93c5fd; border: 1px solid rgba(147,197,253,0.3);
+          {% elif order.status == 'processing' %} background: rgba(251, 191, 36, 0.15); color: #fde68a; border: 1px solid rgba(253,230,138,0.3);
+          {% elif order.status == 'cancelled' %} background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(252,165,165,0.3);
+          {% else %} background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.2);
+          {% endif %}
+        ">
+          {{ order.get_status_display }}
+        </span>
+
+        {% if request.user.is_superuser %}
+        <a href="{% url 'order_update' order.pk %}" class="ym-btn ym-btn--accent ym-btn--sm">
+          <i class="fas fa-pen me-2"></i> Modifier
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ DETAIL SECTION ═══════════ -->
+<section class="ym-section ym-section--gray">
+  <div class="ym-container">
+    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: start;">
+
+      <!-- LEFT: Items Table -->
+      <div>
+        <div class="ym-detail-card" style="padding: 0; overflow: hidden;">
+          <div style="padding: 28px 32px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-family: var(--font-display); font-size: 1.4rem; margin: 0;">Articles commandés</h2>
+            <span style="font-size: 0.85rem; color: var(--color-muted);">{{ order.items.count }} article{{ order.items.count|pluralize }}</span>
+          </div>
+
+          <div class="table-responsive">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead style="background: #fafafa;">
+                <tr>
+                  <th style="padding: 14px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Produit</th>
+                  <th style="padding: 14px 24px; text-align: center; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Statut</th>
+                  <th style="padding: 14px 24px; text-align: center; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Qté</th>
+                  <th style="padding: 14px 24px; text-align: right; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in order.items.all %}
+                <tr style="border-bottom: 1px solid var(--color-border);">
+                  <td style="padding: 20px 24px;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                      {% if item.product.image %}
+                      <img src="{{ item.product.image.url }}" style="width: 52px; height: 52px; object-fit: cover; border-radius: 10px; border: 1px solid var(--color-border);">
+                      {% else %}
+                      <div style="width: 52px; height: 52px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: var(--color-muted);">
+                        <i class="fas fa-box"></i>
+                      </div>
+                      {% endif %}
+                      <div>
+                        <div style="font-weight: 600; color: var(--color-text);">{{ item.product.name }}</div>
+                        <div style="font-size: 0.75rem; color: var(--color-muted); margin-top: 2px;">
+                          <i class="fas fa-store" style="font-size: 0.65rem;"></i> {{ item.product.shop.name }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--color-muted); margin-top: 2px;">{{ item.price|intcomma }} DA / unité</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="padding: 20px 24px; text-align: center;">
+                    <span style="padding: 4px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                      {% if item.status == 'received' %} background: rgba(34,197,94,0.1); color: #16a34a;
+                      {% elif item.status == 'available' %} background: rgba(59,130,246,0.1); color: #2563eb;
+                      {% elif item.status == 'processing' %} background: rgba(234,179,8,0.1); color: #ca8a04;
+                      {% else %} background: rgba(239,68,68,0.1); color: #dc2626; {% endif %}
+                    ">{{ item.get_status_display }}</span>
+                  </td>
+                  <td style="padding: 20px 24px; text-align: center; font-weight: 700; font-size: 1.1rem;">
+                    {{ item.quantity }}
+                  </td>
+                  <td style="padding: 20px 24px; text-align: right; font-weight: 800; color: var(--color-primary); font-size: 1rem;">
+                    {{ item.get_total|intcomma }} DA
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" style="padding: 60px; text-align: center; color: var(--color-muted);">
+                    Aucun article dans cette commande.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot style="background: #fafafa; border-top: 2px solid var(--color-border);">
+                <tr>
+                  <td colspan="3" style="padding: 20px 24px; font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Total de la commande</td>
+                  <td style="padding: 20px 24px; text-align: right; font-weight: 900; font-size: 1.4rem; color: var(--color-pink);">{{ order.total_price|intcomma }} DA</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Order History Timeline -->
+        {% if order.history.all %}
+        <div class="ym-detail-card" style="margin-top: 24px;">
+          <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 24px;">Historique de la commande</h3>
+          <div style="position: relative; padding-left: 24px; border-left: 2px solid var(--color-border);">
+            {% for event in order.history.all|dictsortreversed:"changed_at" %}
+            <div style="position: relative; margin-bottom: 20px;">
+              <div style="position: absolute; left: -33px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--color-primary); border: 2px solid white; box-shadow: 0 0 0 2px var(--color-primary);"></div>
+              <div style="font-size: 0.85rem; font-weight: 600; color: var(--color-text);">
+                {{ event.old_status }} → <strong style="color: var(--color-pink);">{{ event.new_status }}</strong>
+              </div>
+              <div style="font-size: 0.75rem; color: var(--color-muted); margin-top: 4px;">
+                {{ event.changed_at|date:"d M Y, H:i" }}
+                {% if event.changed_by %}- par <em>{{ event.changed_by.username }}</em>{% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- RIGHT: Summary Card -->
+      <div>
+        <!-- Customer Info -->
+        <div class="ym-detail-card" style="margin-bottom: 24px;">
+          <h3 style="font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border);">
+            <i class="fas fa-user me-2" style="color: var(--color-pink);"></i> Client
+          </h3>
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; color: var(--color-accent);">
+              {{ order.user.username|slice:":1"|upper }}
+            </div>
+            <div>
+              <div style="font-weight: 700; color: var(--color-text);">{{ order.user.get_full_name|default:order.user.username }}</div>
+              <div style="font-size: 0.8rem; color: var(--color-muted);">{{ order.user.email|default:"—" }}</div>
+            </div>
+          </div>
+          <a href="{% url 'order_list_user' order.user.id %}" style="font-size: 0.82rem; color: var(--color-pink); text-decoration: none; font-weight: 600;">
+            <i class="fas fa-list-ul me-1"></i> Voir toutes ses commandes
+          </a>
+        </div>
+
+        <!-- Delivery Info -->
+        <div class="ym-detail-card" style="margin-bottom: 24px;">
+          <h3 style="font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border);">
+            <i class="fas fa-truck me-2" style="color: var(--color-pink);"></i> Livraison
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
+            <div>
+              <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-muted);">Adresse</span>
+              <p style="margin: 4px 0 0; color: var(--color-text); font-weight: 500;">{{ order.address|default:"—" }}</p>
+            </div>
+            <div>
+              <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-muted);">Paiement</span>
+              <p style="margin: 4px 0 0; color: var(--color-text); font-weight: 500;">{{ order.get_payment_method_display }}</p>
+            </div>
+            {% if order.notes %}
+            <div>
+              <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-muted);">Notes</span>
+              <p style="margin: 4px 0 0; color: var(--color-text); font-size: 0.85rem; font-style: italic;">{{ order.notes }}</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Quick Status Update (Superuser only) -->
+        {% if request.user.is_superuser %}
+        <div class="ym-detail-card">
+          <h3 style="font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border);">
+            <i class="fas fa-bolt me-2" style="color: var(--color-pink);"></i> Mise à jour rapide
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            {% for code, label in order.STATUS %}
+            {% if code != order.status %}
+            <a href="{% url 'order_status' order.pk code %}" class="ym-btn ym-btn--ghost" style="justify-content: flex-start; font-size: 0.85rem; color: var(--color-text); border-color: var(--color-border);">
+              <i class="fas fa-circle me-2" style="font-size: 0.5rem; color:
+                {% if code == 'delivered' %}#22c55e{% elif code == 'shipped' %}#3b82f6{% elif code == 'processing' %}#f59e0b{% elif code == 'cancelled' %}#ef4444{% else %}#9ca3af{% endif %};"></i>
+              Marquer comme <strong class="ms-1">{{ label }}</strong>
+            </a>
+            {% endif %}
+            {% endfor %}
+            <a href="{% url 'order_delete' order.pk %}" class="ym-btn" style="justify-content: flex-start; font-size: 0.85rem; color: #ef4444; border: 1px solid rgba(239,68,68,0.2); background: rgba(239,68,68,0.05); margin-top: 8px;">
+              <i class="fas fa-trash-alt me-2"></i> Supprimer la commande
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  @media (max-width: 900px) {
+    .ym-container > div[style*="grid-template-columns"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+
+{% endblock %}
