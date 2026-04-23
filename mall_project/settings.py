@@ -161,8 +161,22 @@ CKEDITOR_CONFIGS = {
 # Jazzmin
 # -------------------------
 JAZZMIN_SETTINGS = {
-    "site_header": "BB Shopping",
-    "site_brand": "BB Shopping",
+    "site_title": "BBMalls Admin",
+    "site_header": "BBMalls Dashboard",
+    "site_brand": "BBMalls",
+    "welcome_sign": "مرحبا بك في لوحة التحكم",
+
+    "topmenu_links": [
+        {"name": "Dashboard", "url": "admin:index"},
+        {"name": "Visit Site", "url": "/", "new_window": True},
+    ],
+
+    "icons": {
+        "auth.User": "fas fa-user",
+        "centre_commercial.Mall": "fas fa-building",
+        "centre_commercial.Shop": "fas fa-store",
+        "centre_commercial.Product": "fas fa-box",
+    },
 }
 
 # -------------------------

@@ -29,12 +29,10 @@ admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 
 
-
-
 class ShopInline(admin.TabularInline):
     model = Shop
     extra = 1
-    fields = ('name', 'category', 'location', 'is_featured')
+    fields = ('owner', 'name', 'category', 'location', 'is_featured')
     # prepopulated_fields = {'slug': ('name',)}
 
 class ProductImageInline(admin.TabularInline):
@@ -48,7 +46,7 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Mall)
 class MallAdmin(admin.ModelAdmin):
-    list_display = ('get_thumbnail', 'name', 'city', 'region', 'number_of_shops', 'is_open', 'is_featured')
+    list_display = ('get_thumbnail', 'manager', 'name', 'city', 'region', 'number_of_shops', 'is_open', 'is_featured')
     list_filter = ('city', 'region', 'is_open', 'is_featured')
     search_fields = ('name', 'city', 'description')
     prepopulated_fields = {'slug': ('name',)}
@@ -56,7 +54,7 @@ class MallAdmin(admin.ModelAdmin):
     inlines = [ShopInline]
     
     fieldsets = (
-        ('Identité',      {'fields': ('name', 'slug', 'city', 'region', 'address')}),
+        ('Identité',      {'fields': ('manager', 'name', 'slug', 'city', 'region', 'address')}),
         ('Médias',        {'fields': ('image', 'bg_color')}),
         ('Description',   {'fields': ('description', 'description_short')}),
         ('Infos Pratiques', {'fields': ('number_of_shops', 'number_of_parking_spaces', 'opening_time', 'closing_time', 'phone', 'email', 'website')}),
@@ -71,14 +69,14 @@ class MallAdmin(admin.ModelAdmin):
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
-    list_display = ('get_thumbnail', 'name', 'mall', 'category', 'location', 'is_featured')
+    list_display = ('get_thumbnail', 'owner', 'name', 'mall', 'category', 'location', 'is_featured')
     list_filter = ('mall', 'category', 'is_featured')
     search_fields = ('name', 'description')
     # prepopulated_fields = {'slug': ('name',)}
     list_editable = ('is_featured',)
 
     fieldsets = (
-        ('Identité',      {'fields': ('name', 'mall', 'category', 'location')}),
+        ('Identité',      {'fields': ('owner', 'name', 'mall', 'category', 'location')}),
         ('Design',        {'fields': ('logo', 'cover', 'description')}),
         ('Contact',       {'fields': ('phone', 'email', 'website')}),
         ('Paramètres',    {'fields': ('is_featured', 'is_closed', 'observation')}),

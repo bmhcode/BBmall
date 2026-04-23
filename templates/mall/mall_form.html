@@ -106,7 +106,7 @@
         <span class="portal-nav__brand-icon"><i class="fas fa-gem"></i></span>
         BB <span>Shopping</span>
     </a>
-    <a href="{% url 'mall_table_list' %}" class="ym-btn ym-btn--sm ym-btn--ghost" style="color:#fff; border-color: rgba(255,255,255,0.2);">
+    <a href="{% url 'malls_manage' %}" class="ym-btn ym-btn--sm ym-btn--ghost" style="color:#fff; border-color: rgba(255,255,255,0.2);">
         <i class="fas fa-arrow-left"></i> Retour
     </a>
 </header>
@@ -122,6 +122,12 @@
             <form method="post" enctype="multipart/form-data" class="form-grid">
                 {% csrf_token %}
                 
+                <div class="form-group full-width">
+                    <label for="{{ form.manager.id_for_label }}">{{ form.manager.label }}</label>
+                    {{ form.manager }}
+                </div>
+
+
                 <div class="form-group full-width">
                     <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
                     {{ form.name }}

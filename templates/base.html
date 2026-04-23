@@ -4,9 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="{{mall.name}} — Votre destination shopping premium à {{mall.city}}. Mode, gastronomie, divertissement et événements.">
-  
-  <title>{% block title %}{% if mall %}{{mall.name}} — Shopping, Cuisine & Divertissement{% else %}BB Shopping — Shopping, Cuisine & Divertissement{% endif %}{% endblock %}</title>
+  <!-- <meta name="description" content="{{mall.name}} — Votre destination shopping premium à {{mall.city}}. Mode, gastronomie, divertissement et événements.">
+  <meta name="description" content="BB Shopping — Découvrez nos centres commerciaux premium partout en Algérie. Trouvez votre mall et commencez votre expérience shopping.">
+   -->
+  <meta name="description" content={% if mall %}{{mall.name}} — Votre destination shopping premium à {{mall.city}}. Mode, gastronomie, divertissement et événements.{% else %}BB Shopping — Découvrez nos centres commerciaux premium partout en Algérie. Trouvez votre mall et commencez votre expérience shopping.{% endif %}>
+
+  <title>{% block title %}{% if mall %}{{mall.name}} — Shopping, Cuisine & Divertissement{% else %}BB Shopping — Trouvez Votre Centre{% endif %}{% endblock %}</title>
 
   <!-- Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +23,8 @@
 
   <!-- Main CSS -->
   <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <!-- Portal CSS -->
+  <link rel="stylesheet" href="{% static 'css/portal.css' %}">
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -85,20 +90,42 @@
 <header id="ym-navbar" class="ym-navbar" role="banner">
 
   <!-- Brand -->
-  <a href="{% url 'home' %}" class="ym-navbar__brand">
+  <!-- <a href="{% url 'home' %}" class="ym-navbar__brand">
     <span class="ym-navbar__brand-icon">
       <i class="fas fa-gem fa-sm"></i>
     </span>
     {% if mall %}{{ mall.name }} <span>MALL</span>{% else %}BB <span>Shopping</span>{% endif %}
+  </a> -->
+
+<a href="{% url 'home' %}" class="ym-navbar__brand">
+    <span class="ym-navbar__brand-icon">
+      <i class="fas fa-gem fa-sm"></i>
+    </span>
+</a>
+
+{% if mall %}
+  <a href="{% url 'mall' mall.slug %}" class="ym-navbar__brand">
+     
+     {{ mall.name }} <span>MALL</span>
+    </a>
+{% else %}
+<a href="{% url 'home' %}" class="ym-navbar__brand">
+   
+    BB <span>Shopping</span>
   </a>
+{% endif %}
+
+
 
   <!-- NAV -->
   <nav>
     <ul class="ym-navbar__nav">
 
       <!-- MAIN LINKS -->
-      <li><a href="{% if mall %}{% url 'mall' mall.slug %}{% else %}{% url 'home' %}{% endif %}">Accueil</a></li>
+      <!-- <li><a href="{% if mall %}{% url 'mall' mall.slug %}{% else %}{% url 'home' %}{% endif %}">Accueil</a></li> -->
 
+      <li><a href="{% url 'mall_list' %}">Malls</a></li>
+    
       <li><a href="{% if mall %}{% url 'shops_by_mall' mall.slug %}{% else %}{% url 'shops_all' %}{% endif %}">Magasins</a></li>
 
       <li><a href="{% if mall %}{% url 'products_by_mall' mall.slug %}{% else %}{% url 'products_all' %}{% endif %}">Produits</a></li>
@@ -109,26 +136,13 @@
 
       <li><a href="{% if mall %}{% url 'blogs_by_mall' mall.slug %}{% else %}{% url 'blogs_all' %}{% endif %}">Blog</a></li>
 
-      <!-- USER (ONLY IF LOGGED) -->
-      {% if user.is_authenticated %}
-          <li><a href="{% url 'order_list_all' %}"><i class="fas fa-list"></i> My Orders</a></li>
-
-          <li><a href="{% url 'order_history' %}"><i class="fas fa-history"></i> History</a></li>
-          {% if user.is_superuser %}
-            <li><a href="{% url 'contacts_messages_all' %}"><i class="fas fa-envelope"></i> Contacts messages</a></li>
-          {% endif %}
-      {% endif %}
-
      <li> 
       {% if mall %}
       <a href="{% url 'contact_message_create_by_mall' mall.slug %}" >Contact </a>
-      <li><a href="{% url 'orders_items_list_all' %}"><i class="fas fa-list"></i> Orders items all</a></li>
       {% else %}
       <a href="{% url 'contact_message_create' %}" >Contact </a>
       {% endif %}
      </li>
-      
-
     </ul>
   </nav>
 
@@ -138,7 +152,6 @@
     <button class="ym-navbar__search-btn">
       <i class="fas fa-search"></i>
     </button>
-
     {% if user.is_authenticated %}
       <a href="{% url 'wishlist' %}"><i class="fas fa-heart"></i></a>
 
@@ -155,19 +168,35 @@
         {% csrf_token %}
         <button type="submit" class="ym-split-btn-main">Logout</button>
       </form>
+    
+      <!-- USER (ONLY IF LOGGED) -->
+    
+      <li><a href="{% url 'order_list_all' %}"><i class="fas fa-list"></i> Orders</a></li>
+      <li><a href="{% url 'orders_items_list_all' %}"><i class="fas fa-list"></i> Orders items all</a></li>
+
+      <li><a href="{% url 'order_history' %}"><i class="fas fa-history"></i> History</a></li>
+
+      {% if user.is_superuser %}
+        <li><a href="{% url 'contacts_messages_all' %}"><i class="fas fa-envelope"></i> Contacts messages</a></li>
+      {% endif %}
+    {% else %}
+       <a class="nav-link me-3" href="{% url 'login' %}">
+        <i class="fa fa-user"></i> Login
+      </a>
+      <a class="nav-link" href="{% url 'signup' %}">
+        <i class="fa fa-user-plus"></i> Sign Up
+      </a>
     {% endif %}
 
-
- <!-- CTA -->
+  <!-- CTA -->
     {% if mall %}
     <a href="" class="ym-btn ym-btn--dark ym-btn--sm"> Nous visiter </a>
     {% endif %}
 
-    <!-- MOBILE -->
+  <!-- MOBILE -->
     <button id="ym-hamburger" class="ym-navbar__hamburger">
       <span></span><span></span><span></span>
     </button>
-
   </div>
 
 </header>
@@ -305,6 +334,52 @@
 
 
 {% block extra_js %}{% endblock %}
+<!--=== start Mall list  -->
+<script> 
+(function() {
+  const filterBtns = document.querySelectorAll('.portal-filter-btn');
+  const cards = document.querySelectorAll('.portal-mall-card');
+  const noResults = document.getElementById('portal-no-results');
+  const searchInput = document.getElementById('portal-search-input');
+
+  function applyFilters(ville, query) {
+    let visible = 0;
+    cards.forEach(card => {
+      const matchVille = ville === 'all' || card.dataset.ville === ville;
+      const matchQuery  = !query || card.dataset.name.includes(query.toLowerCase()) || card.dataset.ville.includes(query.toLowerCase());
+      const show = matchVille && matchQuery;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    noResults.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  let activeVille = 'all';
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeVille = btn.dataset.ville;
+      applyFilters(activeVille, searchInput.value);
+    });
+  });
+
+  searchInput.addEventListener('input', () => {
+    applyFilters(activeVille, searchInput.value);
+  });
+
+  window.resetSearch = function() {
+    searchInput.value = '';
+    filterBtns.forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-ville="all"]').classList.add('active');
+    activeVille = 'all';
+    applyFilters('all', '');
+  };
+})();
+</script>
+<!--=== end Mall list  -->
+
 </body>
 
 </html>

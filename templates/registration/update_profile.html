@@ -50,24 +50,31 @@ Mon Profil — BB Shopping
             </p>
           </div>
 
+          <div class="ym-form-group">
+            <label class="ym-form-label" for="{{ p_form.role.id_for_label }}">Rôle</label>
+            {{ p_form.role }}
+            {% if p_form.role.errors %}<span class="ym-form-error">{{ p_form.role.errors.0 }}</span>{% endif %}
+          </div>
+
           <!-- Basic Info Grid -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="ym-form-group">
+              <label class="ym-form-label" for="{{ u_form.username.id_for_label }}">Nom d'utilisateur</label>
+              {{ u_form.username }}
+              {% if u_form.username.errors %}<span class="ym-form-error">{{ u_form.username.errors.0 }}</span>{% endif %}
+            </div>
+
             <div class="ym-form-group">
               <label class="ym-form-label" for="{{ u_form.first_name.id_for_label }}">Prénom</label>
               {{ u_form.first_name }}
               {% if u_form.first_name.errors %}<span class="ym-form-error">{{ u_form.first_name.errors.0 }}</span>{% endif %}
             </div>
+
             <div class="ym-form-group">
               <label class="ym-form-label" for="{{ u_form.last_name.id_for_label }}">Nom</label>
               {{ u_form.last_name }}
               {% if u_form.last_name.errors %}<span class="ym-form-error">{{ u_form.last_name.errors.0 }}</span>{% endif %}
             </div>
-          </div>
-
-          <div class="ym-form-group">
-            <label class="ym-form-label" for="{{ u_form.username.id_for_label }}">Nom d'utilisateur</label>
-            {{ u_form.username }}
-            {% if u_form.username.errors %}<span class="ym-form-error">{{ u_form.username.errors.0 }}</span>{% endif %}
           </div>
 
           <div class="ym-form-group">
@@ -158,4 +165,4 @@ Mon Profil — BB Shopping
         });
     }
 </script>
-{% endblock %}
+{% endblock %}

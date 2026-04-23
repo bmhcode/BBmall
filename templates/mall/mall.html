@@ -33,10 +33,16 @@
         Explorer les boutiques
         <i class="fas fa-arrow-right ym-btn__icon"></i>
       </a>
+
       <a href="{% url 'events_by_mall' mall.slug %}" class="ym-btn ym-btn--ghost" id="hero-events-btn">
         <i class="fas fa-calendar-alt"></i>
         Voir les événements
       </a>
+      <a href="{% url 'order_list_by_mall' mall.slug %}" class="ym-btn ym-btn--ghost" id="hero-events-btn">
+         <i class="fas fa-shipping-fast me-2"></i> 
+        Delivery Office
+      </a>
+
     </div>
   </div>
 

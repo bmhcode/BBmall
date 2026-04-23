@@ -2,19 +2,46 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Orders Dashboard — BB Shopping{% endblock %}
+{% block title %}
+    {% if mall %}Delivery Hub: {{ mall.name }}{% else %}Orders Dashboard{% endif %} — BB Shopping
+{% endblock %}
 
 {% block content %}
 <!-- Page Hero -->
-<section class="ym-page-hero" style="background: var(--color-primary); color: white; padding: 100px 0 60px;">
-    <div class="ym-container">
-        <p class="ym-eyebrow" style="color: var(--color-accent);">
-            <i class="fas fa-clipboard-list me-2"></i> Administration
-        </p>
-        <h1 class="ym-section-title" style="color: white; margin-bottom: 8px;">Order Inventory</h1>
-        <p class="ym-section-subtitle" style="color: rgba(255,255,255,0.7); max-width: 600px;">
-            Manage and track all customer transactions. Currently viewing {{ orders.paginator.count }} active order{{ orders.paginator.count|pluralize }}.
-        </p>
+<section class="ym-page-hero" style="background: var(--color-primary); color: white; padding: 100px 0 60px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; right: 0; width: 40%; height: 100%; background: linear-gradient(225deg, var(--color-accent) 0%, transparent 100%); opacity: 0.1;"></div>
+    <div class="ym-container" style="position: relative; z-index: 2;">
+        <div style="display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap;">
+            {% if mall %}
+                <div style="width: 80px; height: 80px; border-radius: 20px; background: white; padding: 10px; box-shadow: var(--shadow-lg);">
+                    <img src="{{ mall.imageURL }}" alt="{{ mall.name }}" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+            {% else %}
+                <div style="width: 80px; height: 80px; border-radius: 20px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                    <i class="fas fa-hubspot"></i>
+                </div>
+            {% endif %}
+            
+            <div style="flex: 1; min-width: 300px;">
+                <p class="ym-eyebrow" style="color: var(--color-accent); font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">
+                    <i class="fas fa-shipping-fast me-2"></i> 
+                    {% if mall %}DELIVERY OFFICE{% else %}CENTRAL LOGISTICS{% endif %}
+                </p>
+                <h1 class="ym-section-title" style="color: white; margin-bottom: 8px; font-size: 3rem;">
+                    {% if mall %}{{ mall.name }}{% else %}Order Inventory{% endif %}
+                </h1>
+                <p class="ym-section-subtitle" style="color: rgba(255,255,255,0.7); max-width: 600px;">
+                    Efficiently manage logistics and delivery statuses. Tracking {{ orders.paginator.count }} active order{{ orders.paginator.count|pluralize }}.
+                </p>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); padding: 20px 30px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-accent); margin-bottom: 4px; font-weight: 700;">Active Hub</div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: white;">
+                    {% if mall %}{{ mall.city|title }}, {{ mall.region }}{% else %}Global Network{% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -27,12 +54,12 @@
             <div style="flex: 1; max-width: 480px;">
                 <form method="GET" style="position: relative;">
                     <input type="text" name="search" value="{{ search|default:'' }}" 
-                           placeholder="Search by ID, Customer, or Status..." 
-                           style="width: 100%; padding: 14px 24px 14px 50px; border-radius: 50px; border: 1px solid var(--color-border); background: white; font-family: inherit; box-shadow: var(--shadow-sm);">
-                    <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--color-muted);"></i>
+                           placeholder="Search Reference, Customer, or Status..." 
+                           style="width: 100%; padding: 16px 24px 16px 54px; border-radius: 16px; border: 1px solid var(--color-border); background: white; font-family: inherit; box-shadow: var(--shadow-sm); outline: none; transition: border-color 0.2s;">
+                    <i class="fas fa-search" style="position: absolute; left: 22px; top: 50%; transform: translateY(-50%); color: var(--color-muted);"></i>
                     
                     {% if search %}
-                    <a href="{% url 'order_list' %}" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--color-muted);">
+                    <a href="." style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--color-muted);">
                         <i class="fas fa-times-circle"></i>
                     </a>
                     {% endif %}
@@ -40,116 +67,152 @@
             </div>
             
             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <a href="{% url 'orders_items_list_all' %}" class="ym-btn ym-btn--dark ym-btn--sm" style="height: 48px; border-radius: 50px;">
-                    <i class="fas fa-file-invoice me-2"></i> Sales Journal
+                <a href="{% url 'orders_items_list_all' %}" class="ym-btn ym-btn--dark ym-btn--sm" style="height: 54px; border-radius: 16px; display: flex; align-items: center; padding: 0 24px;">
+                    <i class="fas fa-file-invoice me-2"></i> Detailed Logs
                 </a>
-                <div style="display: flex; gap: 8px; align-items: center; background: white; padding: 6px 16px; border-radius: 50px; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm);">
-                    <span style="font-size: 0.85rem; color: var(--color-muted); font-weight: 500;">Status:</span>
-                    <a href="?status=pending" class="ym-badge-pill" style="--bg: #fff7ed; --color: #c2410c;">Pending</a>
-                    <a href="?status=delivered" class="ym-badge-pill" style="--bg: #f0fdf4; --color: #15803d;">Delivered</a>
+                
+                <div class="dropdown">
+                    <button class="ym-btn ym-btn--white ym-btn--sm" data-bs-toggle="dropdown" style="height: 54px; border-radius: 16px; border: 1px solid var(--color-border); padding: 0 20px; background: white;">
+                        <i class="fas fa-filter me-2" style="color: var(--color-pink);"></i> Status Filter <i class="fas fa-chevron-down ms-2 fa-xs"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" style="border-radius: 16px;">
+                        <li><a class="dropdown-item py-2" href="?status=" style="border-radius: 10px;">All Orders</a></li>
+                        {% for key, label in status_choices %}
+                        <li><a class="dropdown-item py-2" href="?status={{ key }}" style="border-radius: 10px;">{{ label }}</a></li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
 
         <!-- Orders Table Container -->
-        <div style="background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); overflow: hidden; border: 1px solid var(--color-border);">
+        <div style="background: white; border-radius: 30px; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--color-border);">
             <div class="table-responsive">
                 <table class="ym-order-table" style="width: 100%; border-collapse: collapse;">
                     <thead>
-                        <tr style="background: #fafafa; border-bottom: 1px solid var(--color-border);">
-                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Reference</th>
-                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Customer Detail</th>
-                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Placement Date</th>
-                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Quantity</th>
-                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Financials</th>
-                            <th style="padding: 20px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Current Status</th>
-                            <th style="padding: 20px 24px; text-align: right; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted); font-weight: 700;">Manage</th>
+                        <tr style="background: #fdfdfd; border-bottom: 1px solid var(--color-border);">
+                            <th style="padding: 24px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-muted); font-weight: 800;">ID / Data</th>
+                            <th style="padding: 24px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-muted); font-weight: 800;">Destination</th>
+                            <th style="padding: 24px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-muted); font-weight: 800;">Items Information</th>
+                            <th style="padding: 24px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-muted); font-weight: 800;">Financials</th>
+                            <th style="padding: 24px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-muted); font-weight: 800;">Logistics Status</th>
+                            <th style="padding: 24px; text-align: right; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-muted); font-weight: 800;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for order in orders %}
-                        <tr style="border-bottom: 1px solid #f3f4f6; transition: background 0.2s;" onmouseover="this.style.background='#fcfcfc'" onmouseout="this.style.background='transparent'">
+                        <tr style="border-bottom: 1px solid #f8fafc; transition: all 0.3s;" onmouseover="this.style.background='#fcfdff'" onmouseout="this.style.background='white'">
                             <!-- Reference -->
                             <td style="padding: 24px;">
-                                <a href="{% url 'order_detail' order.id %}" style="font-weight: 700; color: var(--color-primary); font-family: var(--font-display); font-size: 1.1rem;">
-                                    #{{ order.id }}
-                                </a>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <a href="{% url 'order_detail' order.id %}" style="font-weight: 800; color: var(--color-primary); font-family: var(--font-display); font-size: 1.2rem; text-decoration: none;">
+                                        #{{ order.id }}
+                                    </a>
+                                    <span style="font-size: 0.8rem; color: var(--color-muted);">{{ order.created_at|date:"M d, Y" }} at {{ order.created_at|date:"H:i" }}</span>
+                                </div>
                             </td>
 
                             <!-- Customer -->
                             <td style="padding: 24px;">
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--color-primary); font-size: 0.8rem;">
-                                        {{ order.user.username|slice:":1"|upper }}
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 32px; height: 32px; border-radius: 12px; background: #eef2ff; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #4f46e5; font-size: 0.8rem; border: 1px solid #c7d2fe;">
+                                            {{ order.user.username|slice:":1"|upper }}
+                                        </div>
+                                        <span style="font-weight: 700; font-size: 0.95rem; color: var(--color-text);">{{ order.user.username }}</span>
                                     </div>
-                                    <div>
-                                        <div style="font-weight: 600; font-size: 0.95rem;">{{ order.user.username }}</div>
-                                        <div style="font-size: 0.75rem; color: var(--color-muted);">{{ order.user.email|default:"No email provided" }}</div>
+                                    <div style="font-size: 0.8rem; color: var(--color-muted); line-height: 1.4;">
+                                        <i class="fas fa-map-marker-alt me-1" style="color: var(--color-accent); width: 14px;"></i> {{ order.address|truncatechars:35 }}
                                     </div>
                                 </div>
                             </td>
 
-                            <!-- Date -->
+                            <!-- Items Details -->
                             <td style="padding: 24px;">
-                                <div style="font-size: 0.9rem; color: var(--color-text);">{{ order.created_at|date:"d M, Y" }}</div>
-                                <div style="font-size: 0.75rem; color: var(--color-muted);">at {{ order.created_at|date:"H:i" }}</div>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    {% for item in order.items.all %}
+                                        <div style="background: {% if mall and item.product.shop.mall == mall %}#fff7ed{% else %}#fafafa{% endif %}; 
+                                                    padding: 10px 14px; border-radius: 12px; border: 1px solid {% if mall and item.product.shop.mall == mall %}#ffedd5{% else %}#f1f5f9{% endif %};
+                                                    display: flex; justify-content: space-between; align-items: center; gap: 14px;">
+                                            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                                                <div style="position: relative;">
+                                                    {% if item.product.image %}
+                                                        <img src="{{ item.product.image.url }}" style="width: 36px; height: 36px; border-radius: 8px; object-fit: cover;">
+                                                    {% else %}
+                                                        <div style="width: 36px; height: 36px; border-radius: 8px; background: #e2e8f0; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="fas fa-image text-muted"></i>
+                                                        </div>
+                                                    {% endif %}
+                                                    <span style="position: absolute; top: -5px; right: -5px; background: var(--color-primary); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 2px solid white;">{{ item.quantity }}</span>
+                                                </div>
+                                                <div style="display: flex; flex-direction: column;">
+                                                    <span style="font-weight: 700; font-size: 0.85rem; color: var(--color-text);">{{ item.product.name|truncatechars:18 }}</span>
+                                                    <span style="font-size: 0.7rem; color: var(--color-muted); text-transform: uppercase;">{{ item.product.shop.name }}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="dropdown">
+                                                <button class="status-pill {% if item.status == 'cancelled' %}status-pill--danger{% elif item.status == 'available' %}status-pill--success{% else %}status-pill--warning{% endif %}" 
+                                                        data-bs-toggle="dropdown" style="border: none; cursor: pointer; font-size: 0.65rem; padding: 4px 8px; border-radius: 8px; font-weight: 700; text-transform: uppercase;">
+                                                    {{ item.get_status_display }} <i class="fas fa-caret-down ms-1"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-1" style="border-radius: 12px; min-width: 140px;">
+                                                    {% for s_key, s_label in order_item_status_choices %}
+                                                    <li>
+                                                        <a class="dropdown-item py-2" href="{% url 'order_item_status' item.id s_key %}" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600;">{{ s_label }}</a>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
                             </td>
 
-                            <!-- Items -->
-                            <td style="padding: 24px;">
-                                <details class="ym-details">
-                                    <summary style="font-size: 0.85rem; font-weight: 600; color: var(--color-pink); cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                        {{ order.items.count }} Item{{ order.items.count|pluralize }} <i class="fas fa-chevron-down fa-xs"></i>
-                                    </summary>
-                                    <div style="padding-top: 10px; font-size: 0.8rem; color: var(--color-muted);">
-                                        {% for item in order.items.all %}
-                                        <div style="margin-bottom: 4px; display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding-bottom: 2px;">
-                                            <span>{{ item.product.name|truncatechars:20 }} × {{ item.quantity }}</span>
-                                            <span style="color: var(--color-primary); font-weight: 500;">{{ item.get_status_display }}</span>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </details>
-                            </td>
 
                             <!-- Financials -->
                             <td style="padding: 24px;">
-                                <div style="font-weight: 800; color: var(--color-primary); font-size: 1rem;">{{ order.total_price|intcomma }} DA</div>
-                                <div style="font-size: 0.7rem; color: var(--color-muted); text-transform: uppercase; font-weight: 600;">{{ order.get_payment_method_display }}</div>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="font-weight: 900; color: var(--color-primary); font-size: 1.1rem; font-family: var(--font-display);">
+                                        {{ order.total_price|intcomma }}<span style="font-size: 0.7em; margin-left: 2px;">DA</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; color: var(--color-muted); font-weight: 700; text-transform: uppercase;">
+                                        <i class="fas fa-wallet" style="color: var(--color-accent);"></i> {{ order.get_payment_method_display }}
+                                    </div>
+                                </div>
                             </td>
 
                             <!-- Status -->
                             <td style="padding: 24px;">
-                                <div style="display: flex; flex-direction: column; gap: 6px;">
-                                    <span class="status-badge" style="background: 
+                                <div style="display: flex; flex-direction: column; gap: 10px; width: 160px;">
+                                    <div style="background: 
                                         {% if order.status == 'pending' %}#fff7ed; color: #c2410c; 
                                         {% elif order.status == 'processing' %}#eff6ff; color: #1d4ed8;
                                         {% elif order.status == 'shipped' %}#f5f3ff; color: #6d28d9;
                                         {% elif order.status == 'delivered' %}#f0fdf4; color: #15803d;
                                         {% else %}#fef2f2; color: #b91c1c;{% endif %};
-                                        padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-align: center; border: 1px solid currentColor; border-opacity: 0.1;">
-                                        {{ order.get_status_display }}
-                                    </span>
+                                        padding: 12px; border-radius: 16px; font-size: 0.8rem; font-weight: 800; text-align: center; border: 1px solid currentColor;">
+                                        <i class="fas {% if order.status == 'delivered' %}fa-check-circle{% elif order.status == 'cancelled' %}fa-times-circle{% else %}fa-clock{% endif %} me-1"></i>
+                                        {{ order.get_status_display|upper }}
+                                    </div>
                                     
-                                    {% if request.user.is_superuser %}
-                                    <div class="dropdown">
-                                        <button class="status-change-btn" id="dropdown{{order.id}}" data-bs-toggle="dropdown" aria-expanded="false" 
-                                                style="background: transparent; border: none; color: var(--color-muted); font-size: 0.7rem; font-weight: 600; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                                            Quick Change <i class="fas fa-caret-down"></i>
+                                    <div class="dropdown" style="width: 100%;">
+                                        <button class="ym-btn ym-btn--white ym-btn--sm w-100" data-bs-toggle="dropdown" 
+                                                style="height: 36px; border-radius: 12px; border: 1px solid var(--color-border); font-size: 0.7rem; font-weight: 700; background: white;">
+                                            UPDATE ORDER <i class="fas fa-chevron-down ms-1 fa-xxs"></i>
                                         </button>
-                                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" aria-labelledby="dropdown{{order.id}}" style="border-radius: 12px;">
-                                            {% for key, label in status %}
+                                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" style="border-radius: 16px; min-width: 180px;">
+                                            {% for key, label in status_choices %}
                                             {% if key != order.status %}
                                             <li>
-                                                <a class="dropdown-item py-2" href="{% url 'order_status' order.id key %}" style="border-radius: 8px; font-size: 0.85rem; font-weight: 500;">
-                                                    Mark as {{ label }}
+                                                <a class="dropdown-item py-2 d-flex align-items:center; justify-content:space-between;" href="{% url 'order_status' order.id key %}" style="border-radius: 10px; font-size: 0.8rem; font-weight: 600;">
+                                                    Mark as {{ label }} <i class="fas fa-arrow-right fa-xs opacity-50"></i>
                                                 </a>
                                             </li>
                                             {% endif %}
                                             {% endfor %}
                                         </ul>
                                     </div>
-                                    {% endif %}
                                 </div>
                             </td>
 
@@ -159,23 +222,21 @@
                                     <a href="{% url 'order_detail' order.id %}" class="ym-btn-action" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    {% if request.user.is_superuser %}
-                                    <a href="{% url 'order_update' order.id %}" class="ym-btn-action" title="Edit Order" style="color: var(--color-primary);">
-                                        <i class="fas fa-pen-fancy"></i>
+                                    <a href="{% url 'order_update' order.id %}" class="ym-btn-action" title="Full Management" style="color: var(--color-primary); background: #eff6ff;">
+                                        <i class="fas fa-cog"></i>
                                     </a>
-                                    <a href="{% url 'order_delete' order.id %}" class="ym-btn-action" title="Delete Permanent" style="color: #ef4444;">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
-                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" style="padding: 80px 24px; text-align: center;">
-                                <div style="color: #e5e7eb; margin-bottom: 24px;"><i class="fas fa-shopping-basket fa-4x"></i></div>
-                                <h3 style="font-weight: 700; color: var(--color-primary); margin-bottom: 8px;">No orders matched</h3>
-                                <p style="color: var(--color-muted); font-size: 0.95rem;">Try adjusting your search criteria or checking back later.</p>
+                            <td colspan="6" style="padding: 100px 24px; text-align: center;">
+                                <div style="width: 80px; height: 80px; border-radius: 50%; background: #f8fafc; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: #e2e8f0; font-size: 2rem;">
+                                    <i class="fas fa-box-open"></i>
+                                </div>
+                                <h3 style="font-weight: 800; color: var(--color-primary); margin-bottom: 8px; font-size: 1.5rem;">Pipeline Empty</h3>
+                                <p style="color: var(--color-muted); font-size: 1rem; max-width: 400px; margin: 0 auto;">There are currently no orders in the queue matching your current filters.</p>
+                                <a href="." class="ym-btn ym-btn--primary ym-btn--sm mt-4" style="border-radius: 12px; padding: 0 24px; height: 44px; display: inline-flex; align-items: center;">Clear All Filters</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -187,17 +248,17 @@
         <!-- Pagination -->
         {% if orders.has_other_pages %}
         <div style="margin-top: 48px; display: flex; justify-content: center;">
-            <div style="display: flex; background: white; border-radius: 50px; padding: 6px; box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); gap: 4px;">
+            <div style="display: flex; background: white; border-radius: 20px; padding: 8px; box-shadow: var(--shadow-md); border: 1px solid var(--color-border); gap: 6px;">
                 {% if orders.has_previous %}
                 <a href="?page={{ orders.previous_page_number }}&search={{ search|default:'' }}" class="pagination-link"><i class="fas fa-chevron-left"></i></a>
                 {% endif %}
 
                 {% for i in orders.paginator.page_range %}
-                {% if orders.number == i %}
-                <span class="pagination-link active">{{ i }}</span>
-                {% else %}
-                <a href="?page={{ i }}&search={{ search|default:'' }}" class="pagination-link">{{ i }}</a>
-                {% endif %}
+                    {% if orders.number == i %}
+                        <span class="pagination-link active">{{ i }}</span>
+                    {% elif i > orders.number|add:'-3' and i < orders.number|add:'3' %}
+                        <a href="?page={{ i }}&search={{ search|default:'' }}" class="pagination-link">{{ i }}</a>
+                    {% endif %}
                 {% endfor %}
 
                 {% if orders.has_next %}
@@ -211,62 +272,62 @@
 </section>
 
 <style>
-    .ym-badge-pill {
-        background: var(--bg);
-        color: var(--color);
-        padding: 4px 12px;
-        border-radius: 50px;
-        font-size: 0.75rem;
+    .status-pill {
+        border-radius: 8px;
         font-weight: 700;
-        text-decoration: none;
-        transition: transform 0.2s;
+        text-transform: uppercase;
+        font-size: 0.65rem;
+        padding: 4px 8px;
+        transition: all 0.2s;
     }
-    .ym-badge-pill:hover {
-        transform: translateY(-2px);
-        filter: brightness(0.95);
-    }
+    .status-pill--warning { background: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
+    .status-pill--success { background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
+    .status-pill--danger { background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
+    .status-pill:hover { filter: brightness(0.95); transform: translateY(-1px); }
+
     .ym-btn-action {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        background: #f8fafc;
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: white;
         display: flex;
         align-items: center;
         justify-content: center;
         color: var(--color-muted);
         transition: all 0.2s;
         border: 1px solid #e2e8f0;
+        text-decoration: none;
     }
     .ym-btn-action:hover {
         background: white;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.08);
         transform: translateY(-2px);
+        color: var(--color-primary);
     }
     .pagination-link {
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 50%;
+        border-radius: 14px;
         color: var(--color-text);
-        font-weight: 600;
-        font-size: 0.9rem;
+        font-weight: 700;
+        font-size: 0.95rem;
         transition: all 0.2s;
+        text-decoration: none;
     }
     .pagination-link:hover:not(.active) {
         background: #f8fafc;
+        color: var(--color-primary);
     }
     .pagination-link.active {
         background: var(--color-primary);
         color: white;
-        box-shadow: 0 5px 15px rgba(26, 26, 46, 0.3);
+        box-shadow: 0 8px 20px rgba(26, 26, 46, 0.25);
     }
-    .ym-details summary::-webkit-details-marker {
-        display: none;
-    }
-    .status-change-btn:hover {
-        color: var(--color-pink) !important;
+    .dropdown-item:active {
+        background-color: var(--color-primary);
     }
 </style>
 {% endblock %}

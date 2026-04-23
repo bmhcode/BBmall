@@ -88,9 +88,9 @@ class HomeView(TemplateView):
         context['blogs'] = ArticleBlog.objects.all().order_by('-date_publication')[:3]
         return context
 
-class MallTableListView(ListView):
+class MallsManageView(ListView):
     model = Mall
-    template_name = 'mall/mall_table_list.html'
+    template_name = 'mall/malls_manage.html'
     context_object_name = 'malls'
 
 class MallListView(ListView):
@@ -829,8 +829,38 @@ def order_list(request, userid=None):  # orders list (All / User)
     return render(request, 'mall/order_list.html', {
         'search': search,
         'orders': order_pages,
-        'status': Order.STATUS_CHOICES,  
+        'status_choices': Order.STATUS_CHOICES,  
+        'order_item_status_choices': OrderItem.STATUS_CHOICES,
     })
+
+@login_required # order_list_by_mall
+def order_list_by_mall(request, slug):
+    mall = get_object_or_404(Mall, slug=slug)
+    # Get orders that have items from this mall
+    orders = Order.objects.filter(items__product__shop__mall=mall).distinct().select_related('user') \
+                  .prefetch_related('items__product__shop__mall', 'history').order_by('-created_at')
+
+    search = request.GET.get('search', '')
+    if search:
+        orders = orders.filter(
+            Q(id__icontains=search) |
+            Q(status__icontains=search) |
+            Q(user__username__icontains=search)
+        )
+     
+    # pagination
+    paginator = Paginator(orders, 10)
+    page_number = request.GET.get('page')
+    order_pages = paginator.get_page(page_number)
+
+    return render(request, 'mall/order_list.html', {
+        'mall': mall,
+        'search': search,
+        'orders': order_pages,
+        'status_choices': Order.STATUS_CHOICES,
+        'order_item_status_choices': OrderItem.STATUS_CHOICES,
+    })
+
 
 @login_required # orders items list (all / shop)
 def orders_items_list(request, shop_slug = None): 
@@ -976,15 +1006,20 @@ def order_item_status(request, pk, status):
         # تحديث حالة الطلب
         item.order.update_status_from_items()
 
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
+
     if request.user.is_superuser:
         return redirect('orders_items_list_all')   # مهم لإعادة تحميل الصفحة
     return redirect('orders_items_list_shop', item.product.shop.slug) # مهم لإعادة تحميل الصفحة    
+
 
 @login_required # order status
 def order_status(request, pk, status):
     order = get_object_or_404(Order, pk=pk)
 
-    valid_statuses = [s[0] for s in Order.STATUS]
+    valid_statuses = [s[0] for s in Order.STATUS_CHOICES]
 
     if status in valid_statuses:
         old = order.status
@@ -1000,6 +1035,11 @@ def order_status(request, pk, status):
         
         order.propagate_status_to_items(user=request.user if request.user.is_authenticated else None)
 
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
+
     return redirect('order_list_all')
+
 
 # ================ End Order History views ==========================

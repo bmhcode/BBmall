@@ -185,6 +185,10 @@ class Mall(models.Model):
         ('setif', 'Sétif'),
         ('autre', 'Autre'),
     ]
+
+    # ── Relation ──
+    manager = models.ForeignKey(User,on_delete=models.CASCADE, null=True, blank=True, related_name='malls')
+
     # ── Identité ──
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
@@ -416,6 +420,7 @@ class Shop(models.Model):
     ]
 
     # ── Relation ──
+    owner = models.ForeignKey(User,on_delete=models.CASCADE, null=True, blank=True, related_name='shops')
     mall = models.ForeignKey(Mall, on_delete=models.SET_NULL, null=True, blank=True, related_name='shops')
 
     # ── Identité ──
@@ -886,21 +891,21 @@ class ShopReview(models.Model): # Shop Review Model
 
 class Profile(models.Model):
     USER_ROLES = (
-        ('user', 'User'),
+        ('Customer', 'Customer'),
         ('manager', 'Mall Manager'),
         ('owner', 'Store Owner'),
     )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     full_name = models.CharField(max_length=255, blank=True, null=True)
-    role = models.CharField(max_length=20, choices=USER_ROLES, default='user')
+    role = models.CharField(max_length=20, choices=USER_ROLES, default='Customer')
     image = models.ImageField(upload_to='profiles/', default='profiles/default.png')
     phone = models.CharField(max_length=20, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.user.username
+        return self.user.username + ' : ' + self.role
 
     @property
     def imageURL(self):

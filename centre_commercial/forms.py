@@ -17,7 +17,6 @@ class LoginForm(AuthenticationForm):
         'placeholder': 'Enter password'
     }))
 
-
 class UserUpdateForm(forms.ModelForm):
     email = forms.EmailField()
 
@@ -28,16 +27,17 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['phone','image'] #,'first_name','last_name','is_vender']
+        fields = ['image','role', 'phone']
         widgets = {
-            'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'image': forms.ClearableFileInput(
                     attrs={
                         'class': 'd-none',
                         'accept': 'image/*',
                         'id': 'imageUpload'
                     }
-                    )
+                    ),
+            'role' : forms.Select(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 class CustomUserCreationForm(UserCreationForm):
@@ -59,6 +59,7 @@ class MallForm(forms.ModelForm):
     class Meta:
         model = Mall
         fields = [
+            'manager',
             'name', 'city', 'region', 'address',
             'image', 'bg_color',
             'description', 'description_short',
@@ -69,6 +70,7 @@ class MallForm(forms.ModelForm):
             'opening_date', 'badge',
         ]
         widgets = {
+            'manager': forms.Select(attrs={'class': 'form-control'}),
             'name':               forms.TextInput(attrs={'placeholder': 'Ex : YESMALL'}),
             'city':             forms.Select(),
             'region':            forms.TextInput(attrs={'placeholder': 'Ex : Nouvelle Ville Ali Mendjeli'}),
@@ -95,12 +97,14 @@ class ShopForm(forms.ModelForm):
     class Meta:
         model = Shop
         fields = [
+            'owner',
             'name','category', 'description', 
             'logo', 'cover', 'phone', 'location', 
             'email', 'website', 'is_featured', 'is_closed',
             'observation'
         ]
         widgets = {
+            'owner': forms.Select(attrs={'class': 'form-control'}),
             'name':        forms.TextInput(attrs={'placeholder': 'Ex: Global Tech Store', 'class': 'form-input'}),
             'category':    forms.Select(),
             'description': forms.Textarea(attrs={'placeholder': 'Describe the shop...', 'rows': 4}),

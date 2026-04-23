@@ -144,6 +144,23 @@
       <aside class="ym-detail-sidebar">
         <div class="ym-detail-card">
           <h2 class="ym-detail-section-title">Informations Pratiques</h2>
+          <div class="ym-info-row">
+            <div class="ym-info-icon">
+              {% if shop.owner.profile.image %}
+              <img src="{{ shop.owner.profile.imageURL }}" alt="{{ shop.owner.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+              {% else %}
+              <i class="fas fa-user"></i>
+              {% endif %}
+            </div>
+            <div>
+              <small class="ym-info-label">Owner</small>
+              <span class="ym-info-value">{{ shop.owner.username }}</span><br>
+              <small>{{shop.owner.first_name}} {{shop.owner.last_name}} - {{shop.owner.profile.phone}}</small> 
+            </div>
+          </div>
+
+
+
 
           <div class="ym-info-row">
             <div class="ym-info-icon"><i class="fas fa-map-marker-alt"></i></div>
@@ -185,6 +202,14 @@
           <a href="{% url 'contact_message_create_by_mall' mall.slug %}" class="ym-btn ym-btn--primary" style="width:100%; justify-content:center; margin-top:24px;">
             Contacter la boutique <i class="fas fa-arrow-right ym-btn__icon"></i>
           </a>
+
+          <a href="{% url 'orders_items_list_shop' shop.slug %}" class="ym-btn ym-btn--dark" 
+                    style="width:100%; justify-content:center; margin-top:24px;">
+            My Orders <i class="fas fa-arrow-right ym-btn__icon"></i>
+          </a>
+
+
+
         </div>
 
         <!-- Share -->

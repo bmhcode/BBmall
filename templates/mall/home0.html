@@ -15,16 +15,21 @@
   <link rel="stylesheet" href="{% static 'css/portal.css' %}">
 </head>
 <body class="portal-body">
+
+<!-- ═══════════ PORTAL NAVBAR ═══════════ -->
+<header class="portal-nav">
+  <a href="{% url 'home' %}" class="portal-nav__brand">
+    <span class="portal-nav__brand-icon"><i class="fas fa-gem"></i></span>
+    BB <span>Shopping</span>
+  </a>
+  <nav class="portal-nav__links">
   
-  <!-- ═══════════ PORTAL NAVBAR ═══════════ -->
-  <header class="portal-nav">
-    <a href="{% url 'home' %}" class="portal-nav__brand">
-      <span class="portal-nav__brand-icon"><i class="fas fa-gem"></i></span>
-      BB <span>Shopping</span>
-    </a>
-    <nav class="portal-nav__links">
-      
-    <a href="{% url 'mall_list' %}" class="ym-view-all">Malls <i class="fas fa-arrow-right"></i></a>
+  <a href="{% url 'mall_list' %}" class="ym-view-all">Malls <i class="fas fa-arrow-right"></i></a>
+      <a href="{% url 'orders_items_list_all' %}"><i class="fas fa-list"></i> Orders items all</a>
+
+    {% if user.is_superuser %}
+      <a href="{% url 'malls_manage' %}"><i class="fas fa-cog"></i> Gérer les Malls</a>
+    {% endif %}
     
     <a href="{% url 'promotions_all' %}"><i class="fas fa-tags"></i> Promotions</a>
     <a href="{% url 'shops_all' %}"><i class="fas fa-shop"></i> Shops</a>
@@ -32,13 +37,16 @@
     <a href="{% url 'events_all' %}"><i class="fas fa-calendar-alt"></i> Événements</a> 
     <a href="{% url 'blogs_all' %}"><i class="fas fa-blog"></i> Blogs</a>
     <a href="{% url 'contact_message_create' %}"><i class="fas fa-envelope me-2"></i>Contact</a>
-    
+    {% if user.is_superuser %}
+      <a href="{% url 'contacts_messages_all' %}"><i class="fas fa-envelope me-2"></i>Messages</a>
+    {% endif %}
+
     {% if user.is_authenticated %}
       <a class="nav-icon position-relative me-3" href="{% url 'cart' %}">
-      <i class="fa fa-shopping-cart text-dark"></i>
-      <span id="cart-count-badge" class="badge bg-light text-dark position-absolute top-0 start-100 translate-middle">
-        {{ cart_count|default:"0" }}
-      </span>
+        <i class="fa fa-shopping-cart text-dark"></i>
+        <span id="cart-count-badge" class="badge bg-light text-dark position-absolute top-0 start-100 translate-middle">
+          {{ cart_count|default:"0" }}
+        </span>
       </a>
       {% if nbr_wishlist > 0 %}
       <a class="nav-icon position-relative me-3" href="{% url 'wishlist' %}">
@@ -55,16 +63,16 @@
         </span>
       </a>
       {% endif %}
-      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-        {{user.username}}
-      </a>
-      <form id="logout-form" action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <button class="dropdown-item">
-          <i class="fa fa-sign-out-alt me-2"></i>Logout
-        </button>
-      </form>
-      
+        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
+          {{user.username}}
+        </a>
+        <form id="logout-form" action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button class="dropdown-item">
+            <i class="fa fa-sign-out-alt me-2"></i>Logout
+          </button>
+        </form>
+        
     {% else %}
       <a class="nav-link me-3" href="{% url 'login' %}">
         <i class="fa fa-user"></i> Login
@@ -73,17 +81,6 @@
         <i class="fa fa-user-plus"></i> Sign Up
       </a>
     {% endif %}
-      
-      
-      {% if user.is_superuser %}
-    
-      <a href="{% url 'contacts_messages_all' %}"><i class="fas fa-envelope me-2"></i>Messages</a>
-      
-      <a href="{% url 'malls_manage' %}"><i class="fas fa-cog"></i> Gérer les Malls</a>
-      {% endif %}
-      <a href="{% url 'orders_items_list_all' %}"><i class="fas fa-list"></i> Orders items all</a>
-
-
 
             
 </nav>

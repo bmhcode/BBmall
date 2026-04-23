@@ -19,7 +19,7 @@ urlpatterns = [
     #--------------------- / Auth -------------------------
   
     # Mall Management BBMalls
-    path('malls/', views.MallTableListView.as_view(), name='mall_table_list'),
+    path('malls/', views.MallsManageView.as_view(), name='malls_manage'),
     path('malls/list/', views.MallListView.as_view(), name='mall_list'),
     path('malls/add/', views.MallCreateView.as_view(), name='mall_create'),
     path('malls/<slug:slug>/edit/', views.MallUpdateView.as_view(), name='mall_update'),
@@ -99,6 +99,7 @@ urlpatterns = [
 
     path('orders/', views.order_list, name='order_list_all'),
     path('orders/<int:userid>', views.order_list, name='order_list_user'),
+    path('mall/<slug:slug>/delivery-office/', views.order_list_by_mall, name='order_list_by_mall'),
 
     path('orders/items/', views.orders_items_list, name='orders_items_list_all'),
     path('orders/items/<slug:shop_slug>/', views.orders_items_list, name='orders_items_list_shop'),
