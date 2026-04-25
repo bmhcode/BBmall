@@ -1,15 +1,14 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Malls — BB MALLs</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+{% load humanize %}
+
+{% block title %}Manage Shops — Admin Hub{% endblock %}
+
+{% block content %}
+
+malls_manage.html
+
+
     <style>
         .dashboard-section { padding: 120px 0; background: #f7f5f2; min-height: 100vh; }
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
@@ -32,8 +31,7 @@
         .btn-view { background: #e0f2fe; color: #0284c7; }
         .btn-view:hover { background: #bae6fd; color: #0369a1; }
     </style>
-</head>
-<body>
+
 
 <header class="portal-nav" style="background: #1a1a2e; height: 80px; display: flex; align-items: center; padding: 0 48px; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;">
     <a href="{% url 'malls_manage' %}" class="portal-nav__brand" style="color: #fff; text-decoration: none; font-size: 1.5rem; font-weight: 800; font-family: 'Playfair Display', serif;">
@@ -94,6 +92,9 @@
                             {% endif %}
                         </td>
                         <td class="actions-cell">
+                            <a href="{% url 'mall_dashboard' mall.slug %}" class="btn-action btn-dashboard" title="Dashboard de Gestion" style="background: #fdf2f8; color: #db2777;">
+                                <i class="fas fa-chart-line"></i>
+                            </a>
                             <a href="{% url 'mall' mall.slug %}" class="btn-action btn-view" title="Voir sur le portail">
                                 <i class="fas fa-eye"></i>
                             </a>
@@ -118,6 +119,4 @@
         </div>
     </div>
 </section>
-
-</body>
-</html>
+{% endblock %}

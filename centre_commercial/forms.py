@@ -1,9 +1,8 @@
 from django import forms
 from .models import Profile, Mall, Shop, ContactMessage, Product, Order, OrderItem, ShopReview, ShopSocial, ShopValidation, WorkingHours, ShopHoliday
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
 from django.forms.models import inlineformset_factory
-from django.contrib.auth.forms import AuthenticationForm,UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 
 class LoginForm(AuthenticationForm):
@@ -40,18 +39,36 @@ class ProfileUpdateForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
-class CustomUserCreationForm(UserCreationForm):
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
+
+class NewUserCreationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name')
+        fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for field in self.fields.values():
-            field.widget.attrs.update({'class': 'form-control'})
+        for name, field in self.fields.items():
 
+            # Add Bootstrap / UI class
+            field.widget.attrs.update({
+                'class': 'form-control',
+                'placeholder': field.label
+            })
 
+        # Optional: better password UX
+        self.fields['password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Mot de passe'
+        })
+
+        self.fields['password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Confirmer le mot de passe'
+        })
 
 class MallForm(forms.ModelForm):
     """Formulaire CRUD pour le modèle Mall."""
@@ -61,7 +78,7 @@ class MallForm(forms.ModelForm):
         fields = [
             'manager',
             'name', 'city', 'region', 'address',
-            'image', 'bg_color',
+            'image', 
             'description', 'description_short',
             'number_of_shops', 'number_of_parking_spaces',
             'opening_time','closing_time',
@@ -75,7 +92,6 @@ class MallForm(forms.ModelForm):
             'city':             forms.Select(),
             'region':            forms.TextInput(attrs={'placeholder': 'Ex : Nouvelle Ville Ali Mendjeli'}),
             'address':           forms.TextInput(attrs={'placeholder': 'Ex : Route nationale 3, …'}),
-            'bg_color':        forms.TextInput(attrs={'placeholder': 'linear-gradient(135deg,#1a1a2e,#e91e8c)'}),
             'description':       forms.Textarea(attrs={'rows': 4, 'placeholder': 'Description du centre…'}),
             'description_short':forms.TextInput(attrs={'placeholder': 'Résumé en 180 caractères max'}),
 
@@ -87,8 +103,7 @@ class MallForm(forms.ModelForm):
 
             'phone':         forms.TextInput(attrs={'placeholder': '+213 XX XX XX XX'}),
             'email':             forms.EmailInput(attrs={'placeholder': 'contact@yesmall.dz'}),
-            'website':          forms.URLInput(attrs={'placeholder': 'https://…'}),
-            
+                      
             'opening_date':  forms.DateInput(attrs={'type': 'date'}),
             'badge':             forms.TextInput(attrs={'placeholder': 'Ex : Nouveau, Phare, Bientôt'}),
         }
@@ -98,15 +113,17 @@ class ShopForm(forms.ModelForm):
         model = Shop
         fields = [
             'owner',
+            'mall',
             'name','category', 'description', 
             'logo', 'cover', 'phone', 'location', 
             'email', 'website', 'is_featured', 'is_closed',
             'observation'
         ]
         widgets = {
-            'owner': forms.Select(attrs={'class': 'form-control'}),
-            'name':        forms.TextInput(attrs={'placeholder': 'Ex: Global Tech Store', 'class': 'form-input'}),
-            'category':    forms.Select(),
+            'owner': forms.Select(attrs={'class': 'form-control', 'required': True}),
+            'mall': forms.Select(attrs={'class': 'form-control'}),
+            'name':        forms.TextInput(attrs={ 'class': 'form-input', 'required': True, 'placeholder': 'Ex: Global Tech Store',}),
+            'category':    forms.Select(attrs={'class': 'form-control', 'required': True}),
             'description': forms.Textarea(attrs={'placeholder': 'Describe the shop...', 'rows': 4}),
             'phone':       forms.TextInput(attrs={'placeholder': '+213 XX XX XX XX'}),
             'email':       forms.EmailInput(attrs={'placeholder': 'shop@mall.dz'}),
@@ -122,10 +139,11 @@ class ShopForm(forms.ModelForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['category', 'name', 'price', 'old_price', 'image']
+        fields = ['category', 'name','description', 'price', 'old_price', 'image']
         widgets = {
             'category':  forms.Select(attrs={'class': 'form-select'}),
             'name':      forms.TextInput(attrs={'placeholder': 'Ex: Smartphone X Pro', 'class': 'form-input'}),
+            'description': forms.Textarea(attrs={'placeholder': 'Describe the product...','rows': 4,'class': 'form-control',}),
             'price':     forms.NumberInput(attrs={'placeholder': '0.00', 'class': 'form-input'}),
             'old_price': forms.NumberInput(attrs={'placeholder': '0.00 (Optional)', 'class': 'form-input'}),
             'image':     forms.ClearableFileInput(attrs={'class': 'form-file'}),

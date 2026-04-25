@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Manage Shops — Admin Hub{% endblock %}
+
+{% block content %}
+
+shops_manage.html
+
+<section class="ym-page-hero" style="background: var(--color-primary); color: white; padding: 100px 0 60px;">
+    <div class="ym-container">
+        <p class="ym-eyebrow" style="color: var(--color-accent);"><i class="fas fa-store me-2"></i> Administration</p>
+        <h1 class="ym-section-title" style="color: white; margin-bottom: 8px;">Shop Directory</h1>
+        <p class="ym-section-subtitle" style="color: rgba(255,255,255,0.7); max-width: 600px;">
+            Manage all boutiques across the platform.
+        </p>
+    </div>
+</section>
+
+<section class="ym-section ym-section--gray" style="padding: 48px 0;">
+    <div class="ym-container">
+        <!-- Search & Actions -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; gap: 24px;">
+            <div style="flex: 1; max-width: 400px;">
+                <form method="GET" style="position: relative;">
+                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" 
+                           placeholder="Search shops, malls or owners..." 
+                           style="width: 100%; padding: 12px 20px 12px 48px; border-radius: 12px; border: 1px solid var(--color-border); outline: none;">
+                    <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--color-muted);"></i>
+                </form>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <a href="{% url 'admin_dashboard' %}" class="ym-btn ym-btn--primary ym-btn--sm">Back to Hub</a>
+            </div>
+        </div>
+
+        <div style="background: white; border-radius: 20px; box-shadow: var(--shadow-md); border: 1px solid var(--color-border); overflow: hidden;">
+            <div class="table-responsive">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 1px solid var(--color-border);">
+                            <th style="padding: 20px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted);">Boutique</th>
+                            <th style="padding: 20px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted);">Mall / Location</th>
+                            <th style="padding: 20px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted);">Owner</th>
+                            <th style="padding: 20px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted);">Status</th>
+                            <th style="padding: 20px; text-align: right; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-muted);">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for shop in shops %}
+                        <tr style="border-bottom: 1px solid #f8fafc;">
+                            <td style="padding: 20px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #f1f5f9; overflow: hidden; border: 1px solid #e2e8f0;">
+                                        {% if shop.logo %}
+                                            <img src="{{ shop.logoURL }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        {% else %}
+                                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #cbd5e1;">
+                                                <i class="fas fa-store"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 700; color: var(--color-primary);">{{ shop.name }}</div>
+                                        <div style="font-size: 0.75rem; color: var(--color-muted);">{{ shop.get_category_display }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="padding: 20px;">
+                                <div style="font-weight: 600; color: var(--color-text); font-size: 0.9rem;">{{ shop.mall.name }}</div>
+                                <div style="font-size: 0.75rem; color: var(--color-muted);">{{ shop.location }}</div>
+                            </td>
+                            <td style="padding: 20px;">
+                                <div style="font-size: 0.9rem; font-weight: 500;">{{ shop.owner.username }}</div>
+                            </td>
+                            <td style="padding: 20px;">
+                                {% if shop.is_closed %}
+                                    <span style="padding: 4px 10px; border-radius: 50px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; background: #fee2e2; color: #ef4444;">Closed</span>
+                                {% else %}
+                                    <span style="padding: 4px 10px; border-radius: 50px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; background: #f0fdf4; color: #16a34a;">Open</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 20px; text-align: right;">
+                                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                    <a href="{% url 'shop_dashboard' shop.slug %}" class="btn-action-sm" title="Dashboard" style="color: #db2777; background: #fdf2f8;"><i class="fas fa-chart-line"></i></a>
+                                    
+                                    {% if shop.mall.slug %}
+                                    <a href="{% url 'shop_update' shop.mall.slug shop.slug %}" class="btn-action-sm" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <a href="{% url 'shop' shop.mall.slug shop.slug %}" class="btn-action-sm" title="View"><i class="fas fa-eye"></i></a>
+                                    {% endif %}
+
+
+                                      <a href="{% url 'shop_delete' shop.mall.slug shop.slug %}" class="btn-action btn-delete" title="Supprimer">
+                                <i class="fas fa-trash"></i>
+                            </a>
+
+                                </div>
+
+
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .btn-action-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-muted);
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .btn-action-sm:hover {
+        background: #e2e8f0;
+        color: var(--color-primary);
+    }
+</style>
+{% endblock %}

@@ -15,21 +15,35 @@ urlpatterns = [
   
     path('accounts/', include('django.contrib.auth.urls')),
     path('signup/', views.signup, name='signup'),
+    path('add-user/', views.add_user, name='add_user'),
+    
     path('update-profile/<str:username>/',views.update_profile, name="update_profile"),
     #--------------------- / Auth -------------------------
   
-    # Mall Management BBMalls
-    path('malls/', views.MallsManageView.as_view(), name='malls_manage'),
-    path('malls/list/', views.MallListView.as_view(), name='mall_list'),
-    path('malls/add/', views.MallCreateView.as_view(), name='mall_create'),
-    path('malls/<slug:slug>/edit/', views.MallUpdateView.as_view(), name='mall_update'),
-    path('malls/<slug:slug>/delete/', views.MallDeleteView.as_view(), name='mall_delete'),
+    # Dashboards
+    path('admin-dashboard/', views.AdminDashboardView.as_view(), name='admin_dashboard'),
+    path('mall/<slug:slug>/dashboard/', views.MallDashboardView.as_view(), name='mall_dashboard'),
+    path('shop/<slug:slug>/dashboard/', views.ShopDashboardView.as_view(), name='shop_dashboard'),
     
+    # Management
+    path('users/manage/', views.UsersManageView.as_view(), name='users_manage'),
+    path('malls/', views.MallsManageView.as_view(), name='malls_manage'),
+    path('shops/manage/', views.ShopsManageView.as_view(), name='shops_manage'),
+
+
+    # Malls 
     path('mall/<slug:slug>/', views.MallView.as_view(), name='mall'),
+    path('malls/list/', views.MallListView.as_view(), name='mall_list'),
+    path('mall/add/', views.MallCreateView.as_view(), name='mall_create'),
+    path('mall/<slug:slug>/edit/', views.MallUpdateView.as_view(), name='mall_update'),
+    path('mall/<slug:slug>/delete/', views.MallDeleteView.as_view(), name='mall_delete'),
+    
 
     # Shops
     path('mall/<slug:slug>/shop/add/', views.ShopCreateView.as_view(), name='shop_create'),
-    path('mall/<slug:mall_slug>/shop/<slug:slug>/', views.ShopDetailView.as_view(), name='shop_detail'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/edit/', views.ShopUpdateView.as_view(), name='shop_update'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/delete/', views.ShopDeleteView.as_view(), name='shop_delete'),
+    path('mall/<slug:mall_slug>/shop/<slug:slug>/', views.ShopDetailView.as_view(), name='shop'),
     path('shops/', views.ShopListView.as_view(), name='shops_all'),
     path('mall/<slug:slug>/shops/', views.ShopListView.as_view(), name='shops_by_mall'),
     

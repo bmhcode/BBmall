@@ -40,7 +40,7 @@
                 <p style="color: #6b7280;">{{ contacts|length }} message{{ contacts|pluralize:"s" }} trouvé{{ contacts|pluralize:"s" }}</p>
             </div>
             {% if mall and mall.slug %}
-            <a href="{% url 'contact_message_create' mall.slug %}" class="ym-btn ym-btn--primary">
+            <a href="{% url 'contact_message_create_by_mall' mall.slug %}" class="ym-btn ym-btn--primary">
                 <i class="fas fa-plus"></i> Nouveau message
             </a>
             {% else %}
@@ -88,7 +88,7 @@
                         <td colspan="5" style="text-align: center; padding: 80px 40px;">
                             <div style="font-size: 3rem; color: #e5e7eb; margin-bottom: 20px;"><i class="fas fa-envelope-open"></i></div>
                             <p style="color: #6b7280; font-size: 1.2rem;">Aucun message reçu pour le moment.</p>
-                            <a href="{% url 'contact_message_create' mall.slug %}" class="ym-btn ym-btn--primary" style="margin-top: 20px; display: inline-block;">
+                            <a href="{% url 'contact_message_create_by_mall' mall.slug %}" class="ym-btn ym-btn--primary" style="margin-top: 20px; display: inline-block;">
                                 Simuler un premier message
                             </a>
                         </td>

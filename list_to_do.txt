@@ -1,0 +1,38 @@
+
+Category page :
+
+ - Add category
+ - Edit category
+ - Delete category
+ - Search category
+ - Filter category
+ - Sort category
+ - Pagination
+ 
+
+users_manage.html :
+
+ - Delete user
+ - Suspend user
+ - Search user
+ - Filter user
+ - Sort user
+ - Pagination
+ 
+ malls_manage.html :
+
+ - Suspend mall
+ - Search mall
+ - Filter mall
+ - Sort mall
+ - Pagination
+ 
+ shops_manage.html :
+
+ - Suspend shop
+ - Search shop
+ - Filter shop
+ - Sort shop
+ - Pagination
+ 
+ 

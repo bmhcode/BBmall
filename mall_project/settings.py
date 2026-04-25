@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     'django_ckeditor_5',
     'django.contrib.humanize',
+
 ]
 
 MIDDLEWARE = [
@@ -69,7 +70,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                
                 'centre_commercial.context_processors.cart_processor',
+                'centre_commercial.context_processors.wishlist_processor',
             ],
         },
     },

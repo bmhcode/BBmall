@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{mall.name}} — Shopping, Cuisine & Divertissement à {{mall.city}}{% endblock %}
+{% block title %}{{mall.name}} — {{mall.city}}{% endblock %}
 
 {% block main_attrs %}style="margin-top:0"{% endblock %}
 
@@ -38,10 +38,18 @@
         <i class="fas fa-calendar-alt"></i>
         Voir les événements
       </a>
+
+       {% if user.is_superuser or mall.manager == user %}
       <a href="{% url 'order_list_by_mall' mall.slug %}" class="ym-btn ym-btn--ghost" id="hero-events-btn">
          <i class="fas fa-shipping-fast me-2"></i> 
         Delivery Office
       </a>
+      <a href="{% url 'mall_dashboard' mall.slug %}" class="ym-btn ym-btn--primary" id="hero-manage-btn">
+         <i class="fas fa-cog me-2"></i> 
+        {{mall.name}} Management
+      </a>
+      {% endif %}
+
 
     </div>
   </div>
@@ -206,7 +214,7 @@
     <div class="ym-stores-grid ym-reveal">
       {% for shop in shops_featured %}
       <article class="ym-store-card" data-category="{{ shop.category }}">
-        <a href="{% url 'shop_detail' mall_slug=mall.slug slug=shop.slug %}" aria-label="Voir {{ shop.name }}">
+        <a href="{% url 'shop' mall_slug=mall.slug slug=shop.slug %}" aria-label="Voir {{ shop.name }}">
           <div class="ym-store-card__image-wrap">
             {% if shop.coverURL %}
             <img src="{{ shop.coverURL }}" alt="{{ shop.name }}" loading="lazy">
@@ -232,7 +240,7 @@
               <i class="fas fa-map-marker-alt fa-xs"></i>
               {{ shop.location }}
             </span>
-            <a href="{% url 'shop_detail' mall.slug shop.slug %}" class="ym-store-card__link">
+            <a href="{% url 'shop' mall.slug shop.slug %}" class="ym-store-card__link">
               Visiter <i class="fas fa-arrow-right fa-xs"></i>
             </a>
           </div>

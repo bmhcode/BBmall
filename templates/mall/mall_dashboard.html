@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Mall Manager Dashboard: {{ mall.name }} — BB Shopping{% endblock %}
+
+
+
+
+{% block content %}
+
+mall_dashboard.html
+<section class="ym-page-hero" style="background: var(--color-primary); color: white; padding: 120px 0 60px;">
+    <div class="ym-container">
+        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+            <div style="width: 64px; height: 64px; border-radius: 16px; background: white; padding: 8px;">
+                <img src="{{ mall.imageURL }}" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <div>
+                <p class="ym-eyebrow" style="color: var(--color-accent); margin-bottom: 4px;"><i class="fas fa-building me-2"></i> Mall Management</p>
+                <h1 class="ym-section-title" style="color: white; margin-bottom: 0;">{{ mall.name }}</h1>
+            </div>
+        </div>
+        <p class="ym-section-subtitle" style="color: rgba(255,255,255,0.7); max-width: 600px;">
+            Manage boutiques, inventory, and logistics for this center.
+        </p>
+    </div>
+</section>
+
+<section class="ym-section ym-section--gray" style="padding: 48px 0;">
+    <div class="ym-container">
+        <!-- Dashboard Toolbar -->
+        <div style="display: flex; gap: 12px; margin-bottom: 32px; overflow-x: auto; padding-bottom: 8px;">
+            <a href="{% url 'order_list_by_mall' mall.slug %}" class="ym-btn ym-btn--dark ym-btn--sm">
+                <i class="fas fa-shipping-fast me-2"></i> Delivery Office
+            </a>
+            <a href="{% url 'mall_update' mall.slug %}" class="ym-btn ym-btn--white ym-btn--sm" style="border: 1px solid var(--color-border);">
+                <i class="fas fa-edit me-2"></i> Edit Mall Details
+            </a>
+            <a href="{% url 'contacts_messages_by_mall' mall.slug %}" class="ym-btn ym-btn--white ym-btn--sm" style="border: 1px solid var(--color-border);">
+                <i class="fas fa-envelope me-2"></i> Mall Messages
+            </a>
+            <a href="{% url 'shop_create' mall.slug %}" class="ym-btn ym-btn--primary ym-btn--sm">
+                <i class="fas fa-plus me-2"></i> Add New Boutique
+            </a>
+        </div>
+
+        <!-- Stats Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 48px;">
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #eef2ff; color: #4f46e5;"><i class="fas fa-store"></i></div>
+                <div class="dash-stat-content">
+                    <h3>{{ shops_count }}</h3>
+                    <p>Total Boutiques</p>
+                </div>
+            </div>
+            
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #fff7ed; color: #c2410c;"><i class="fas fa-box"></i></div>
+                <div class="dash-stat-content">
+                    <h3>{{ products_count }}</h3>
+                    <p>Total Products</p>
+                </div>
+            </div>
+
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #fdf2f8; color: #db2777;"><i class="fas fa-shopping-bag"></i></div>
+                <div class="dash-stat-content">
+                    <h3>{{ orders_count }}</h3>
+                    <p>Orders Handled</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
+            <!-- Recent Boutiques -->
+            <div style="background: white; border-radius: 24px; padding: 32px; box-shadow: var(--shadow-md); border: 1px solid var(--color-border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary);">My Boutiques</h2>
+                    <a href="{% url 'shops_by_mall' mall.slug %}" style="font-size: 0.85rem; font-weight: 600; color: var(--color-pink);">View All</a>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    {% for shop in recent_shops %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid #f8fafc;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: #f1f5f9; overflow: hidden; border: 1px solid #e2e8f0;">
+                                <img src="{{ shop.logoURL }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <div>
+                                <div style="font-weight: 700; font-size: 0.95rem;">{{ shop.name }}</div>
+                                <div style="font-size: 0.75rem; color: var(--color-muted);">{{ shop.get_category_display }} · {{ shop.location }}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{% url 'shop_dashboard' shop.slug %}" class="btn-action-sm" title="Internal Management"><i class="fas fa-chart-line"></i></a>
+                            <a href="{% url 'shop' mall.slug shop.slug %}" class="btn-action-sm" title="Public Page"><i class="fas fa-eye"></i></a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Recent Mall Orders -->
+            <div style="background: white; border-radius: 24px; padding: 32px; box-shadow: var(--shadow-md); border: 1px solid var(--color-border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary);">Hub Logistics</h2>
+                    <a href="{% url 'order_list_by_mall' mall.slug %}" style="font-size: 0.85rem; font-weight: 600; color: var(--color-pink);">Delivery Hub</a>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    {% for order in recent_orders %}
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.9rem;">#{{ order.id }} - {{ order.user.username }}</div>
+                            <div style="font-size: 0.75rem; color: var(--color-muted);">{{ order.created_at|date:"d M, H:i" }}</div>
+                        </div>
+                        <span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; 
+                                    background: {% if order.status == 'delivered' %}#f0fdf4; color: #16a34a;{% else %}#fff7ed; color: #c2410c;{% endif %}">
+                            {{ order.status }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .dash-stat-card {
+        background: white;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--color-border);
+        transition: transform 0.3s;
+    }
+    .dash-stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin-bottom: 20px;
+    }
+    .dash-stat-content h3 { font-size: 1.75rem; font-weight: 800; color: var(--color-primary); margin-bottom: 4px; }
+    .dash-stat-content p { color: var(--color-muted); font-size: 0.9rem; font-weight: 600; }
+    
+    .btn-action-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-muted);
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .btn-action-sm:hover {
+        background: #e2e8f0;
+        color: var(--color-primary);
+    }
+</style>
+{% endblock %}

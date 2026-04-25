@@ -42,18 +42,16 @@ shop_list.html
         {% endfor %}
       </div>
       
-      {% if mall and mall.slug %}
-      <a href="{% url 'shop_create' mall.slug %}" class="ym-btn ym-btn--accent ym-btn--sm" style="white-space:nowrap;">
-        <i class="fas fa-plus"></i> Add Shop
-      </a>
-      {% endif %}
+  
     </div>      
 
     <!-- Stores Grid -->
     <div class="ym-stores-grid ym-reveal">
       {% for shop in shops %}
       <article class="ym-store-card" data-category="{{ shop.category }}">
-        <a href="{% url 'shop_detail' mall_slug=shop.mall.slug slug=shop.slug %}" aria-label="Voir {{ shop.name }}">
+        {% if mall %}
+          <a href="{% url 'shop' shop.mall.slug shop.slug %}" aria-label="Voir {{ shop.name }}">
+        {% endif %}
           <div class="ym-store-card__image-wrap">
             {% if shop.coverURL %}
             <img src="{{ shop.coverURL }}" alt="{{ shop.name }}" loading="lazy">
@@ -79,9 +77,11 @@ shop_list.html
               <i class="fas fa-map-marker-alt fa-xs"></i>
               {{ shop.location }}
             </span>
-            <a href="{% url 'shop_detail' mall_slug=shop.mall.slug slug=shop.slug %}" class="ym-store-card__link">
+            {% if shop.mall.slug %}
+            <a href="{% url 'shop' shop.mall.slug shop.slug %}" class="ym-store-card__link">
               Visiter <i class="fas fa-arrow-right fa-xs"></i>
             </a>
+            {% endif %}
           </div>  
           <h6 style="color: var(--text-muted); font-size:0.75rem; margin-top:8px;">{{shop.mall.name}} - {{shop.mall.city}} </h6>  
         </div>
@@ -91,9 +91,7 @@ shop_list.html
       <div class="ym-empty" style="grid-column:1/-1">
         <i class="fas fa-store-slash"></i>
         <p>Aucune boutique pour le moment.</p>
-        <a href="{% url 'shop_create' mall.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="margin-top:16px;display:inline-flex">
-          Add a shop
-        </a>
+        
       </div>
       {% endfor %}
       

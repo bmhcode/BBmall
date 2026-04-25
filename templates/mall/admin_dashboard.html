@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Admin Dashboard — BB Shopping{% endblock %}
+
+
+
+{% block content %}
+
+admin_dashboard.html
+
+<section class="ym-page-hero" style="background: var(--color-primary); color: white; padding: 120px 0 60px;">
+    <div class="ym-container">
+        <p class="ym-eyebrow" style="color: var(--color-accent);"><i class="fas fa-shield-alt me-2"></i> Superuser Portal</p>
+        <h1 class="ym-section-title" style="color: white; margin-bottom: 8px;">System Overview</h1>
+        <p class="ym-section-subtitle" style="color: rgba(255,255,255,0.7); max-width: 600px;">
+            Central management for users, malls, shops and transactions.
+        </p>
+    </div>
+</section>
+
+<section class="ym-section ym-section--gray" style="padding: 48px 0;">
+    <div class="ym-container">
+        <!-- Stats Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 48px;">
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #eef2ff; color: #4f46e5;"><i class="fas fa-users"></i></div>
+                <div class="dash-stat-content">
+                    <h3>{{ users_count }}</h3>
+                    <p>Total Users</p>
+                </div>
+                <a href="{% url 'users_manage' %}" class="dash-stat-link">Manage <i class="fas fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #fff7ed; color: #c2410c;"><i class="fas fa-building"></i></div>
+                <div class="dash-stat-content">
+                    <h3>{{ malls_count }}</h3>
+                    <p>Malls</p>
+                </div>
+                <a href="{% url 'malls_manage' %}" class="dash-stat-link">Manage <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #f0fdf4; color: #16a34a;"><i class="fas fa-store"></i></div>
+                <div class="dash-stat-content">
+                    <h3>{{ shops_count }}</h3>
+                    <p>Active Shops</p>
+                </div>
+                <a href="{% url 'shops_manage' %}" class="dash-stat-link">Manage <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #fdf2f8; color: #db2777;"><i class="fas fa-shopping-bag"></i></div>
+                <div class="dash-stat-content">
+                    <h3>{{ orders_count }}</h3>
+                    <p>Orders</p>
+                </div>
+                <a href="{% url 'order_list_all' %}" class="dash-stat-link">Manage <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
+            <!-- Recent Orders -->
+            <div style="background: white; border-radius: 24px; padding: 32px; box-shadow: var(--shadow-md); border: 1px solid var(--color-border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary);">Recent Orders</h2>
+                    <a href="{% url 'order_list_all' %}" style="font-size: 0.85rem; font-weight: 600; color: var(--color-pink);">View All</a>
+                </div>
+                
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <th style="padding: 12px 0; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--color-muted);">ID</th>
+                            <th style="padding: 12px 0; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--color-muted);">Customer</th>
+                            <th style="padding: 12px 0; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--color-muted);">Date</th>
+                            <th style="padding: 12px 0; text-align: right; font-size: 0.75rem; text-transform: uppercase; color: var(--color-muted);">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                        <tr style="border-bottom: 1px solid #f8fafc;">
+                            <td style="padding: 16px 0; font-weight: 700;">#{{ order.id }}</td>
+                            <td style="padding: 16px 0;">{{ order.user.username }}</td>
+                            <td style="padding: 16px 0; color: var(--color-muted); font-size: 0.85rem;">{{ order.created_at|date:"d M" }}</td>
+                            <td style="padding: 16px 0; text-align: right; font-weight: 700; color: var(--color-primary);">{{ order.total_price|intcomma }} DA</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Recent Users -->
+            <div style="background: white; border-radius: 24px; padding: 32px; box-shadow: var(--shadow-md); border: 1px solid var(--color-border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary);">New Users</h2>
+                    <a href="{% url 'users_manage' %}" style="font-size: 0.85rem; font-weight: 600; color: var(--color-pink);">Manage</a>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    {% for user in recent_users %}
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--color-primary);">
+                            {{ user.username|slice:":1"|upper }}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 0.95rem;">{{ user.username }}</div>
+                            <div style="font-size: 0.75rem; color: var(--color-muted);">Joined {{ user.date_joined|timesince }} ago</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .dash-stat-card {
+        background: white;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--color-border);
+        position: relative;
+        transition: transform 0.3s;
+    }
+    .dash-stat-card:hover { transform: translateY(-5px); }
+    .dash-stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin-bottom: 20px;
+    }
+    .dash-stat-content h3 { font-size: 1.75rem; font-weight: 800; color: var(--color-primary); margin-bottom: 4px; }
+    .dash-stat-content p { color: var(--color-muted); font-size: 0.9rem; font-weight: 600; margin-bottom: 16px; }
+    .dash-stat-link {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--color-pink);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+</style>
+{% endblock %}

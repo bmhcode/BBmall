@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Malls — BB MALLs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <style>
+        .dashboard-section { padding: 120px 0; background: #f7f5f2; min-height: 100vh; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .dashboard-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
+        .dashboard-table { width: 100%; border-collapse: collapse; }
+        .dashboard-table th { background: #1a1a2e; color: #fff; text-align: left; padding: 18px 24px; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+        .dashboard-table td { padding: 20px 24px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+        .mall-avatar { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; background: #eee; }
+        .mall-name { font-weight: 600; color: #1a1a2e; display: block; }
+        .mall-city { font-size: 0.8rem; color: #6b7280; }
+        .badge-status { padding: 4px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .badge-open { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+        .badge-closed { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .actions-cell { display: flex; gap: 10px; }
+        .btn-action { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; border: none; cursor: pointer; text-decoration: none; }
+        .btn-edit { background: #f3f4f6; color: #4b5563; }
+        .btn-edit:hover { background: #e5e7eb; color: #1f2937; }
+        .btn-delete { background: #fee2e2; color: #ef4444; }
+        .btn-delete:hover { background: #fecaca; color: #dc2626; }
+        .btn-view { background: #e0f2fe; color: #0284c7; }
+        .btn-view:hover { background: #bae6fd; color: #0369a1; }
+    </style>
+</head>
+<body>
+
+<header class="portal-nav" style="background: #1a1a2e; height: 80px; display: flex; align-items: center; padding: 0 48px; position: fixed; top: 0; left: 0; right: 0; z-index: 1000;">
+    <a href="{% url 'malls_manage' %}" class="portal-nav__brand" style="color: #fff; text-decoration: none; font-size: 1.5rem; font-weight: 800; font-family: 'Playfair Display', serif;">
+        BB <span>Shopping</span>
+    </a>
+    <div style="margin-left: auto;">
+        <a href="{% url 'home' %}" class="ym-btn ym-btn--sm ym-btn--ghost" style="color:#fff; border-color: rgba(255,255,255,0.2);">Voir le portail</a>
+    </div>
+</header>
+
+<section class="dashboard-section">
+    <div class="ym-container">
+        <div class="dashboard-header">
+            <div>
+                <h1 style="font-family: 'Playfair Display', serif; font-size: 2rem;">Gestion des Centres</h1>
+                <p style="color: #6b7280;">{{ malls|length }} mall{{ malls|pluralize:"s" }} enregistré{{ malls|pluralize:"s" }}</p>
+
+            </div>
+            <a href="{% url 'mall_create' %}" class="ym-btn ym-btn--primary">
+                <i class="fas fa-plus"></i> Ajouter un Mall
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Centre Commercial</th>
+                        <th>Région</th>
+                        <th>Boutiques</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mall in malls %}
+                    <tr>
+                        <td style="width: 100px;">
+                           {% if mall.image and mall.image.url %}
+                                <img src="{{ mall.image.url }}" class="mall-avatar" alt="{{ mall.nom }}">
+                            {% else %}
+                                <div class="mall-avatar" style="background: {{ mall.couleur_bg }};"></div>
+                            {% endif %} 
+                        </td>
+                        <td>
+                            <span class="mall-name">{{ mall.name }}</span>
+                            <span class="mall-city">{{ mall.city }}</span>
+                        </td>
+                        <!-- <td>{{ mall.get_region_display }}</td> -->
+                        <td>{{ mall.region }}</td>
+
+                        <td>{{ mall.number_of_shops }}</td>
+                        <td>
+                            {% if mall.is_open_now %}
+                                <span class="badge-status badge-open">Ouvert</span>
+                            {% else %}
+                                <span class="badge-status badge-closed">Fermé</span>
+                            {% endif %}
+                        </td>
+                        <td class="actions-cell">
+                            <a href="{% url 'mall_dashboard' mall.slug %}" class="btn-action btn-dashboard" title="Dashboard de Gestion" style="background: #fdf2f8; color: #db2777;">
+                                <i class="fas fa-chart-line"></i>
+                            </a>
+                            <a href="{% url 'mall' mall.slug %}" class="btn-action btn-view" title="Voir sur le portail">
+                                <i class="fas fa-eye"></i>
+                            </a>
+
+                            <a href="{% url 'mall_update' mall.slug %}" class="btn-action btn-edit" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'mall_delete' mall.slug %}" class="btn-action btn-delete" title="Supprimer">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 60px;">
+                            <p style="color: #6b7280; font-size: 1.1rem;">Aucun mall trouvé. Commencez par en ajouter un !</p>
+                            <a href="{% url 'mall_create' %}" class="ym-btn ym-btn--dark" style="margin-top: 20px;">Créer mon premier mall</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

@@ -195,6 +195,11 @@
                     {{ form.category }}
                 </div>
 
+                <div class="form-group full-width">
+                    <label for="{{ form.description.id_for_label }}">Description</label>
+                    {{ form.description }}
+                </div>
+
                 <div class="form-group">
                     <label for="{{ form.price.id_for_label }}">Current Price (DZD)</label>
                     {{ form.price }}
@@ -229,7 +234,7 @@
                 </button>
             </form>
             
-            <a href="{% if product %}{{ product.get_absolute_url }}{% else %}{% url 'shop_detail' shop.mall.slug shop.slug %}{% endif %}" class="btn-back">
+            <a href="{% if product %}{{ product.get_absolute_url }}{% else %}{% url 'shop' shop.mall.slug shop.slug %}{% endif %}" class="btn-back">
                 Cancel and return to store
             </a>
         </div>

@@ -79,6 +79,9 @@
       <li><a href="{% url 'events_all' %}"><i class="fas fa-calendar-alt me-2"></i>Événements</a></li>
       <li><a href="{% url 'blogs_all' %}"><i class="fas fa-newspaper me-2"></i>Blog</a></li>
       <li><a href="{% url 'contacts_messages_all' %}"><i class="fas fa-envelope me-2"></i>Contacts list</a></li> 
+      {% if user.is_superuser %}
+      <li><a href="{% url 'admin_dashboard' %}" style="color: var(--color-pink);"><i class="fas fa-shield-alt me-2"></i>Admin Dashboard</a></li>
+      {% endif %}
     {% endif %}
     </ul>
   </nav>
@@ -153,7 +156,25 @@
       <i class="fas fa-search"></i>
     </button>
     {% if user.is_authenticated %}
-      <a href="{% url 'wishlist' %}"><i class="fas fa-heart"></i></a>
+      <a href="{% url 'wishlist' %}" style="position: relative;">
+        <i class="fas fa-heart"></i>
+
+      {% if nbr_wishlist > 0 %}
+        <span class="badge"
+              style="
+                position: absolute;
+                top: -5px;
+                right: -10px;
+                background: red;
+                color: white;
+                font-size: 10px;
+                padding: 3px 6px;
+                border-radius: 50%;
+              ">
+          {{ nbr_wishlist }}  
+        </span>
+      {% endif %}
+      </a>
 
       <a href="{% url 'cart' %}" class="cart-link">
         <i class="fas fa-shopping-cart"></i>
@@ -163,22 +184,38 @@
       <a href="{% url 'update_profile' user.username %}" class="ym-split-btn-main">
         <i class="fas fa-user-circle"></i> {{ user.username }}
       </a>
-      
+
+      <!-- {# Roles Dashboards #}
+      {% if user.malls.all %}
+        {% for m in user.malls.all %}
+        <a href="{% url 'mall_dashboard' m.slug %}" style="color: var(--color-accent);"><i class="fas fa-building me-1"></i> {{ m.name }} Dash</a>
+        {% endfor %}
+      {% endif %}
+
+      {% if user.shops.all %}
+        {% for s in user.shops.all %}
+        <a href="{% url 'shop_dashboard' s.slug %}" style="color: var(--color-pink);"><i class="fas fa-store me-1"></i> {{ s.name }} Dash</a>
+        {% endfor %}
+      {% endif %} -->
+
       <form action="{% url 'logout' %}" method="post">
+
         {% csrf_token %}
         <button type="submit" class="ym-split-btn-main">Logout</button>
       </form>
     
       <!-- USER (ONLY IF LOGGED) -->
-    
+<!--     
       <li><a href="{% url 'order_list_all' %}"><i class="fas fa-list"></i> Orders</a></li>
-      <li><a href="{% url 'orders_items_list_all' %}"><i class="fas fa-list"></i> Orders items all</a></li>
+      <li><a href="{% url 'orders_items_list_all' %}"><i class="fas fa-list"></i> Orders items all</a></li> -->
 
-      <li><a href="{% url 'order_history' %}"><i class="fas fa-history"></i> History</a></li>
+      <!-- <li><a href="{% url 'order_history' %}"><i class="fas fa-history"></i> History</a></li> -->
 
       {% if user.is_superuser %}
-        <li><a href="{% url 'contacts_messages_all' %}"><i class="fas fa-envelope"></i> Contacts messages</a></li>
+        <a href="{% url 'admin_dashboard' %}" class="ym-btn ym-btn--pink ym-btn--sm" style="height: 32px; padding: 0 16px; border-radius: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">
+          <i class="fas fa-shield-alt me-1"></i> Dashboard</a>
       {% endif %}
+
     {% else %}
        <a class="nav-link me-3" href="{% url 'login' %}">
         <i class="fa fa-user"></i> Login

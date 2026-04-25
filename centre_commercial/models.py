@@ -9,7 +9,7 @@ from django.utils import timezone
 from datetime import timedelta
 import uuid
 
-from django_ckeditor_5.fields import CKEditor5Field
+# from django_ckeditor_5.fields import CKEditor5Field
 
 from django.conf import settings
 from django.utils.html import mark_safe
@@ -35,7 +35,7 @@ def generate_unique_slug(model, field_value):
 
 class Store(models.Model):
     name    = models.CharField('name of store', max_length=255, blank=True, null=False, default="BB Shopping")
-    about_us = CKEditor5Field('Text', config_name='extends')
+    about_us = models.TextField(blank=True, help_text="Information about the store",default="Information about the store", verbose_name="About us")
     address = models.CharField(max_length=255, blank=True, null=True, default="Store adress")
     phone  = models.CharField('Contact Phone',max_length=255, blank=True, null=True, default="Store phone")
     email  = models.EmailField('Email Address', max_length=255, default="store@mail.com")
@@ -58,7 +58,7 @@ class StoreSection(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="sections")
     title = models.CharField(max_length=50)
     subtitle = models.CharField(max_length=50)
-    description = CKEditor5Field('Text', config_name='extends')
+    description = models.TextField(blank=True, verbose_name="Description")
     image = models.ImageField(upload_to="store_sections/", blank=True, default='', )
 
     def __str__(self):
@@ -85,9 +85,7 @@ class Subscription(models.Model):
         'PRO': 5,
         'BUSINESS': None,  # None = Unlimited
     }
-
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='subscription')
-    
     plan = models.CharField(max_length=20, choices=PLAN_CHOICES, default='FREE')
 
     def max_products(self):
@@ -204,15 +202,14 @@ class Mall(models.Model):
 
     # ── Description ──
     description_short = models.CharField(max_length=180, blank=True)
-    description = models.TextField()
-    
+    description = models.TextField(blank=True, default="Description of the mall", help_text="Description of the mall", verbose_name="Description")
     # ── Statut ──
     is_open = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
     badge           = models.CharField(max_length=40, blank=True, verbose_name="Badge (ex: New, Phare)")
-    observation     = models.TextField(blank=True, null=True, verbose_name="Observation") # En cas de fermeture ou autre
+    observation     = models.TextField(blank=True, default="", help_text="En cas de fermeture ou autre",verbose_name="Observation",) 
     
-    # ── Contact ──
+    # ── Contact ── 
     phone        = models.CharField(max_length=20, blank=True, null=True, verbose_name="Phone")
     email            = models.EmailField(blank=True, null=True)
     website         = models.URLField(blank=True, null=True)
@@ -248,7 +245,6 @@ class Mall(models.Model):
                 'slug': self.slug
             }
         )
-
     @property
     def is_open_now(self):
         if not self.is_open:
@@ -286,7 +282,7 @@ class Event(models.Model):
     title = models.CharField(max_length=200, verbose_name="Title")
     slug = models.SlugField(unique=True, blank=True)
     date = models.DateTimeField(verbose_name="Date")
-    description = models.TextField(verbose_name="Description")
+    description = models.TextField(blank=True, verbose_name="Description")
     image = models.ImageField(upload_to='events/', verbose_name="Image")
     location = models.CharField(max_length=200, default="Place Centrale", verbose_name="Location")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -319,7 +315,7 @@ class ArticleBlog(models.Model):
 
     title = models.CharField(max_length=200, verbose_name="Title")
     slug = models.SlugField(unique=True, blank=True)
-    content = models.TextField(verbose_name="Content")
+    content = models.TextField(blank=True, verbose_name="Content")
     image = models.ImageField(upload_to='blog/', verbose_name="Image")
     date_publication = models.DateTimeField(auto_now_add=True, verbose_name="Date publication")
 
@@ -344,7 +340,7 @@ class ContactMessage(models.Model):
     name = models.CharField(max_length=100, verbose_name="Name")
     email = models.EmailField(verbose_name="Email")
     subject = models.CharField(max_length=200, verbose_name="Subject")
-    message = models.TextField(verbose_name="Message")
+    message = models.TextField(blank=True, verbose_name="Message")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date created")
 
     def __str__(self):
@@ -356,7 +352,7 @@ class NewsFeed(models.Model): # Fil d'actualités
 
     title = models.CharField(max_length=200, verbose_name="Title")
     slug = models.SlugField(unique=True, blank=True)
-    content = models.TextField(verbose_name="Content")
+    content = models.TextField(blank=True, verbose_name="Content")
     image = models.ImageField(upload_to='fils_actualites/', verbose_name="Image")
     start_publication = models.DateTimeField(auto_now_add=True, verbose_name="Start publication")
     end_publication = models.DateTimeField(verbose_name="End publication")
@@ -382,7 +378,7 @@ class DisplayBoard(models.Model): # Paneau d'affichage
 
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
-    content = models.TextField()
+    content = models.TextField(blank=True, verbose_name="Content")
     image = models.ImageField(upload_to='display_boards/')
     start_publication = models.DateTimeField(auto_now_add=True)
     end_publication = models.DateTimeField()
@@ -401,6 +397,7 @@ class DisplayBoard(models.Model): # Paneau d'affichage
     class Meta:
         verbose_name = "Display Board"
         verbose_name_plural = "Display Boards"
+
 #============== End Mall ==============
 
 # =========================================
@@ -415,19 +412,20 @@ class Shop(models.Model):
         ('technologie', 'Technologie'),
         ('maison', 'Maison'),
         ('loisirs', 'Loisirs & Culture'),
+        ('sport', 'Sport'),
         ('cinema', 'Cinéma'),
         ('autre', 'Autre'),
     ]
 
     # ── Relation ──
-    owner = models.ForeignKey(User,on_delete=models.CASCADE, null=True, blank=True, related_name='shops')
-    mall = models.ForeignKey(Mall, on_delete=models.SET_NULL, null=True, blank=True, related_name='shops')
+    owner = models.ForeignKey(User,on_delete=models.CASCADE, related_name='shops')
+    mall = models.ForeignKey(Mall, null=True, blank=True, on_delete=models.SET_NULL, related_name='shops')
 
     # ── Identité ──
     name = models.CharField(max_length=200, verbose_name="Name of shop")
     slug = models.SlugField(unique=True, blank=True)
     category = models.CharField(max_length=50, choices=CATEGORIES, verbose_name="Category")
-    description = models.TextField(verbose_name="Description")
+    description = models.TextField(blank=True, verbose_name="Description")
     cover = models.ImageField(upload_to='shops/cover/', verbose_name="Cover")
     logo = models.ImageField(upload_to='shops/logo/', verbose_name="Logo")
 
@@ -441,7 +439,7 @@ class Shop(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     is_closed = models.BooleanField(default=False, verbose_name="Is closed ?")
-    observation = models.TextField(blank=True, null=True, verbose_name="Observation") # En cas de fermeture ou autre
+    observation = models.TextField(blank=True, verbose_name="Observation") # En cas de fermeture ou autre
 
     class Meta:
         verbose_name = "Shop"
@@ -467,10 +465,6 @@ class Shop(models.Model):
                 'slug': self.slug
                 }
             )
-
-
-
-
     @property
     def logoURL(self):
         return self.logo.url if self.logo else ""
@@ -520,7 +514,6 @@ class WorkingHours(models.Model):
         (5, 'Saturday'),
         (6, 'Sunday'),
     ]
-
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='working_hours')
     day = models.IntegerField(choices=DAYS)
 
@@ -555,12 +548,9 @@ class ShopValidation(models.Model):
         (180, '6 Months'),
         (365, '1 Year'),
     ]
-
     shop = models.OneToOneField(Shop, on_delete=models.CASCADE, related_name='validation')
-
     is_validated = models.BooleanField(default=False)
-  
-    observation = models.TextField(blank=True)
+    observation = models.TextField(blank=True, verbose_name="Observation")
 
     start_date = models.DateField(null=True, blank=True,verbose_name=_("Start date"))
     period = models.IntegerField(choices=PERIOD_CHOICES, null=True, blank=True,verbose_name=_("Period"))
@@ -571,12 +561,12 @@ class ShopValidation(models.Model):
             return self.start_date + timedelta(days=self.period)
         return None    
 
-class ShopReview(models.Model): # Shop Review Model
+class ShopReview(models.Model): # Shop Review 
     shop = models.ForeignKey('Shop', on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     rating = models.IntegerField(default=5)  # من 1 إلى 5
-    comment = models.TextField(blank=True)
+    comment = models.TextField(blank=True, verbose_name="Comment")
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -589,10 +579,12 @@ class Promotion(models.Model):
     # But adding a direct FK to Mall can optimize queries and allow mall-wide promos.
     shop = models.ForeignKey(Shop, on_delete=models.SET_NULL, null=True, blank=True, related_name='promotions')
     title = models.CharField(max_length=200, verbose_name="Title")
-    description = models.TextField(verbose_name="Description")
+    description = models.TextField(blank=True, verbose_name="Description")
     image = models.ImageField(upload_to='promotions/', verbose_name="Image")
+
     start_date = models.DateField(verbose_name="Start date")
     end_date = models.DateField(verbose_name="End date")
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
 
     def __str__(self):
@@ -648,9 +640,9 @@ class Product(models.Model):
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=200)
-    description = CKEditor5Field('Content', config_name='default')
-
     slug = models.SlugField(unique=True, blank=True)
+    # description = CKEditor5Field('Description', config_name='default') 
+    description = models.TextField(blank=True, verbose_name="Description")
 
     old_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -718,13 +710,16 @@ class ProductImages(models.Model):
         return f"Image of {self.product.name} - {self.id}"
       
 class Wishlist(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist')
-
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wishlist')
     products = models.ManyToManyField(Product, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Wishlist for {self.user.username}"
+
+    def count(self):
+        return self.products.count()
+
 #============== End Product ============== 
 
 # =========================================
@@ -870,20 +865,6 @@ class OrderHistory(models.Model):
         return f"Order #{self.order.id}: {self.old_status} → {self.new_status}"
 # =========================END ORDER MODEL =========================
 
-# =========================
-#  Shop Review Model
-# =========================
-class ShopReview(models.Model): # Shop Review Model
-    shop = models.ForeignKey('Shop', on_delete=models.CASCADE, related_name='reviews')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    rating = models.IntegerField(default=5)  # من 1 إلى 5
-    comment = models.TextField(blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('shop', 'user')  # user يقيّم مرة واحدة فقط
 
 # =========================================
 # PROFILE
@@ -891,9 +872,11 @@ class ShopReview(models.Model): # Shop Review Model
 
 class Profile(models.Model):
     USER_ROLES = (
-        ('Customer', 'Customer'),
-        ('manager', 'Mall Manager'),
-        ('owner', 'Store Owner'),
+        ('customer', 'Customer'),
+        ('shop_owner', 'Shop Owner'), # Shop Owner / Tenant
+        ('mall_manager', 'Mall Manager'),  # ou directeur de centre commercial
+        ('admin', 'Admin'),
+        ('superadmin', 'Super Admin'),
     )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -901,7 +884,7 @@ class Profile(models.Model):
     role = models.CharField(max_length=20, choices=USER_ROLES, default='Customer')
     image = models.ImageField(upload_to='profiles/', default='profiles/default.png')
     phone = models.CharField(max_length=20, blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
+    address = models.TextField(blank=True, verbose_name="Address")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

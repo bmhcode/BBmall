@@ -95,7 +95,7 @@ class ProductCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('get_thumbnail', 'name', 'shop', 'category', 'price', 'old_price', 'created_at')
+    list_display = ('get_thumbnail', 'name', 'shop', 'category','description', 'price', 'old_price', 'created_at')
     list_filter = ('shop__mall', 'category', 'shop')
     search_fields = ('name', 'shop__name')
     prepopulated_fields = {'slug': ('name',)}

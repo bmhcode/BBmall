@@ -75,9 +75,7 @@ product_list.html
                 <a href="{{ product.get_absolute_url }}" style="text-decoration: none; color: inherit;">
                     <div class="ym-product-card__image" style="height: 280px; position: relative; overflow: hidden; background: #f9f9f9;">
                         {% if product.main_image %}
-                            <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
-                        {% elif product.image %}
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+                             <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
                         {% else %}
                             <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ddd;">
                                 <i class="fas fa-image fa-3x"></i>
@@ -173,29 +171,53 @@ product_list.html
 </style>
 
 <script>
-    function toggleWishlistGrid(btnElement, productId) {
-        fetch(`/wishlist/toggle/${productId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const icon = btnElement.querySelector('i');
-            if (data.status === 'added') {
-                btnElement.style.color = 'var(--accent)';
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-            } else if (data.status === 'removed') {
-                btnElement.style.color = 'var(--text-muted)';
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-            }
-        })
-        .catch(err => console.error(err));
-    }
+function getCSRFToken() {
+    return document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+}
+
+function toggleWishlistGrid(btnElement, productId) {
+
+    // 🔒 منع الضغط المتكرر
+    if (btnElement.disabled) return;
+    btnElement.disabled = true;
+
+    fetch(`/wishlist/toggle/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Request failed');
+        return response.json();
+    })
+    .then(data => {
+        const icon = btnElement.querySelector('i');
+
+        if (data.status === 'added') {
+            btnElement.classList.add('active');
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+        } else if (data.status === 'removed') {
+            btnElement.classList.remove('active');
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+        }
+    })
+
+    
+    .catch(err => {
+        console.error(err);
+        alert("Something went wrong");
+    })
+    .finally(() => {
+        btnElement.disabled = false;
+    });
+}
 </script>
 
 {% endblock %}

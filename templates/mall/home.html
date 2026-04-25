@@ -76,12 +76,11 @@
       
       
       {% if user.is_superuser %}
-    
-      <a href="{% url 'contacts_messages_all' %}"><i class="fas fa-envelope me-2"></i>Messages</a>
-      
-      <a href="{% url 'malls_manage' %}"><i class="fas fa-cog"></i> Gérer les Malls</a>
+      <a href="{% url 'admin_dashboard' %}" class="ym-btn ym-btn--pink ym-btn--sm" style="margin-top: 10px; width: 100%; justify-content: center; height: 32px; font-size: 0.7rem;">
+          <i class="fas fa-shield-alt me-2"></i> Admin Dashboard
+      </a>
       {% endif %}
-      <a href="{% url 'orders_items_list_all' %}"><i class="fas fa-list"></i> Orders items all</a>
+
 
 
 
@@ -231,7 +230,9 @@
       <div class="ym-empty" style="grid-column: 1/-1; padding: 100px; background: rgba(255,255,255,0.5); border-radius: 20px;">
           <i class="fas fa-building" style="font-size: 3rem; color: #d1d5db; margin-bottom: 20px;"></i>
           <p>Aucun centre commercial n'est disponible pour le moment.</p>
-          <a href="{% url 'mall_create' %}" class="ym-btn ym-btn--dark" style="margin-top: 20px;">Ajouter le premier Mall</a>
+          {% if user.is_superuser %}
+            <a href="{% url 'mall_create' %}" class="ym-btn ym-btn--dark" style="margin-top: 20px;">Ajouter le premier Mall</a>
+          {% endif %}
       </div>
       {% endfor %}
 
