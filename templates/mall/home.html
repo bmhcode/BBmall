@@ -55,8 +55,8 @@
         </span>
       </a>
       {% endif %}
-      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-        {{user.username}}
+     <a href="{% url 'user_update' user.username %}" class="ym-split-btn-main">
+        <i class="fas fa-user-circle"></i> {{ user.username }}
       </a>
       <form id="logout-form" action="{% url 'logout' %}" method="post">
         {% csrf_token %}

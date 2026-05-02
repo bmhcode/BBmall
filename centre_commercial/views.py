@@ -18,6 +18,8 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
+from django.views import View
+
 
 # ============================================================================
 # AUTH VIEWS
@@ -39,8 +41,27 @@ def signup(request): # signup
     }
     return render(request, 'registration/signup.html', context)
 
-@login_required # update_profile
-def update_profile(request, username):
+
+@login_required # create_user
+@user_passes_test(lambda u: u.is_superuser)
+def add_user(request):
+    if request.method == 'POST':
+        form = NewUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('users_manage')
+    else:
+        form = NewUserCreationForm()
+    
+    context = {
+            'form': form
+    }
+    return render(request, 'registration/user_add.html', context)
+
+
+@login_required # user_update
+def user_update(request, username):
     user = get_object_or_404(User, username=username)
     profile, _ = Profile.objects.get_or_create(user=user)
     if request.method == 'POST':
@@ -63,24 +84,43 @@ def update_profile(request, username):
         'u_form': u_form,
         'p_form': p_form
     }
-    return render(request, 'registration/update_profile.html', context)
+    return render(request, 'registration/user_update.html', context)
 
-@login_required # create_user
-@user_passes_test(lambda u: u.is_superuser)
-def add_user(request):
-    if request.method == 'POST':
-        form = NewUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
+class UserDeleteView(DeleteView):
+    model = User
+    template_name = 'registration/user_confirm_delete.html'
+    context_object_name = 'user'
+    success_url = reverse_lazy('users_manage')
+
+    slug_field = 'username'
+    slug_url_kwarg = 'username'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
             return redirect('users_manage')
-    else:
-        form = NewUserCreationForm()
+        return super().dispatch(request, *args, **kwargs)
     
-    context = {
-            'form': form
-    }
-    return render(request, 'registration/new_user.html', context)
+    # def get_object(self, queryset=None):
+    #     obj = super().get_object()
+    #     if obj == self.request.user:
+    #         raise PermissionDenied("You cannot delete yourself")
+    #     return obj
+
+
+class ToggleUserStatusView(View):
+    def post(self, request, user_id):
+        if not request.user.is_superuser:
+            return redirect('users_manage')
+
+        user = get_object_or_404(User, id=user_id)
+
+        # تبديل الحالة
+        user.is_active = not user.is_active
+        user.save()
+
+        return redirect('users_manage')
+
+
 # ================ End Auth views ==========================
 
 
@@ -124,7 +164,7 @@ class AdminDashboardView(TemplateView):
 
 class UsersManageView(ListView):
     model = User
-    template_name = 'mall/users_manage.html'
+    template_name = 'registration/users_manage.html'
     context_object_name = 'users'
     paginate_by = 20
 
@@ -144,6 +184,7 @@ class UsersManageView(ListView):
                 Q(last_name__icontains=q)
             )
         return queryset
+
 
 class ShopsManageView(ListView):
     model = Shop
@@ -269,6 +310,23 @@ class MallDeleteView(DeleteView):
 #     model = Mall
 #     template_name = 'mall/mall_detail.html'
 #     context_object_name = 'mall'
+
+
+
+class ToggleMallStatusView(View):
+    def post(self, request, mall_id):
+        if not request.mall.is_actif:
+            return redirect('malls_manage')
+
+        mall = get_object_or_404(Mall, id=mall_id)
+
+        # تبديل الحالة
+        mall.is_actif = not mall.is_actif
+        mall.save()
+
+        return redirect('malls_manage')
+
+
 
 # ================ End Mall views ==========================
 
@@ -835,18 +893,28 @@ def product_image_set_main(request, id):
 
 @login_required
 @require_POST
-def wishlist_toggle(request, id):
-    product = get_object_or_404(Product, id=id)
+def wishlist_toggle(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
     wishlist, created = Wishlist.objects.get_or_create(user=request.user)
-    
-    if product in wishlist.products.all():
+
+    if wishlist.products.filter(id=product.id).exists():
         wishlist.products.remove(product)
         status = 'removed'
     else:
         wishlist.products.add(product)
         status = 'added'
-        
-    return JsonResponse({'status': status})
+
+    # ⭐ مهم جداً: نحسب العدد
+    wishlist_count = wishlist.products.count()
+
+    return JsonResponse({
+        'status': status,
+        'wishlist_count': wishlist_count
+    })
+
+
+    
 
 @login_required
 def wishlist_list(request):

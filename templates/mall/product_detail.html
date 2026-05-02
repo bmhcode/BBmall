@@ -5,6 +5,8 @@
 
 {% block content %}
 
+product_detail.html
+
 <!-- Product Header Area -->
 <section class="ym-section ym-section--light" style="padding: 120px 0 80px;">
     <div class="ym-container">
@@ -14,7 +16,7 @@
             <span style="margin: 0 8px;">/</span>
             <a href="{% url 'mall' product.shop.mall.slug %}" style="text-decoration: none; color: inherit;">{{ product.shop.mall.name }}</a>
             <span style="margin: 0 8px;">/</span>
-            <a href="{% url 'shop_detail' mall_slug=product.shop.mall.slug slug=product.shop.slug %}" style="text-decoration: none; color: inherit;">{{ product.shop.name }}</a>
+            <a href="{% url 'shop' product.shop.mall.slug product.shop.slug %}" style="text-decoration: none; color: inherit;">{{ product.shop.name }}</a>
             <span style="margin: 0 8px;">/</span>
             <span style="color: var(--primary); font-weight: 600;">{{ product.name }}</span>
         </nav>
@@ -109,17 +111,22 @@
                                 <i class="fas fa-shopping-cart" style="margin-right:8px;"></i> Add to Cart
                             </button>
                             
-                            <button onclick="toggleWishlistDetail({{ product.id }})" id="wishlist-detail-btn" 
-                                class="ym-btn {% if is_in_wishlist %}ym-btn--accent{% else %}ym-btn--ghost{% endif %}" 
-                                style="padding: 16px 20px; font-weight: 600; font-size: 1.05rem; border-color: {% if is_in_wishlist %}var(--accent){% else %}var(--border){% endif %}; transition: all 0.3s; box-shadow: {% if is_in_wishlist %}0 8px 25px rgba(236,72,153,0.3){% else %}none{% endif %};">
-                                <i id="wishlist-detail-icon" class="{% if is_in_wishlist %}fas{% else %}far{% endif %} fa-heart" style="margin-right:8px; transform: scale(1.1);"></i>
-                                <span id="wishlist-detail-text">{% if is_in_wishlist %}Saved to Wishlist{% else %}Save to Wishlist{% endif %}</span>
+                           <button onclick="toggleWishlistDetail({{ product.id }})" id="wishlist-detail-btn" 
+                                class="ym-btn {% if is_in_wishlist %}ym-btn--accent{% else %}ym-btn--ghost{% endif %}">
+
+                                <i id="wishlist-detail-icon" 
+                                class="{% if is_in_wishlist %}fas{% else %}far{% endif %} fa-heart">
+                                </i>
+
+                                <span id="wishlist-detail-text">
+                                    {% if is_in_wishlist %}Saved to Wishlist{% else %}Save to Wishlist{% endif %}
+                                </span>
                             </button>
 
                             <a href="#" class="ym-btn ym-btn--accent" style="padding: 16px 40px;">
                                 Contact Store
                             </a>
-                            <a href="{% url 'shop_detail' mall_slug=product.shop.mall.slug slug=product.shop.slug %}" class="ym-btn ym-btn--dark" style="padding: 16px 40px;">
+                            <a href="{% url 'shop' product.shop.mall.slug product.shop.slug %}" class="ym-btn ym-btn--dark" style="padding: 16px 40px;">
                                 View Shop Details
                             </a>
                         {% endif %}
@@ -134,7 +141,7 @@
                     <div>
                         <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px;">Verified Vendor</p>
                         <h4 style="font-size: 1.2rem; font-weight: 700;">{{ product.shop.name }}</h4>
-                        <p style="font-size: 0.9rem; color: var(--text-muted);">{{ product.shop.location }} — {{ product.shop.mall.name }}</p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">{{ product.shop.mall.name }} - {{ product.shop.location }} </p>
                     </div>
                 </div>
             </div>
@@ -155,23 +162,24 @@
             {% for item in related_products %}
             <div class="ym-product-card" style="background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.3s ease; position: relative;">
                 
-                <!-- Wishlist Toggle Button -->
+              <!-- Wishlist Toggle Button -->
                 {% if request.user.is_authenticated %}
-                <button onclick="toggleWishlistGrid(this, {{ item.id }})" 
+                    <button onclick="toggleWishlistGrid(this, {{ item.id }})" 
                         class="wishlist-toggle-btn {% if item.id in user_wishlist_ids %}active{% endif %}"
-                        style="position: absolute; top: 15px; right: 15px; z-index: 10; background: white; border: none; width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 8px 25px rgba(0,0,0,0.15); cursor: pointer; display: flex; align-items: center; justify-content: center; color: {% if item.id in user_wishlist_ids %}var(--accent){% else %}var(--text-muted){% endif %}; transition: transform 0.2s;">
-                    <i class="{% if item.id in user_wishlist_ids %}fas{% else %}far{% endif %} fa-heart fa-lg" style="margin-top: 1px;"></i>
-                </button>
+                        style="position: absolute; top: 15px; right: 15px; z-index: 10; background: white; border: none; width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 8px 25px rgba(0,0,0,0.15); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;">
+
+                        <i class="{% if item.id in user_wishlist_ids %}fas{% else %}far{% endif %} fa-heart fa-lg"></i>
+
+                    </button>
                 {% endif %}
 
                 <a href="{{ item.get_absolute_url }}" style="text-decoration: none; color: inherit;">
-                    <div style="height: 240px; background: #f9f9f9; overflow: hidden;">
-                        {% if item.main_image %}
-                            <img src="{{ item.main_image.image.url }}" alt="{{ item.name }}" style="width: 100%; height: 100%; object-fit: cover;">
-                        {% elif item.image %}
-                            <img src="{{ item.image.url }}" alt="{{ item.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="ym-product-card__image" style="height: 280px; position: relative; overflow: hidden; background: #f9f9f9;">
+                      
+                       {% if item.main_image %}
+                             <img src="{{ item.main_image.image.url }}" alt="{{ item.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
                         {% else %}
-                            <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ddd;">
+                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ddd;">
                                 <i class="fas fa-image fa-3x"></i>
                             </div>
                         {% endif %}
@@ -188,98 +196,132 @@
 </section>
 {% endif %}
 
-<script>
-    function toggleWishlistDetail(productId) {
-        const btn = document.getElementById('wishlist-detail-btn');
-        const icon = document.getElementById('wishlist-detail-icon');
-        const text = document.getElementById('wishlist-detail-text');
-
-        fetch(`/wishlist/toggle/${productId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'added') {
-                btn.classList.add('ym-btn--accent');
-                btn.style.boxShadow = '0 8px 25px rgba(236,72,153,0.3)';
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                text.innerText = 'Saved to Wishlist';
-            } else if (data.status === 'removed') {
-                btn.classList.remove('ym-btn--accent');
-                btn.classList.add('ym-btn--ghost');
-                btn.style.boxShadow = 'none';
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                text.innerText = 'Save to Wishlist';
-            }
-        })
-        .catch(err => console.error(err));
-    }
-
-    function toggleWishlistGrid(btnElement, productId) {
-        fetch(`/wishlist/toggle/${productId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const icon = btnElement.querySelector('i');
-            if (data.status === 'added') {
-                btnElement.style.color = 'var(--accent)';
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-            } else if (data.status === 'removed') {
-                btnElement.style.color = 'var(--text-muted)';
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-            }
-        })
-        .catch(err => console.error(err));
-    }
-
-    function addToCart(productId) {
-        const btn = document.getElementById('add-to-cart-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i> Adding...';
-        
-        fetch(`/cart/add/${productId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                btn.innerHTML = '<i class="fas fa-check" style="margin-right:8px;"></i> Added to Cart';
-                btn.classList.add('ym-btn--accent');
-                btn.classList.remove('ym-btn--primary');
-                // update global cart count visually if we have that badge
-                const badges = document.querySelectorAll('#cart-count-badge');
-                badges.forEach(badge => badge.innerText = data.cart_count);
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.classList.remove('ym-btn--accent');
-                    btn.classList.add('ym-btn--primary');
-                }, 2000);
-            }
-        })
-        .catch(err => console.error(err));
-    }
-</script>
 
 <style>
     .wishlist-toggle-btn:hover { transform: scale(1.15) !important; color: var(--accent) !important; }
     .wishlist-toggle-btn:active { transform: scale(0.9) !important; }
+
+    .wishlist-toggle-btn i {
+        color: var(--text-muted);
+        transition: 0.3s;
+    }
+
+    .wishlist-toggle-btn.active i {
+        color: var(--accent);
+    }
+
+
 </style>
+
+<script>
+
+/* CSRF */
+function getCSRFToken() {
+    return document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+}
+
+/* BADGE */
+function updateBadge(count) {
+    const badge = document.querySelector('.wishlist-badge');
+    if (!badge) return;
+
+    count = parseInt(count || 0);
+    badge.innerText = count;
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+/* GRID */
+function toggleWishlistGrid(btn, productId) {
+
+    btn.disabled = true;
+
+    const icon = btn.querySelector('i');
+    const wasActive = btn.classList.contains('active');
+
+    btn.classList.toggle('active');
+    icon.classList.toggle('fas');
+    icon.classList.toggle('far');
+
+    fetch(`/wishlist/toggle/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+
+        }
+       
+    })
+    .then(res => res.json())
+    .then(data => {
+        updateBadge(data.nbr_wishlist || data.wishlist_count);
+    })
+    .catch(() => {
+
+        // rollback
+        btn.classList.toggle('active');
+
+        if (wasActive) {
+            icon.classList.add('fas');
+            icon.classList.remove('far');
+        } else {
+            icon.classList.add('far');
+            icon.classList.remove('fas');
+        }
+    })
+    .finally(() => btn.disabled = false);
+}
+
+/* DETAIL */
+function toggleWishlistDetail(productId) {
+
+    const btn = document.getElementById('wishlist-detail-btn');
+    const icon = document.getElementById('wishlist-detail-icon');
+    const text = document.getElementById('wishlist-detail-text');
+
+    if (!btn) return;
+
+    const wasActive = btn.classList.contains('ym-btn--accent');
+
+    // 🚀 Optimistic UI
+    btn.classList.toggle('ym-btn--accent');
+    btn.classList.toggle('ym-btn--ghost');
+
+    icon.classList.toggle('fas');
+    icon.classList.toggle('far');
+
+    text.innerText = wasActive ? "Save to Wishlist" : "Saved to Wishlist";
+
+    fetch(`/wishlist/toggle/${productId}/`, {
+        method: 'POST',
+        credentials: 'same-origin',   // مهم
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error();
+        return res.json();
+    })
+    .then(data => {
+        updateBadge(data.nbr_wishlist || data.wishlist_count);
+    })
+    .catch(() => {
+
+        // ❌ rollback إذا فشل
+        btn.classList.toggle('ym-btn--accent');
+        btn.classList.toggle('ym-btn--ghost');
+
+        icon.classList.toggle('fas');
+        icon.classList.toggle('far');
+
+        text.innerText = wasActive ? "Saved to Wishlist" : "Save to Wishlist";
+    });
+}
+</script>
 
 {% endblock %}

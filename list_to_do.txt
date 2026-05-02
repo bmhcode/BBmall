@@ -12,9 +12,9 @@ Category page :
 
 users_manage.html :
 
- - Delete user
+ - Delete user ok
  - Suspend user
- - Search user
+ - Search user ok
  - Filter user
  - Sort user
  - Pagination

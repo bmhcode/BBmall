@@ -5,6 +5,7 @@ from django.forms.models import inlineformset_factory
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 
+
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'form-control',
@@ -28,19 +29,18 @@ class ProfileUpdateForm(forms.ModelForm):
         model = Profile
         fields = ['image','role', 'phone']
         widgets = {
-            'image': forms.ClearableFileInput(
+            'image': forms.FileInput(
                     attrs={
                         'class': 'd-none',
                         'accept': 'image/*',
-                        'id': 'imageUpload'
+                        'id': 'imageUpload',
+                        'style': 'display:none;'
                     }
                     ),
             'role' : forms.Select(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 
 
 class NewUserCreationForm(UserCreationForm):
@@ -69,6 +69,8 @@ class NewUserCreationForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Confirmer le mot de passe'
         })
+
+
 
 class MallForm(forms.ModelForm):
     """Formulaire CRUD pour le modèle Mall."""

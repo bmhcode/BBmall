@@ -1,4 +1,5 @@
 from .models import Order, Wishlist
+# from django.core.cache import cache
 
 def cart_processor(request):
     cart_count = 0
@@ -11,14 +12,10 @@ def cart_processor(request):
         'cart_count': cart_count
     }
 
-
 def wishlist_processor(request):
-    nbr_wishlist = 0
-    if request.user.is_authenticated:
-        wishlist = Wishlist.objects.filter(user=request.user).first()
-        if wishlist:
-            nbr_wishlist = wishlist.products.count()
+    if request.user.is_authenticated and hasattr(request.user, 'wishlist'):
+        return {
+            'wishlist_count': request.user.wishlist.products.count()
+        }
+    return {'wishlist_count': 0}
 
-    return {
-        'nbr_wishlist': nbr_wishlist
-    }

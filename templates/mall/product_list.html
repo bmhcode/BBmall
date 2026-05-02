@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    {% if mall %}Products in {{ mall.name }}{% else %}Discover Products{% endif %} — BB Shopping
+    {% if mall %} Products in {{ mall.name }} {% else %} Discover Products {% endif %} — BB Shopping
 {% endblock %}
 
 {% block content %}
@@ -65,14 +65,15 @@ product_list.html
                 
                 <!-- Wishlist Toggle Button -->
                 {% if request.user.is_authenticated %}
-                <button onclick="toggleWishlistGrid(this, {{ product.id }})" 
-                        class="wishlist-toggle-btn {% if product.id in user_wishlist_ids %}active{% endif %}"
+                    <button onclick="toggleWishlistGrid(this, {{ product.id }})" 
+                        class="wishlist-toggle-btn {% if product.id in user_wishlist_ids %} active {% endif %}"
                         style="position: absolute; top: 15px; right: 15px; z-index: 10; background: white; border: none; width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 8px 25px rgba(0,0,0,0.15); cursor: pointer; display: flex; align-items: center; justify-content: center; color: {% if product.id in user_wishlist_ids %}var(--accent){% else %}var(--text-muted){% endif %}; transition: transform 0.2s;">
-                    <i class="{% if product.id in user_wishlist_ids %}fas{% else %}far{% endif %} fa-heart fa-lg" style="margin-top: 1px;"></i>
-                </button>
+                        <i class="{% if product.id in user_wishlist_ids %} fas {% else %} far {% endif %} fa-heart fa-lg" style="margin-top: 1px;"></i>
+                    </button>
                 {% endif %}
 
-                <a href="{{ product.get_absolute_url }}" style="text-decoration: none; color: inherit;">
+
+               <a href="{{ product.get_absolute_url }}" style="text-decoration: none; color: inherit;">
                     <div class="ym-product-card__image" style="height: 280px; position: relative; overflow: hidden; background: #f9f9f9;">
                         {% if product.main_image %}
                              <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
@@ -170,7 +171,11 @@ product_list.html
     .wishlist-toggle-btn:active { transform: scale(0.9) !important; }
 </style>
 
+
 <script>
+
+const wishlistBadge = document.querySelector('.wishlist-badge');
+
 function getCSRFToken() {
     return document.cookie
         .split('; ')
@@ -178,46 +183,88 @@ function getCSRFToken() {
         ?.split('=')[1];
 }
 
+function updateBadge(count) {
+    if (!wishlistBadge) return;
+
+    count = parseInt(count || 0);
+
+    wishlistBadge.textContent = count;
+
+    if (count <= 0) {
+        wishlistBadge.style.display = 'none';
+    } else {
+        wishlistBadge.style.display = 'inline-block';
+    }
+
+    wishlistBadge.classList.add('bump');
+    setTimeout(() => wishlistBadge.classList.remove('bump'), 200);
+}
+
 function toggleWishlistGrid(btnElement, productId) {
 
-    // 🔒 منع الضغط المتكرر
-    if (btnElement.disabled) return;
+    if (!btnElement || btnElement.disabled) return;
+
     btnElement.disabled = true;
+
+    const icon = btnElement.querySelector('i');
+    const isActive = btnElement.classList.contains('active');
+
+    // 🎯 حفظ الحالة قبل التغيير (للـ rollback)
+    const previousState = isActive;
+
+    // 🚀 Optimistic UI
+    btnElement.classList.toggle('active');
+
+    if (!previousState) {
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+    } else {
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+    }
 
     fetch(`/wishlist/toggle/${productId}/`, {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
             'X-CSRFToken': getCSRFToken(),
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Request failed');
+    .then(async response => {
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text);
+        }
         return response.json();
     })
     .then(data => {
-        const icon = btnElement.querySelector('i');
+        // ✔ تأكيد العدد من السيرفر
+        updateBadge(data.wishlist_count);
+    })
+    .catch((err) => {
 
-        if (data.status === 'added') {
-            btnElement.classList.add('active');
+        console.error("Wishlist error:", err);
+
+        // ❌ rollback
+        btnElement.classList.toggle('active');
+
+        if (previousState) {
             icon.classList.remove('far');
             icon.classList.add('fas');
-        } else if (data.status === 'removed') {
-            btnElement.classList.remove('active');
+        } else {
             icon.classList.remove('fas');
             icon.classList.add('far');
         }
-    })
 
-    
-    .catch(err => {
-        console.error(err);
-        alert("Something went wrong");
+        alert("حدث خطأ، حاول مرة أخرى");
     })
     .finally(() => {
         btnElement.disabled = false;
     });
 }
+
 </script>
 
 {% endblock %}

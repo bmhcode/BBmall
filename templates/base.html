@@ -155,33 +155,23 @@
     <button class="ym-navbar__search-btn">
       <i class="fas fa-search"></i>
     </button>
-    {% if user.is_authenticated %}
-      <a href="{% url 'wishlist' %}" style="position: relative;">
-        <i class="fas fa-heart"></i>
 
-      {% if nbr_wishlist > 0 %}
-        <span class="badge"
-              style="
-                position: absolute;
-                top: -5px;
-                right: -10px;
-                background: red;
-                color: white;
-                font-size: 10px;
-                padding: 3px 6px;
-                border-radius: 50%;
-              ">
-          {{ nbr_wishlist }}  
-        </span>
-      {% endif %}
+    {% if user.is_authenticated %}
+
+   
+
+      <a href="{% url 'wishlist' %}" class="wishlist-icon">
+        <i class="fas fa-heart"></i>
+        <span class="wishlist-badge">{{ wishlist_count|default:"0" }}</span>
       </a>
+
 
       <a href="{% url 'cart' %}" class="cart-link">
         <i class="fas fa-shopping-cart"></i>
         <span class="badge">{{ cart_count|default:"0" }}</span>
       </a>
 
-      <a href="{% url 'update_profile' user.username %}" class="ym-split-btn-main">
+      <a href="{% url 'user_update' user.username %}" class="ym-split-btn-main">
         <i class="fas fa-user-circle"></i> {{ user.username }}
       </a>
 
@@ -414,8 +404,16 @@
     applyFilters('all', '');
   };
 })();
+
 </script>
 <!--=== end Mall list  -->
+
+</script>
+
+
+
+
+
 
 </body>
 

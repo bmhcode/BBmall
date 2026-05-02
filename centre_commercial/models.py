@@ -203,7 +203,9 @@ class Mall(models.Model):
     # ── Description ──
     description_short = models.CharField(max_length=180, blank=True)
     description = models.TextField(blank=True, default="Description of the mall", help_text="Description of the mall", verbose_name="Description")
+    
     # ── Statut ──
+    is_actif = models.BooleanField(default=False)
     is_open = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
     badge           = models.CharField(max_length=40, blank=True, verbose_name="Badge (ex: New, Phare)")
@@ -247,6 +249,9 @@ class Mall(models.Model):
         )
     @property
     def is_open_now(self):
+        if self.is_actif:
+            return False
+
         if not self.is_open:
             return False
         now = timezone.localtime().time()
@@ -438,6 +443,8 @@ class Shop(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
+    is_actif = models.BooleanField(default=False)
+
     is_closed = models.BooleanField(default=False, verbose_name="Is closed ?")
     observation = models.TextField(blank=True, verbose_name="Observation") # En cas de fermeture ou autre
 
@@ -485,6 +492,9 @@ class Shop(models.Model):
 
     def is_open_now(self):
         # 1. Manual override
+        if self.is_actif:
+            return False
+
         if self.is_closed:
             return False
 
@@ -653,7 +663,8 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     is_featured = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    
+    is_actif = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created_at', '-updated_at']
@@ -670,7 +681,6 @@ class Product(models.Model):
 
     def main_image(self):
         return self.images.filter(is_main=True).first()
-
 
     @property
     def is_new(self):
@@ -780,7 +790,7 @@ class Order(models.Model):
             return
 
         if all(s == 'received' for s in statuses):
-            new_status = 'delivered'
+            new_status = 'processing'
 
         elif all(s == 'cancelled' for s in statuses):
             new_status = 'cancelled'
@@ -789,7 +799,7 @@ class Order(models.Model):
             new_status = 'processing'
 
         elif any(s == 'available' for s in statuses):
-            new_status = 'shipped'
+            new_status = 'processing'
 
         else:
             new_status = 'pending'

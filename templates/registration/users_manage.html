@@ -8,7 +8,6 @@
 
 users_manage.html
 
-
 <section class="ym-page-hero" style="background: var(--color-primary); color: white; padding: 100px 0 60px;">
     <div class="ym-container">
         <p class="ym-eyebrow" style="color: var(--color-accent);"><i class="fas fa-users me-2"></i> Administration</p>
@@ -21,19 +20,20 @@ users_manage.html
 
 <section class="ym-section ym-section--gray" style="padding: 48px 0;">
     <div class="ym-container">
+
         <!-- Search Bar -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
             <div style="flex: 1; max-width: 400px;">
                 <form method="GET" style="position: relative;">
                     <input type="text" name="q" value="{{ request.GET.q|default:'' }}" 
-                           placeholder="Search users..." 
+                           placeholder="Search username, email, first name and last name..." 
                            style="width: 100%; padding: 12px 20px 12px 48px; border-radius: 12px; border: 1px solid var(--color-border); outline: none;">
                     <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--color-muted);"></i>
                 </form>
             </div>
             <div style="display: flex; gap: 12px;">
-                <a href="{% url 'add_user' %}" class="ym-btn ym-btn--primary ym-btn--sm">Add User</a>
-                <a href="{% url 'admin_dashboard' %}" class="ym-btn ym-btn--primary ym-btn--sm">Back to Hub</a>
+                <a href="{% url 'user_add' %}" class="ym-btn ym-btn--primary ym-btn--sm"><i class="fas fa-plus me-2"></i>Add User</a>
+                <a href="{% url 'admin_dashboard' %}" class="ym-btn ym-btn--primary ym-btn--sm"><i class="fas fa-arrow-left me-2"></i>Back to Hub</a>
             </div>
         </div>
 
@@ -86,11 +86,30 @@ users_manage.html
                             <td style="padding: 20px; color: var(--color-text); font-size: 0.85rem;">
                                 {{ user.profile.phone|default:"-" }}
                             </td>
+                        
                             <td style="padding: 20px; text-align: right;">
                                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                    <a href="{% url 'update_profile' user.username %}" class="btn-action-sm" title="Edit Profile"><i class="fas fa-edit"></i></a>
+                                    <a href="{% url 'user_update' user.username %}" class="btn-action-sm" title="Edit Profile"><i class="fas fa-edit"></i></a>
+                                    <a href="{% url 'user_delete' user.username %}" class="btn-action-sm" title="Delete User"><i class="fas fa-trash"></i></a>
+                        
+                                    <form method="POST" action="{% url 'user_toggle' user.id %}" class="d-inline">
+                                        {% csrf_token %}
+
+                                        <button 
+                                            type="submit"
+                                            class="btn btn-sm {% if user.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+                                            onclick="return confirm('{% if user.is_active %}Suspend this user?{% else %}Unsuspend this user?{% endif %}')"
+                                            title="{% if user.is_active %}Suspend user{% else %}Activate user{% endif %}"
+                                        >
+                                        <i class="fa {% if user.is_active %}fa-user-check{% else %}fa-user-slash{% endif %}"></i>
+                                    </button>
+                                    </form>
+
                                 </div>
                             </td>
+
+
+
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -118,4 +137,6 @@ users_manage.html
         color: var(--color-primary);
     }
 </style>
+
+
 {% endblock %}

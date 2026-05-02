@@ -104,6 +104,27 @@ malls_manage.html
                             <a href="{% url 'mall_delete' mall.slug %}" class="btn-action btn-delete" title="Supprimer">
                                 <i class="fas fa-trash"></i>
                             </a>
+
+                            <form method="POST" action="{% url 'mall_toggle' mall.id %}" class="d-inline">
+                                        {% csrf_token %}
+
+                                        <button 
+                                            type="submit"
+                                            class="btn btn-sm {% if mall.is_actif %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+                                            onclick="return confirm('{% if mall.is_actif %} Suspend this mall ? {% else %} Activate this mall ?{% endif %}')"
+                                            title="{% if mall.is_actif %}Suspend mall{% else %} Activate mall {% endif %}"
+                                        >
+                                        <i class="fa {% if mall.is_actif %}fa-user-check{% else %}fa-user-slash{% endif %}"></i>
+                                    </button>
+                                    </form>
+
+
+
+
+
+
+
+
                         </td>
                     </tr>
                     {% empty %}

@@ -27,7 +27,8 @@
     <div class="ym-container">
         <div class="ym-stores-grid" id="wishlistGrid">
             {% for product in products %}
-            <div class="ym-product-card" id="wishlist-item-{{ product.id }}" style="background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.3s ease; position: relative;">
+            <div class="ym-product-card" id="wishlist-item-{{ product.id }}" 
+                style="background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.3s ease; position: relative;">
                 
                 <!-- Wishlist Toggle Button -->
                 <button onclick="toggleWishlist(this, {{ product.id }})" 

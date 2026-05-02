@@ -15,9 +15,15 @@ urlpatterns = [
   
     path('accounts/', include('django.contrib.auth.urls')),
     path('signup/', views.signup, name='signup'),
-    path('add-user/', views.add_user, name='add_user'),
+    path('user-add/', views.add_user, name='user_add'),
+    path('user-update/<str:username>/',views.user_update, name="user_update"),
+    path('user-delete/<str:username>/', views.UserDeleteView.as_view(), name='user_delete'),
+    path('users/manage/', views.UsersManageView.as_view(), name='users_manage'),
     
-    path('update-profile/<str:username>/',views.update_profile, name="update_profile"),
+
+    path('user-toggle/<int:user_id>/', views.ToggleUserStatusView.as_view(), name='user_toggle'),
+
+
     #--------------------- / Auth -------------------------
   
     # Dashboards
@@ -26,18 +32,19 @@ urlpatterns = [
     path('shop/<slug:slug>/dashboard/', views.ShopDashboardView.as_view(), name='shop_dashboard'),
     
     # Management
-    path('users/manage/', views.UsersManageView.as_view(), name='users_manage'),
     path('malls/', views.MallsManageView.as_view(), name='malls_manage'),
     path('shops/manage/', views.ShopsManageView.as_view(), name='shops_manage'),
 
 
     # Malls 
+    path('mall/add/', views.MallCreateView.as_view(), name='mall_create'),
     path('mall/<slug:slug>/', views.MallView.as_view(), name='mall'),
     path('malls/list/', views.MallListView.as_view(), name='mall_list'),
-    path('mall/add/', views.MallCreateView.as_view(), name='mall_create'),
     path('mall/<slug:slug>/edit/', views.MallUpdateView.as_view(), name='mall_update'),
     path('mall/<slug:slug>/delete/', views.MallDeleteView.as_view(), name='mall_delete'),
     
+    path('mall-toggle/<int:mall_id>/', views.ToggleMallStatusView.as_view(), name='mall_toggle'),
+
 
     # Shops
     path('mall/<slug:slug>/shop/add/', views.ShopCreateView.as_view(), name='shop_create'),
@@ -84,15 +91,23 @@ urlpatterns = [
     path('product-image/<int:id>/delete/', views.product_image_delete, name='product_image_delete'),
     path('product-image/<int:id>/set-main/', views.product_image_set_main, name='product_image_set_main'),
 
+
+
+
+
     # Wishlist
     path('wishlist/', views.wishlist_list, name='wishlist'),
-    path('wishlist/toggle/<int:id>/', views.wishlist_toggle, name='wishlist_toggle'),
+    path('wishlist/toggle/<int:product_id>/', views.wishlist_toggle, name='wishlist_toggle'),
     path('wishlist/to-cart/<int:product_id>/', views.wishlist_to_cart, name='wishlist_to_cart'),
 
 
+
+
+
+
     # Cart & Checkout
-    path('cart/', views.cart_view, name='cart'),
     path('cart/add/<int:product_id>/', views.cart_add, name='cart_add'),
+    path('cart/', views.cart_view, name='cart'),
     path('cart/remove/<int:item_id>/', views.cart_remove, name='cart_remove'),
     path('cart/update/<int:item_id>/', views.cart_update, name='cart_update'),
     path('checkout/', views.checkout, name='checkout'),
@@ -101,7 +116,6 @@ urlpatterns = [
     # Order History
     path('history/', views.order_history, name='order_history'),
     
-
     # path('order/create/', views.order_create, name='order_create'),
 
     path('order/detail/<int:pk>/', views.order_detail, name='order_detail'),
