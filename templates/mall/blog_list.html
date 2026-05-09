@@ -10,6 +10,16 @@
     <p class="ym-eyebrow"><i class="fas fa-newspaper"></i> Blog</p>
     <h1 class="ym-section-title">Actualités &amp; Inspiration</h1>
     <p class="ym-section-subtitle">Restez à l'affût des dernières tendances mode, lifestyle et événements exclusifs.</p>
+
+    {% if mall %}
+      {% if user.is_superuser or mall.manager == user %}
+      <div style="margin-top: 20px;">
+        <a href="{% url 'blog_create' mall.slug %}" class="ym-btn ym-btn--primary ym-btn--sm">
+          <i class="fas fa-plus"></i> Ajouter un article
+        </a>
+      </div>
+      {% endif %}
+    {% endif %}
   </div>
 </section>
 
@@ -18,30 +28,48 @@
   <div class="ym-container">
 
     <div class="ym-blog-grid ym-reveal">
-      {% for article in blogs %}
+      {% for article in articles %}
 
-        {% if mall %}
-          <a href="{% url 'blog_detail' mall_slug=mall.slug slug=article.slug %}" class="ym-blog-card">
-        {% endif %}
-
+        <div style="position: relative;">
+        <a href="{% url 'blog_detail' article.mall.slug article.slug %}" aria-label="Lire: {{ article.title }}">
         <div class="ym-blog-card__image-wrap">
           {% if article.image %}
-          <img src="{{ article.image.url }}" alt="{{ article.titre }}">
+          <img src="{{ article.image.url }}" alt="{{ article.title }}">
           {% else %}
           <div class="ym-blog-card__image-placeholder">
             <i class="fas fa-newspaper"></i>
           </div>
           {% endif %}
         </div>
+
+        
         <div class="ym-blog-card__body">
-          <p class="ym-blog-card__date">{{ article.publication_date|date:"d M Y" }}</p>
+          <p class="ym-blog-card__date">{{ article.date_publication|date:"d M Y" }}</p>
           <h2 class="ym-blog-card__title">{{ article.title }}</h2>
           <p class="ym-blog-card__excerpt">{{ article.content|truncatewords:20 }}</p>
-          <span class="ym-blog-card__read-more">
-            Lire la suite <i class="fas fa-arrow-right"></i>
-          </span>
+
+          <a href="{% url 'blog_detail' article.mall.slug article.slug %}" class="ym-blog-card__read-more">
+            Lire la suite <i class="fas fa-arrow-right fa-xs"></i>
+          </a>
+
+
         </div>
       </a>
+
+      <!-- Edit/Delete buttons for manager -->
+      {% if mall %}
+        {% if user.is_superuser or mall.manager == user %}
+        <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; z-index: 5;">
+          <a href="{% url 'blog_update' mall.slug article.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="padding: 6px 10px; font-size: 0.72rem;">
+            <i class="fas fa-edit"></i>
+          </a>
+          <a href="{% url 'blog_delete' mall.slug article.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="padding: 6px 10px; font-size: 0.72rem; background: #ef4444;">
+            <i class="fas fa-trash"></i>
+          </a>
+        </div>
+        {% endif %}
+      {% endif %}
+      </div>
       {% empty %}
       <div class="ym-empty" style="grid-column: 1/-1;">
         <i class="fas fa-newspaper"></i>

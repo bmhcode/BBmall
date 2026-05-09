@@ -15,7 +15,22 @@
       {% endif %}
     </p>
     <h1 class="ym-section-title" style="max-width:800px;">{{ article.title }}</h1>
-    <p class="ym-blog-card__date" style="margin-top:12px; font-size:0.8rem;">{{ article.publication_date|date:"d F Y" }}</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; align-items:center; max-width:800px; margin: 16px auto 0;">
+      <p class="ym-blog-card__date" style="font-size:0.8rem; margin:0;">{{ article.date_publication|date:"d F Y" }}</p>
+
+      {% if mall %}
+        {% if user.is_superuser or mall.manager == user %}
+        <div style="display:flex; gap:8px; margin-left:auto;">
+          <a href="{% url 'blog_update' mall.slug article.slug %}" class="ym-btn ym-btn--accent ym-btn--sm">
+            <i class="fas fa-edit"></i> Modifier
+          </a>
+          <a href="{% url 'blog_delete' mall.slug article.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="background:#ef4444;">
+            <i class="fas fa-trash"></i> Supprimer
+          </a>
+        </div>
+        {% endif %}
+      {% endif %}
+    </div>
   </div>
 </section>
 
@@ -26,12 +41,12 @@
 
       {% if article.image %}
       <div class="ym-article-hero-image">
-        <img src="{{ article.image.url }}" alt="{{ article.titre }}">
+        <img src="{{ article.image.url }}" alt="{{ article.title }}" loading="lazy">
       </div>
       {% endif %}
 
       <div class="ym-article-body ym-reveal">
-        <p class="ym-detail-text" style="white-space:pre-line; font-size:1.05rem; line-height:1.9;">{{ article.contenu }}</p>
+        <p class="ym-detail-text" style="white-space:pre-line; font-size:1.05rem; line-height:1.9;">{{ article.content }}</p>
       </div>
 
       <div class="ym-article-footer">

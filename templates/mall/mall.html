@@ -471,10 +471,10 @@
     <div class="ym-blog-grid ym-reveal">
       {% for article in articles_blog %}
       <article class="ym-blog-card">
-        <a href="{% url 'blog_detail' mall_slug=mall.slug slug=article.slug %}" aria-label="Lire: {{ article.titre }}">
+        <a href="{% url 'blog_detail' mall_slug=mall.slug slug=article.slug %}" aria-label="Lire: {{ article.title }}">
           <div class="ym-blog-card__image-wrap">
             {% if article.image %}
-            <img src="{{ article.image.url }}" alt="{{ article.titre }}" loading="lazy">
+            <img src="{{ article.image.url }}" alt="{{ article.title }}" loading="lazy">
             {% else %}
             <div class="ym-blog-card__image-placeholder">
               <i class="fas fa-newspaper"></i>
@@ -487,8 +487,8 @@
             <i class="fas fa-calendar-alt fa-xs me-1"></i>
             {{ article.date_publication|date:"d F Y" }}
           </p>
-          <h3 class="ym-blog-card__title">{{ article.titre }}</h3>
-          <p class="ym-blog-card__excerpt">{{ article.contenu|truncatewords:25 }}</p>
+          <h3 class="ym-blog-card__title">{{ article.title }}</h3>
+          <p class="ym-blog-card__excerpt">{{ article.content|truncatewords:25 }}</p>
           <a href="{% url 'blog_detail' mall_slug=mall.slug slug=article.slug %}" class="ym-blog-card__read-more">
             Lire l'article <i class="fas fa-arrow-right fa-xs"></i>
           </a>

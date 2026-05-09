@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView, DeleteView
 from django.db.models import Q,Sum
 from .models import Profile, Mall, Shop,  Event, Promotion, ArticleBlog, ContactMessage, ProductCategory, Product, ProductImages, Order,OrderHistory, OrderItem, OrderItemHistory, Wishlist
-from .forms import NewUserCreationForm, UserUpdateForm, ProfileUpdateForm,MallForm, ShopForm, ContactForm, ProductForm, PromotionForm, EventForm, OrderUpdateForm, OrderItemFormSet
+from .forms import NewUserCreationForm, UserUpdateForm, ProfileUpdateForm,MallForm, ShopForm, ContactForm, ProductForm, PromotionForm, EventForm, OrderUpdateForm, OrderItemFormSet, ArticleBlogForm
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.utils import timezone
@@ -762,6 +762,81 @@ class ArticleBlogDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['mall'] = self.object.mall
         return context
+
+class ArticleBlogCreateView(CreateView):
+    model = ArticleBlog
+    form_class = ArticleBlogForm
+    template_name = 'mall/blog_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.mall = get_object_or_404(Mall, slug=self.kwargs.get('mall_slug'))
+        if not request.user.is_superuser and self.mall.manager != request.user:
+            messages.error(request, "Vous n'avez pas les droits pour gérer le blog de ce centre.")
+            return redirect('mall', self.mall.slug)
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.mall = self.mall
+        messages.success(self.request, "Article de blog créé avec succès !")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.mall
+        return context
+
+    def get_success_url(self):
+        return reverse('blogs_by_mall', kwargs={'slug': self.mall.slug})
+
+class ArticleBlogUpdateView(UpdateView):
+    model = ArticleBlog
+    form_class = ArticleBlogForm
+    template_name = 'mall/blog_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.mall = get_object_or_404(Mall, slug=self.kwargs.get('mall_slug'))
+        if not request.user.is_superuser and self.mall.manager != request.user:
+            messages.error(request, "Vous n'avez pas les droits pour modifier cet article.")
+            return redirect('mall', self.mall.slug)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(ArticleBlog, slug=self.kwargs['slug'], mall=self.mall)
+
+    def form_valid(self, form):
+        messages.success(self.request, "Article de blog mis à jour avec succès !")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.mall
+        return context
+
+    def get_success_url(self):
+        return reverse('blogs_by_mall', kwargs={'slug': self.mall.slug})
+
+class ArticleBlogDeleteView(DeleteView):
+    model = ArticleBlog
+    template_name = 'mall/blog_confirm_delete.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.mall = get_object_or_404(Mall, slug=self.kwargs.get('mall_slug'))
+        if not request.user.is_superuser and self.mall.manager != request.user:
+            messages.error(request, "Vous n'avez pas les droits pour supprimer cet article.")
+            return redirect('mall', self.mall.slug)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(ArticleBlog, slug=self.kwargs['slug'], mall=self.mall)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.mall
+        return context
+
+    def get_success_url(self):
+        messages.success(self.request, "Article de blog supprimé.")
+        return reverse('blogs_by_mall', kwargs={'slug': self.mall.slug})
 # ================ End ArticleBlog views ==========================
 
 
@@ -942,6 +1017,7 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['related_products'] = Product.objects.filter(category=self.object.category).exclude(id=self.object.id)[:4]
+        context['mall'] = self.object.shop.mall
         
         is_in_wishlist = False
         if self.request.user.is_authenticated:
@@ -951,6 +1027,22 @@ class ProductDetailView(DetailView):
             
         context['is_in_wishlist'] = is_in_wishlist
         return context
+
+
+
+def get_object(self):
+        return get_object_or_404(
+            Product,
+            slug=self.kwargs['product_slug'],
+            shop__slug=self.kwargs['shop_slug'],
+            shop__mall__slug=self.kwargs['mall_slug']
+        )
+
+
+
+
+
+
 
 class ProductCreateView(CreateView):
     model = Product

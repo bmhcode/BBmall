@@ -69,7 +69,10 @@ urlpatterns = [
     # Blog
     path('blogs/', views.ArticleBlogListView.as_view(), name='blogs_all'),
     path('mall/<slug:slug>/blogs/', views.ArticleBlogListView.as_view(), name='blogs_by_mall'),
+    path('mall/<slug:mall_slug>/blog/add/', views.ArticleBlogCreateView.as_view(), name='blog_create'),
     path('mall/<slug:mall_slug>/blog/<slug:slug>/', views.ArticleBlogDetailView.as_view(), name='blog_detail'),
+    path('mall/<slug:mall_slug>/blog/<slug:slug>/edit/', views.ArticleBlogUpdateView.as_view(), name='blog_update'),
+    path('mall/<slug:mall_slug>/blog/<slug:slug>/delete/', views.ArticleBlogDeleteView.as_view(), name='blog_delete'),
 
     # Contact messages
     path('contact/', views.ContactMessageCreateView.as_view(), name='contact_message_create'),

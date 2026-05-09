@@ -1,5 +1,5 @@
 from django import forms
-from .models import Profile, Mall, Shop, Event, ContactMessage, Product, Promotion, Order, OrderItem, ShopReview, ShopSocial, ShopValidation, WorkingHours, ShopHoliday
+from .models import Profile, Mall, Shop, Event, ContactMessage, Product, Promotion, Order, OrderItem, ShopReview, ShopSocial, ShopValidation, WorkingHours, ShopHoliday, ArticleBlog
 from django.contrib.auth.models import User
 from django.forms.models import inlineformset_factory
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -163,6 +163,16 @@ class PromotionForm(forms.ModelForm):
             'image':       forms.ClearableFileInput(attrs={'class': 'form-file'}),
             'start_date':  forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
             'end_date':    forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
+        }
+
+class ArticleBlogForm(forms.ModelForm):
+    class Meta:
+        model = ArticleBlog
+        fields = ['title', 'content', 'image']
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Ex: Nouvelles tendances été 2026', 'class': 'form-input'}),
+            'content': forms.Textarea(attrs={'placeholder': 'Contenu de l\'article...', 'rows': 8, 'class': 'form-control'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-file'}),
         }
 
 class EventForm(forms.ModelForm):

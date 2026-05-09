@@ -330,7 +330,7 @@ class ArticleBlog(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.titre
+        return self.title
 
     def get_absolute_url(self):
         return reverse('blog_detail', kwargs={'slug': self.slug})
