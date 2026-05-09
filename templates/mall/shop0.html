@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ shop.name }} — {{mall.name}} {% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<section class="ym-page-hero">
+  <div class="ym-container">
+    {% if mall and mall.slug %}
+      <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'shops_by_mall' mall.slug %}" style="color:inherit;">Nos Magasins</a></p>
+    {% else %}
+      <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'shops_all' %}" style="color:inherit;">Nos Magasins</a></p>
+    {% endif %}
+    <h1 class="ym-section-title">{{ shop.name }}</h1>
+    <span class="ym-store-card__badge ym-store-card__badge--featured" style="position:static; display:inline-block; margin-top:12px;">
+      {{ shop.get_category_display }}
+    </span>
+  </div>
+</section>
+
+<!-- Detail Content -->
+<section class="ym-section ym-section--gray">
+  <div class="ym-container">
+    <div class="ym-detail-layout">
+
+      <!-- Main Column -->
+      <div class="ym-detail-main">
+
+        <!-- Store Image -->
+        {% if shop.coverURL %}
+        <div class="ym-detail-image-wrap">
+          <img src="{{ shop.coverURL }}" alt="{{ shop.name }}">
+        </div>
+        {% endif %}
+
+        <!-- About -->
+        <div class="ym-detail-card">
+          <h2 class="ym-detail-section-title">À propos de {{ shop.name }}</h2>
+          <p class="ym-detail-text">{{ shop.description }}</p>
+        </div>
+
+        <!-- Products Section -->
+        <div class="ym-detail-card" style="margin-top: 40px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 class="ym-detail-section-title" style="margin: 0;">Nos Produits</h2>
+            <a href="{% url 'product_create' shop.mall.slug shop.slug %}" class="ym-btn ym-btn--accent ym-btn--sm">
+              <i class="fas fa-plus"></i> Ajouter un produit
+            </a>
+          </div>
+          
+          <div class="ym-products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+            {% for product in shop.products.all %}
+            <div class="ym-product-item" style="background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; position: relative;">
+               
+              
+
+
+              <!-- Wishlist Toggle Button -->
+                {% if request.user.is_authenticated %}
+
+                <button onclick="toggleWishlistGrid(this, {{ product.id }})" 
+                        class="wishlist-toggle-btn {% if product.id in user_wishlist_ids %}active{% endif %}"
+                        style="position: absolute; top: 15px; left: 15px; z-index: 10; background: white; border: none; width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 8px 25px rgba(0,0,0,0.15); cursor: pointer; display: flex; align-items: center; justify-content: center; color: {% if product.id in user_wishlist_ids %}var(--accent){% else %}var(--text-muted){% endif %}; transition: transform 0.2s;">
+                    <i class="{% if product.id in user_wishlist_ids %}fas{% else %}far{% endif %} fa-heart fa-lg" style="margin-top: 1px;"></i>
+                </button>
+
+                {% endif %}
+              
+              
+              
+              <a href="{% url 'product' product.shop.mall.slug product.shop.slug product.slug %}" style="text-decoration: none; color: inherit;">
+                <div style="height: 180px; overflow: hidden; background: #f9f9f9;">
+                 
+                  {% if product.main_image %}
+                    <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                  {% else %}
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ddd;">
+                      <i class="fas fa-image fa-2x"></i>
+                    </div>
+                  {% endif %}
+
+
+
+                </div>
+                <div style="padding: 15px;">
+                  <h4 style="font-size: 0.95rem; margin-bottom: 5px; font-weight: 600;">{{ product.name }}</h4>
+                  <p style="font-weight: 700; color: var(--primary); font-size: 1rem;">{{ product.price }} DZD</p>
+                </div>
+              </a>
+              <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
+                <a href="{% url 'product_update' product.shop.mall.slug product.shop.slug product.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="padding: 5px 8px; font-size: 0.7rem;">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'product_delete' product.shop.mall.slug product.shop.slug product.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="padding: 5px 8px; font-size: 0.7rem;">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </div>
+            </div>
+
+            {% empty %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+              <i class="fas fa-box-open fa-2x" style="margin-bottom: 10px;"></i>
+              <p>Aucun produit n'a encore été ajouté.</p>
+            </div>
+             {% endfor %}
+
+          </div>
+        </div>
+
+        <!-- Active Promotions -->
+        {% if shop.promotions.all %}
+        <div class="ym-detail-card">
+          <h2 class="ym-detail-section-title">
+            <i class="fas fa-tags" style="color:var(--color-pink); margin-right:8px;"></i>Offres en cours
+          </h2>
+          <div class="ym-promos-inline">
+            {% for promo in shop.promotions.all %}
+            <div class="ym-promo-inline-card">
+              <span class="ym-promo-card__tag">Promo</span>
+              <h3 class="ym-promo-card__title" style="font-size:1.1rem;">{{ promo.title }}</h3>
+              <p style="font-size:0.875rem; color:rgba(255,255,255,0.7); margin-bottom:8px;">{{ promo.description }}</p>
+              <p class="ym-promo-card__date">
+                <i class="far fa-clock"></i> Jusqu'au {{ promo.end_date|date:"d F Y" }}
+              </p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="ym-detail-sidebar">
+        <div class="ym-detail-card">
+          <h2 class="ym-detail-section-title">Informations Pratiques</h2>
+          <div class="ym-info-row">
+            <div class="ym-info-icon">
+              {% if shop.owner.profile.image %}
+              <img src="{{ shop.owner.profile.imageURL }}" alt="{{ shop.owner.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+              {% else %}
+              <i class="fas fa-user"></i>
+              {% endif %}
+            </div>
+            <div>
+              <small class="ym-info-label">Owner</small>
+              <span class="ym-info-value">{{shop.owner.last_name}} {{shop.owner.first_name}}</span><br>
+              <small>{{shop.owner.profile.phone}}</small> 
+            </div>
+          </div>
+
+
+
+
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div>
+              <small class="ym-info-label">Localisation</small>
+              <span class="ym-info-value">{{ shop.location }}</span><br>
+              <small>{{shop.mall.name}}-{{shop.mall.city}} </small> 
+            </div>
+          </div>
+
+          {% if shop.phone %}
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-phone"></i></div>
+            <div>
+              <small class="ym-info-label">Téléphone</small>
+              <a href="tel:{{ shop.phone }}" class="ym-info-value">{{ shop.phone }}</a>
+            </div>
+          </div>
+          {% endif %}
+          {% if shop.email %}
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-envelope"></i></div>
+            <div>
+              <small class="ym-info-label">Email</small>
+              <a href="mailto:{{ shop.email }}" class="ym-info-value">{{ shop.email }}</a>
+            </div>
+          </div>
+          {% endif %}
+          {% if shop.website %}
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-globe"></i></div>
+            <div>
+              <small class="ym-info-label">Site Internet</small>
+              <a href="{{ shop.websiteURL }}" target="_blank" class="ym-info-value" style="color:var(--color-pink);">Visiter le site</a>
+            </div>
+          </div>
+          {% endif %}
+
+          <a href="{% url 'contact_message_create_by_mall' mall.slug %}" class="ym-btn ym-btn--primary" style="width:100%; justify-content:center; margin-top:24px;">
+            Contacter la boutique <i class="fas fa-arrow-right ym-btn__icon"></i>
+          </a>
+
+          <a href="{% url 'orders_items_list_shop' shop.slug %}" class="ym-btn ym-btn--dark" 
+                    style="width:100%; justify-content:center; margin-top:24px;">
+            Orders <i class="fas fa-arrow-right ym-btn__icon"></i>
+          </a>
+
+          {% if user.is_superuser or shop.owner == user or shop.mall.manager == user %}
+          <a href="{% url 'shop_dashboard' shop.slug %}" class="ym-btn ym-btn--pink" 
+                    style="width:100%; justify-content:center; margin-top:12px;">
+                    Management Dashboard <i class="fas fa-cog ym-btn__icon"></i>
+          </a>
+          {% endif %}
+
+
+
+
+        </div>
+
+        <!-- Share -->
+        <div class="ym-detail-card" style="margin-top:20px;">
+          <h3 class="ym-detail-section-title" style="font-size:1rem;">Partagez l'expérience</h3>
+          <div style="display:flex; gap:10px; margin-top:16px;">
+            <button class="ym-btn ym-btn--dark ym-btn--sm" style="flex:1; justify-content:center;">
+              <i class="fab fa-facebook-f"></i> Partager
+            </button>
+            <button class="ym-btn ym-btn--dark ym-btn--sm" style="flex:1; justify-content:center;">
+              <i class="fab fa-twitter"></i> Tweet
+            </button>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+
+
+
+<script>
+    
+const wishlistBadge = document.querySelector('.wishlist-badge');
+
+function getCSRFToken() {
+    return document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+}
+
+function updateBadge(count) {
+    if (!wishlistBadge) return;
+
+    count = parseInt(count || 0);
+
+    wishlistBadge.textContent = count;
+
+    if (count <= 0) {
+        wishlistBadge.style.display = 'none';
+    } else {
+        wishlistBadge.style.display = 'inline-block';
+    }
+
+    wishlistBadge.classList.add('bump');
+    setTimeout(() => wishlistBadge.classList.remove('bump'), 200);
+}
+
+function toggleWishlistGrid(btnElement, productId) {
+
+    if (!btnElement || btnElement.disabled) return;
+
+    btnElement.disabled = true;
+
+    const icon = btnElement.querySelector('i');
+    const isActive = btnElement.classList.contains('active');
+
+    // 🎯 حفظ الحالة قبل التغيير (للـ rollback)
+    const previousState = isActive;
+
+    // 🚀 Optimistic UI
+    btnElement.classList.toggle('active');
+
+    if (!previousState) {
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+    } else {
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+    }
+
+    fetch(`/wishlist/toggle/${productId}/`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(async response => {
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // ✔ تأكيد العدد من السيرفر
+        updateBadge(data.wishlist_count);
+    })
+    .catch((err) => {
+
+        console.error("Wishlist error:", err);
+
+        // ❌ rollback
+        btnElement.classList.toggle('active');
+
+        if (previousState) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+        } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+        }
+
+        alert("حدث خطأ، حاول مرة أخرى");
+    })
+    .finally(() => {
+        btnElement.disabled = false;
+    });
+}
+
+</script>
+
+
+{% endblock %}

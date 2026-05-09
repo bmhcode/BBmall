@@ -5,7 +5,7 @@
 
 {% block content %}
 
-product_detail.html
+product.html
 
 <!-- Product Header Area -->
 <section class="ym-section ym-section--light" style="padding: 120px 0 80px;">
@@ -79,6 +79,7 @@ product_detail.html
                     {{ product.category.name }}
                 </p>
                 
+            
                 <h1 style="font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 24px; color: var(--primary); line-height: 1.1;">
                     {{ product.name }}
                 </h1>
@@ -210,6 +211,18 @@ product_detail.html
         color: var(--accent);
     }
 
+#wishlist-detail-btn.ym-btn--ghost {
+    background-color: #f1f5f9; /* لون خفيف */
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+#wishlist-detail-btn.ym-btn--accent {
+    background-color: #ec4899; /* الوردي */
+    color: #fff;
+}
+
+
 
 </style>
 
@@ -223,7 +236,7 @@ function getCSRFToken() {
         ?.split('=')[1];
 }
 
-/* BADGE */
+/* BADGE Wishlist */
 function updateBadge(count) {
     const badge = document.querySelector('.wishlist-badge');
     if (!badge) return;
@@ -322,6 +335,56 @@ function toggleWishlistDetail(productId) {
         text.innerText = wasActive ? "Saved to Wishlist" : "Save to Wishlist";
     });
 }
+
+
+
+/* ADD to Cart */
+function addToCart(productId) {
+
+    const btn = document.getElementById('add-to-cart-btn');
+    if (!btn) return;
+
+    btn.disabled = true;
+    btn.innerText = "Adding...";
+
+    fetch(`/cart/add/${productId}/`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error();
+        return res.json();
+    })
+    .then(data => {
+
+        // مثال: تحديث badge إذا عندك
+        const cartBadge = document.querySelector('.cart-badge');
+        if (cartBadge && data.cart_count !== undefined) {
+            cartBadge.innerText = data.cart_count;
+            cartBadge.style.display = 'inline-block';
+        }
+
+        btn.innerText = "Added ✔";
+    })
+    .catch(() => {
+        btn.innerText = "Error!";
+    })
+    .finally(() => {
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+        }, 1500);
+    });
+}
+
+
+
+
 </script>
 
 {% endblock %}

@@ -93,8 +93,10 @@ mall_dashboard.html
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px;">
+                        {% if shop.slug %}
                             <a href="{% url 'shop_dashboard' shop.slug %}" class="btn-action-sm" title="Internal Management"><i class="fas fa-chart-line"></i></a>
                             <a href="{% url 'shop' mall.slug shop.slug %}" class="btn-action-sm" title="Public Page"><i class="fas fa-eye"></i></a>
+                        {% endif %}
                         </div>
                     </div>
                     {% endfor %}

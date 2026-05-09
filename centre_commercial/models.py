@@ -455,9 +455,20 @@ class Shop(models.Model):
     def __str__(self):
         return f"{self.mall.name if self.mall else 'Without mall'} - {self.name}"
 
+   
     def save(self, *args, **kwargs):
-        if not self.slug:
+
+        # إذا كان كائن جديد
+        if not self.pk:
             self.slug = generate_unique_slug(Shop, self.name)
+
+        else:
+            old = Shop.objects.get(pk=self.pk)
+
+            # إذا تغيّر الاسم → غيّر slug
+            if old.name != self.name:
+                self.slug = generate_unique_slug(Shop, self.name)
+
         super().save(*args, **kwargs)
 
     # def get_absolute_url(self):
@@ -582,27 +593,6 @@ class ShopReview(models.Model): # Shop Review
 
     class Meta:
         unique_together = ('shop', 'user')  # user يقيّم مرة واحدة فقط
-
-class Promotion(models.Model):
-    # ── Relation ──
-    # Note: Promotion already has a FK to Magasin, which has a FK to Mall.
-    # But adding a direct FK to Mall can optimize queries and allow mall-wide promos.
-    shop = models.ForeignKey(Shop, on_delete=models.SET_NULL, null=True, blank=True, related_name='promotions')
-    title = models.CharField(max_length=200, verbose_name="Title")
-    description = models.TextField(blank=True, verbose_name="Description")
-    image = models.ImageField(upload_to='promotions/', verbose_name="Image")
-
-    start_date = models.DateField(verbose_name="Start date")
-    end_date = models.DateField(verbose_name="End date")
-
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
-
-    def __str__(self):
-        return f"{self.title} - {self.shop.name}"
-
-    class Meta:
-        verbose_name = "Promotion"
-        verbose_name_plural = "Promotions"
  #============== End Shop ==============
 
 # =========================================
@@ -646,6 +636,7 @@ class ProductCategory(models.Model):
         return "-"    
 
 class Product(models.Model):
+
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
 
@@ -663,7 +654,6 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     is_featured = models.BooleanField(default=False)
-    
     is_actif = models.BooleanField(default=False)
 
     class Meta:
@@ -674,10 +664,36 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+    # def save(self, *args, **kwargs):
+
+    #     # إذا كان كائن جديد
+    #     if not self.pk:
+    #         self.slug = generate_unique_slug(Shop, self.name)
+
+    #     else:
+    #         old = Shop.objects.get(pk=self.pk)
+
+    #         # إذا تغيّر الاسم → غيّر slug
+    #         if old.name != self.name:
+    #             self.slug = generate_unique_slug(Shop, self.name)
+
+    #     super().save(*args, **kwargs)
+
     def save(self, *args, **kwargs):
-        if not self.slug:
+
+        # إذا كان كائن جديد
+        if not self.pk:
             self.slug = generate_unique_slug(Product, self.name)
+
+        else:
+            old = Product.objects.get(pk=self.pk)
+
+            # إذا تغيّر الاسم → غيّر slug
+            if old.name != self.name:
+                self.slug = generate_unique_slug(Product, self.name)
+
         super().save(*args, **kwargs)
+
 
     def main_image(self):
         return self.images.filter(is_main=True).first()
@@ -692,15 +708,13 @@ class Product(models.Model):
         return 
     
     def get_absolute_url(self):
-        return reverse(
-            'product_detail',
-            kwargs={
+        return reverse('product', kwargs={
                 'mall_slug': self.shop.mall.slug,
                 'shop_slug': self.shop.slug,
-                'slug': self.slug
+                'product_slug': self.slug
             }
         )
-
+    
 class ProductImages(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True,related_name='images', verbose_name=_("Product images"))
     caption = models.CharField(max_length=128, blank=True, null=True)
@@ -718,7 +732,34 @@ class ProductImages(models.Model):
 
     def __str__(self):
         return f"Image of {self.product.name} - {self.id}"
-      
+#============== End Product ============== 
+
+# =========================================
+# PROMOTION & WISHLIST
+# =========================================
+class Promotion(models.Model):
+    # ── Relation ──
+    # Note: Promotion already has a FK to Magasin, which has a FK to Mall.
+    # But adding a direct FK to Mall can optimize queries and allow mall-wide promos.
+    # shop = models.ForeignKey(Shop, on_delete=models.SET_NULL, null=True, blank=True, related_name='promotions')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True, related_name='promotions')
+
+    title = models.CharField(max_length=200, verbose_name="Title")
+    description = models.TextField(blank=True, verbose_name="Description")
+    image = models.ImageField(upload_to='promotions/', verbose_name="Image")
+
+    start_date = models.DateField(verbose_name="Start date")
+    end_date = models.DateField(verbose_name="End date")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
+
+    def __str__(self):
+        return f"{self.title} - {self.product}"
+
+    class Meta:
+        verbose_name = "Promotion"
+        verbose_name_plural = "Promotions"
+
 class Wishlist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wishlist')
     products = models.ManyToManyField(Product, blank=True)
@@ -729,8 +770,8 @@ class Wishlist(models.Model):
 
     def count(self):
         return self.products.count()
+#============== End Promotion & Wishlist ============== 
 
-#============== End Product ============== 
 
 # =========================================
 # ORDER

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supprimer la Promotion — {{ object.title }}{% endblock %}
+
+{% block content %}
+<style>
+    .delete-section { padding: 80px 0; background: #f8f9fb; min-height: 60vh; display: flex; align-items: center; }
+    .delete-card {
+        max-width: 520px; margin: 0 auto; background: #fff;
+        padding: 44px 48px; border-radius: 24px; text-align: center;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    }
+    .delete-icon {
+        width: 64px; height: 64px; border-radius: 50%;
+        background: #fef2f2; color: #ef4444;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; margin-bottom: 20px;
+    }
+    .delete-card h1 {
+        font-family: 'Playfair Display', serif; font-size: 1.6rem;
+        color: #1a1a2e; margin: 0 0 10px;
+    }
+    .delete-card p { color: #6b7280; font-size: 0.95rem; margin: 0 0 28px; }
+    .delete-card p strong { color: #1a1a2e; }
+    .delete-actions { display: flex; gap: 12px; justify-content: center; }
+    .delete-actions a, .delete-actions button {
+        padding: 12px 32px; border-radius: 50px; font-weight: 600;
+        font-size: 0.9rem; cursor: pointer; text-decoration: none;
+        transition: all 0.2s ease; border: none;
+    }
+    .btn-del-cancel { background: #f3f4f6; color: #6b7280; }
+    .btn-del-cancel:hover { background: #e5e7eb; }
+    .btn-del-confirm { background: #ef4444; color: #fff; }
+    .btn-del-confirm:hover { background: #dc2626; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(239,68,68,0.3); }
+</style>
+
+<section class="delete-section">
+    <div class="ym-container">
+        <div class="delete-card">
+            <div class="delete-icon"><i class="fas fa-trash-alt"></i></div>
+            <h1>Supprimer cette promotion ?</h1>
+            <p>Vous êtes sur le point de supprimer <strong>{{ object.title }}</strong>. Cette action est irréversible.</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="delete-actions">
+                    <a href="{% url 'shop' mall.slug shop.slug %}" class="btn-del-cancel">Annuler</a>
+                    <button type="submit" class="btn-del-confirm">
+                        <i class="fas fa-trash me-1"></i> Supprimer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

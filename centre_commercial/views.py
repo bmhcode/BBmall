@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView, DeleteView
 from django.db.models import Q,Sum
-from .models import Profile, Mall,Shop, Event, Promotion, ArticleBlog, ContactMessage, Product, ProductImages, Order,OrderHistory, OrderItem, OrderItemHistory, Wishlist
-from .forms import NewUserCreationForm, UserUpdateForm, ProfileUpdateForm,MallForm, ShopForm, ContactForm, ProductForm, OrderUpdateForm, OrderItemFormSet
+from .models import Profile, Mall, Shop,  Event, Promotion, ArticleBlog, ContactMessage, ProductCategory, Product, ProductImages, Order,OrderHistory, OrderItem, OrderItemHistory, Wishlist
+from .forms import NewUserCreationForm, UserUpdateForm, ProfileUpdateForm,MallForm, ShopForm, ContactForm, ProductForm, PromotionForm, EventForm, OrderUpdateForm, OrderItemFormSet
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.utils import timezone
@@ -20,6 +20,7 @@ from django.views.decorators.http import require_POST
 
 from django.views import View
 
+from django.views.decorators.csrf import csrf_exempt
 
 # ============================================================================
 # AUTH VIEWS
@@ -164,7 +165,7 @@ class AdminDashboardView(TemplateView):
 
 class UsersManageView(ListView):
     model = User
-    template_name = 'registration/users_manage.html'
+    template_name = 'registration/user_list_manage.html'
     context_object_name = 'users'
     paginate_by = 20
 
@@ -188,7 +189,7 @@ class UsersManageView(ListView):
 
 class ShopsManageView(ListView):
     model = Shop
-    template_name = 'mall/shops_manage.html'
+    template_name = 'mall/shop_list_manage.html'
     context_object_name = 'shops'
     paginate_by = 20
 
@@ -210,7 +211,7 @@ class ShopsManageView(ListView):
 
 class MallsManageView(ListView):
     model = Mall
-    template_name = 'mall/malls_manage.html'
+    template_name = 'mall/mall_list_manage.html'
     context_object_name = 'malls'
 
 class MallDashboardView(TemplateView):
@@ -249,7 +250,7 @@ class ShopDashboardView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['shop'] = self.shop
         context['products_count'] = self.shop.products.count()
-        context['promotions_count'] = self.shop.promotions.count()
+        context['promotions_count'] = Promotion.objects.filter(product__shop=self.shop).count()
         context['orders_count'] = Order.objects.filter(items__product__shop=self.shop).distinct().count()
         context['recent_products'] = self.shop.products.all().order_by('-created_at')[:5]
         context['recent_orders'] = Order.objects.filter(items__product__shop=self.shop).distinct().order_by('-created_at')[:5]
@@ -279,7 +280,7 @@ class MallView(TemplateView):
         context['mall'] = mall
         context['shops_featured'] = mall.shops.all() #filter(is_featured=True)[:6]
         context['future_events'] = mall.events.all() #.order_by('date')[:3]
-        context['promotions_actives'] = Promotion.objects.filter(shop__mall=mall).select_related('shop')
+        context['promotions_actives'] = Promotion.objects.filter(product__shop__mall=mall).select_related('product', 'product__shop', 'product__shop__mall')
         context['articles_blog'] = mall.blogs.all() #ArticleBlog.objects.all().order_by('-date_publication')[:3]
 
         restaurants_count = mall.shops.filter(category='restauration').count()
@@ -348,21 +349,88 @@ class PromotionListView(ListView):
             end_date__gte=now
         )
 
-        # 🎯 جلب slug من URL
         self.mall_slug = self.kwargs.get('slug')
-        self.mall = None  # مهم جداً
+        self.mall = None
 
         if self.mall_slug:
             self.mall = get_object_or_404(Mall, slug=self.mall_slug)
-            queryset = queryset.filter(shop__mall=self.mall)
+            queryset = queryset.filter(product__shop__mall=self.mall)
 
-        return queryset.select_related('shop', 'shop__mall').order_by('-created_at')
+        return queryset.select_related(
+            'product',
+            'product__shop',
+            'product__shop__mall'
+        ).order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['mall'] = self.mall
         return context
-# ================ End P    romotion views ==========================
+
+class PromotionCreateView(CreateView):
+    model = Promotion
+    form_class = PromotionForm
+    template_name = 'mall/promotion_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.shop = get_object_or_404(Shop, slug=self.kwargs.get('shop_slug'))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['product'].queryset = Product.objects.filter(shop=self.shop)
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['shop'] = self.shop
+        context['mall'] = self.shop.mall
+        return context
+
+    def get_success_url(self):
+        return reverse('shop', kwargs={'mall_slug': self.shop.mall.slug, 'slug': self.shop.slug})
+
+class PromotionUpdateView(UpdateView):
+    model = Promotion
+    form_class = PromotionForm
+    template_name = 'mall/promotion_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.shop = get_object_or_404(Shop, slug=self.kwargs.get('shop_slug'))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['product'].queryset = Product.objects.filter(shop=self.shop)
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['shop'] = self.shop
+        context['mall'] = self.shop.mall
+        return context
+
+    def get_success_url(self):
+        return reverse('shop', kwargs={'mall_slug': self.shop.mall.slug, 'slug': self.shop.slug})
+
+class PromotionDeleteView(DeleteView):
+    model = Promotion
+    template_name = 'mall/promotion_confirm_delete.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.shop = get_object_or_404(Shop, slug=self.kwargs.get('shop_slug'))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['shop'] = self.shop
+        context['mall'] = self.shop.mall
+        return context
+
+    def get_success_url(self):
+        return reverse('shop', kwargs={'mall_slug': self.shop.mall.slug, 'slug': self.shop.slug})
+
+# ================ End Promotion views ==========================
 
 # ============================================================================
 # SHOP VIEWS
@@ -517,10 +585,16 @@ class ShopDetailView(DetailView):
             wishlist, _ = Wishlist.objects.get_or_create(user=self.request.user)
             user_wishlist_ids = wishlist.products.values_list('id', flat=True)
 
+        # Promotions for this shop's products
+        shop_promotions = Promotion.objects.filter(
+            product__shop=shop
+        ).select_related('product').order_by('-end_date')
+
         context.update({
-            'mall': mall,  # 👈 الآن مضمون دائماً
+            'mall': mall,
             'related_shops': related_shops,
             'user_wishlist_ids': user_wishlist_ids,
+            'shop_promotions': shop_promotions,
         })
 
         return context
@@ -568,6 +642,82 @@ class EventDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['mall'] = self.object.mall
         return context
+
+class EventCreateView(CreateView):
+    model = Event
+    form_class = EventForm
+    template_name = 'mall/event_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.mall = get_object_or_404(Mall, slug=self.kwargs.get('mall_slug'))
+        if not request.user.is_superuser and self.mall.manager != request.user:
+            messages.error(request, "Vous n'avez pas les droits pour gérer les événements de ce centre.")
+            return redirect('mall', self.mall.slug)
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.mall = self.mall
+        messages.success(self.request, "Événement créé avec succès !")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.mall
+        return context
+
+    def get_success_url(self):
+        return reverse('events_by_mall', kwargs={'slug': self.mall.slug})
+
+class EventUpdateView(UpdateView):
+    model = Event
+    form_class = EventForm
+    template_name = 'mall/event_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.mall = get_object_or_404(Mall, slug=self.kwargs.get('mall_slug'))
+        if not request.user.is_superuser and self.mall.manager != request.user:
+            messages.error(request, "Vous n'avez pas les droits pour modifier cet événement.")
+            return redirect('mall', self.mall.slug)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Event, slug=self.kwargs['slug'], mall=self.mall)
+
+    def form_valid(self, form):
+        messages.success(self.request, "Événement mis à jour avec succès !")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.mall
+        return context
+
+    def get_success_url(self):
+        return reverse('events_by_mall', kwargs={'slug': self.mall.slug})
+
+class EventDeleteView(DeleteView):
+    model = Event
+    template_name = 'mall/event_confirm_delete.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.mall = get_object_or_404(Mall, slug=self.kwargs.get('mall_slug'))
+        if not request.user.is_superuser and self.mall.manager != request.user:
+            messages.error(request, "Vous n'avez pas les droits pour supprimer cet événement.")
+            return redirect('mall', self.mall.slug)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Event, slug=self.kwargs['slug'], mall=self.mall)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mall'] = self.mall
+        return context
+
+    def get_success_url(self):
+        messages.success(self.request, "Événement supprimé.")
+        return reverse('events_by_mall', kwargs={'slug': self.mall.slug})
+
 # ================ End Event views ==========================
 
 
@@ -708,6 +858,29 @@ class ContactMessageDeleteView(DeleteView):
 
 # ================ End Contact views ==========================
 
+
+# ============================================================================
+# CATEGORY VIEWS
+# ============================================================================
+
+def category_ajax_add(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        name = data.get("name")
+
+        if not name:
+            return JsonResponse({"error": "Name required"}, status=400)
+
+        if ProductCategory.objects.filter(name__iexact=name).exists():
+            return JsonResponse({"error": "Category already exists"}, status=400)
+
+        category = ProductCategory.objects.create(name=name)
+
+        return JsonResponse({
+            "id": category.id,
+            "name": category.name
+        })
+
 # ============================================================================
 # PRODUCT VIEWS
 # ============================================================================
@@ -762,8 +935,9 @@ class ProductListView(ListView):
 
 class ProductDetailView(DetailView):
     model = Product
-    template_name = 'mall/product_detail.html'
+    template_name = 'mall/product.html'
     context_object_name = 'product'
+    slug_url_kwarg = 'product_slug'   # 👈 هذا هو الحل
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -812,10 +986,11 @@ class ProductCreateView(CreateView):
 
     def get_success_url(self):
         return reverse(
-            'shop',
+            'product',
             kwargs={
                 'mall_slug': self.shop.mall.slug,
-                'slug': self.shop.slug
+                'shop_slug': self.shop.slug,
+                'product_slug': self.object.slug
             }
         )
 
@@ -828,6 +1003,8 @@ class ProductUpdateView(UpdateView):
     model = Product
     form_class = ProductForm
     template_name = 'mall/product_form.html'
+    slug_url_kwarg = 'product_slug'   # 👈 هذا هو الحل
+
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -851,10 +1028,10 @@ class ProductUpdateView(UpdateView):
                 is_main=(i == main_index)
             )
 
-
     def get_success_url(self):
         return self.object.get_absolute_url()   
 
+    
 class ProductDeleteView(DeleteView):
     model = Product
     template_name = 'mall/product_confirm_delete.html'
@@ -912,9 +1089,6 @@ def wishlist_toggle(request, product_id):
         'status': status,
         'wishlist_count': wishlist_count
     })
-
-
-    
 
 @login_required
 def wishlist_list(request):

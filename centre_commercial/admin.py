@@ -69,14 +69,14 @@ class MallAdmin(admin.ModelAdmin):
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
-    list_display = ('get_thumbnail', 'owner', 'name', 'mall', 'category', 'location', 'is_featured')
+    list_display = ('get_thumbnail', 'owner', 'name', 'slug', 'mall', 'category', 'location', 'is_featured')
     list_filter = ('mall', 'category', 'is_featured')
     search_fields = ('name', 'description')
     # prepopulated_fields = {'slug': ('name',)}
     list_editable = ('is_featured',)
 
     fieldsets = (
-        ('Identité',      {'fields': ('owner', 'name', 'mall', 'category', 'location')}),
+        ('Identité',      {'fields': ('owner', 'name', 'slug', 'mall', 'category', 'location')}),
         ('Design',        {'fields': ('logo', 'cover', 'description')}),
         ('Contact',       {'fields': ('phone', 'email', 'website')}),
         ('Paramètres',    {'fields': ('is_featured', 'is_closed', 'observation')}),
@@ -110,8 +110,8 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Promotion)
 class PromotionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'shop', 'start_date', 'end_date')
-    list_filter = ('shop', 'start_date')
+    list_display = ('title', 'product', 'start_date', 'end_date')
+    list_filter = ('product', 'start_date')
     search_fields = ('title', 'description')
 
 @admin.register(Event)

@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %} 
-    {{evenement.mall.nom}} - {{ evenement.titre }} 
-{% endblock %}
+{% block title %}{{ event.title }} — {{ event.mall.name }}{% endblock %}
 
 {% block content %}
 
@@ -10,18 +8,31 @@
 <section class="ym-page-hero">
   <div class="ym-container">
     {% if event.mall and event.mall.slug %}
-      <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'evenements_by_mall' evenement.mall.slug %}" style="color:inherit;">Événements</a></p>
+      <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'events_by_mall' event.mall.slug %}" style="color:inherit;">Événements</a></p>
     {% else %}
-      <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'evenements_all' %}" style="color:inherit;">Événements</a></p>
+      <p class="ym-eyebrow"><i class="fas fa-arrow-left"></i> <a href="{% url 'events_all' %}" style="color:inherit;">Événements</a></p>
     {% endif %}
-    <h1 class="ym-section-title">{{ evenement.title }}</h1>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+    <h1 class="ym-section-title">{{ event.title }}</h1>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; align-items:center;">
       <span class="ym-store-card__badge ym-store-card__badge--new" style="position:static; display:inline-flex; align-items:center; gap:6px;">
-        <i class="far fa-calendar-alt"></i> {{ evenement.date|date:"l d F Y" }}
+        <i class="far fa-calendar-alt"></i> {{ event.date|date:"l d F Y" }}
       </span>
       <span class="ym-store-card__badge ym-store-card__badge--featured" style="position:static; display:inline-flex; align-items:center; gap:6px;">
-        <i class="far fa-clock"></i> {{ evenement.date|date:"H:i" }}
+        <i class="far fa-clock"></i> {{ event.start_event|date:"H:i" }} — {{ event.end_event|date:"H:i" }}
       </span>
+
+      {% if event.mall %}
+        {% if user.is_superuser or event.mall.manager == user %}
+        <div style="display:flex; gap:8px; margin-left:auto;">
+          <a href="{% url 'event_update' event.mall.slug event.slug %}" class="ym-btn ym-btn--accent ym-btn--sm">
+            <i class="fas fa-edit"></i> Modifier
+          </a>
+          <a href="{% url 'event_delete' event.mall.slug event.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="background:#ef4444;">
+            <i class="fas fa-trash"></i> Supprimer
+          </a>
+        </div>
+        {% endif %}
+      {% endif %}
     </div>
   </div>
 </section>
@@ -36,25 +47,72 @@
         <div class="ym-detail-card">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:20px; color:var(--color-muted); font-size:0.9rem;">
             <i class="fas fa-map-marker-alt" style="color:var(--color-pink);"></i>
-            <span>Lieu : <strong style="color:var(--color-text);">{{ evenement.lieu }}</strong></span>
+            <span>Lieu : <strong style="color:var(--color-text);">{{ event.location }}</strong></span>
           </div>
-          <p class="ym-detail-text" style="white-space:pre-line;">{{ evenement.description }}</p>
+          <p class="ym-detail-text" style="white-space:pre-line;">{{ event.description }}</p>
         </div>
 
-        <div style="margin-top:24px;">
-          <a href="{% url 'evenements_by_mall' evenement.mall.slug %}" class="ym-btn ym-btn--dark">
+        <div style="margin-top:24px; display:flex; gap:12px; flex-wrap:wrap;">
+          {% if event.mall %}
+          <a href="{% url 'events_by_mall' event.mall.slug %}" class="ym-btn ym-btn--dark">
             <i class="fas fa-arrow-left"></i> Retour aux événements
           </a>
+          {% else %}
+          <a href="{% url 'events_all' %}" class="ym-btn ym-btn--dark">
+            <i class="fas fa-arrow-left"></i> Retour aux événements
+          </a>
+          {% endif %}
         </div>
       </div>
 
       <!-- Sidebar -->
       <aside class="ym-detail-sidebar">
-        {% if evenement.image %}
+        {% if event.image %}
         <div class="ym-detail-image-wrap" style="border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-xl);">
-          <img src="{{ evenement.image.url }}" alt="{{ evenement.titre }}" style="width:100%; height:300px; object-fit:cover;">
+          <img src="{{ event.image.url }}" alt="{{ event.title }}" style="width:100%; height:300px; object-fit:cover;">
+        </div>
+        {% endif %}
+
+        <!-- Event Info Card -->
+        <div class="ym-detail-card" style="margin-top:20px;">
+          <h3 class="ym-detail-section-title" style="font-size:1rem; margin-bottom:16px;">Informations</h3>
+          
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div>
+              <small class="ym-info-label">Date</small>
+              <span class="ym-info-value">{{ event.date|date:"d F Y" }}</span>
+            </div>
+          </div>
+
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-clock"></i></div>
+            <div>
+              <small class="ym-info-label">Horaires</small>
+              <span class="ym-info-value">{{ event.start_event|date:"H:i" }} — {{ event.end_event|date:"H:i" }}</span>
+            </div>
+          </div>
+
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div>
+              <small class="ym-info-label">Lieu</small>
+              <span class="ym-info-value">{{ event.location }}</span>
+            </div>
+          </div>
+
+          {% if event.mall %}
+          <div class="ym-info-row">
+            <div class="ym-info-icon"><i class="fas fa-building"></i></div>
+            <div>
+              <small class="ym-info-label">Centre</small>
+              <span class="ym-info-value">{{ event.mall.name }}</span>
+            </div>
+          </div>
+          {% endif %}
         </div>
 
+        <!-- Calendar buttons -->
         <div class="ym-detail-card" style="margin-top:20px; text-align:center;">
           <h3 class="ym-detail-section-title" style="font-size:1rem; margin-bottom:16px;">Ajouter à mon agenda ?</h3>
           <div style="display:flex; justify-content:center; gap:10px;">
@@ -66,7 +124,6 @@
             </button>
           </div>
         </div>
-        {% endif %}
       </aside>
 
     </div>

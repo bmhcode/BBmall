@@ -69,18 +69,7 @@
               
               
               
-              
-              
-              
-              
-              
-              
-              
-              
-              
-              
-              
-              <a href="{% url 'product_detail' shop.mall.slug shop.slug product.slug %}" style="text-decoration: none; color: inherit;">
+              <a href="{% url 'product' product.shop.mall.slug product.shop.slug product.slug %}" style="text-decoration: none; color: inherit;">
                 <div style="height: 180px; overflow: hidden; background: #f9f9f9;">
                  
                   {% if product.main_image %}
@@ -100,10 +89,10 @@
                 </div>
               </a>
               <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
-                <a href="{% url 'product_update' shop.mall.slug shop.slug product.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="padding: 5px 8px; font-size: 0.7rem;">
+                <a href="{% url 'product_update' product.shop.mall.slug product.shop.slug product.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="padding: 5px 8px; font-size: 0.7rem;">
                   <i class="fas fa-edit"></i>
                 </a>
-                <a href="{% url 'product_delete' shop.mall.slug shop.slug product.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="padding: 5px 8px; font-size: 0.7rem;">
+                <a href="{% url 'product_delete' product.shop.mall.slug product.shop.slug product.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="padding: 5px 8px; font-size: 0.7rem;">
                   <i class="fas fa-trash"></i>
                 </a>
               </div>
@@ -120,25 +109,89 @@
         </div>
 
         <!-- Active Promotions -->
-        {% if shop.promotions.all %}
-        <div class="ym-detail-card">
-          <h2 class="ym-detail-section-title">
-            <i class="fas fa-tags" style="color:var(--color-pink); margin-right:8px;"></i>Offres en cours
-          </h2>
-          <div class="ym-promos-inline">
-            {% for promo in shop.promotions.all %}
-            <div class="ym-promo-inline-card">
-              <span class="ym-promo-card__tag">Promo</span>
-              <h3 class="ym-promo-card__title" style="font-size:1.1rem;">{{ promo.title }}</h3>
-              <p style="font-size:0.875rem; color:rgba(255,255,255,0.7); margin-bottom:8px;">{{ promo.description }}</p>
-              <p class="ym-promo-card__date">
-                <i class="far fa-clock"></i> Jusqu'au {{ promo.end_date|date:"d F Y" }}
-              </p>
+        <div class="ym-detail-card" style="margin-top: 40px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+            <h2 class="ym-detail-section-title" style="margin: 0;">
+              <i class="fas fa-tags" style="color:var(--color-pink); margin-right:8px;"></i>Offres en cours
+            </h2>
+            {% if user.is_superuser or shop.owner == user or shop.mall.manager == user %}
+            <a href="{% url 'promotion_create' shop.mall.slug shop.slug %}" class="ym-btn ym-btn--pink ym-btn--sm">
+              <i class="fas fa-bullhorn"></i> Mettre un produit en promotion
+            </a>
+            {% endif %}
+          </div>
+
+          {% if shop_promotions %}
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+            {% for promo in shop_promotions %}
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #2d1f6e 100%); border-radius: 16px; overflow: hidden; position: relative; color: #fff;">
+              
+              <!-- Promo Image -->
+              {% if promo.product.main_image %}
+              <div style="height: 160px; overflow: hidden; position: relative;">
+                <img src="{{ promo.product.main_image.image.url }}" alt="{{ promo.product.name }}" 
+                     style="width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(26,26,46,0.9) 0%, transparent 60%);"></div>
+              </div>
+              {% endif %}
+
+              <div style="padding: 20px; {% if promo.product.main_image %}margin-top: -40px; position: relative; z-index: 2;{% endif %}">
+                <!-- Promo Tag -->
+                <span style="background: var(--color-pink, #e91e8c); color: #fff; padding: 4px 14px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                  <i class="fas fa-fire" style="margin-right: 4px;"></i> Promo
+                </span>
+
+                <h3 style="font-size: 1.1rem; margin: 12px 0 6px; font-weight: 700;">{{ promo.title }}</h3>
+                
+                <!-- Product link -->
+                <a href="{% url 'product' promo.product.shop.mall.slug promo.product.shop.slug promo.product.slug %}" 
+                   style="color: rgba(255,255,255,0.7); font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                  <i class="fas fa-cube" style="font-size: 0.7rem;"></i> {{ promo.product.name }}
+                  {% if promo.product.old_price %}
+                    <span style="background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;">
+                      {{ promo.product.price }} DZD
+                    </span>
+                  {% endif %}
+                </a>
+
+                {% if promo.description %}
+                <p style="font-size: 0.82rem; color: rgba(255,255,255,0.6); margin-bottom: 10px; line-height: 1.4;">
+                  {{ promo.description|truncatewords:20 }}
+                </p>
+                {% endif %}
+
+                <p style="font-size: 0.78rem; color: rgba(255,255,255,0.5); margin-bottom: 14px;">
+                  <i class="far fa-calendar-alt" style="margin-right: 4px;"></i>
+                  {{ promo.start_date|date:"d M" }} → {{ promo.end_date|date:"d M Y" }}
+                </p>
+
+                <!-- Action buttons (owner/admin only) -->
+                {% if user.is_superuser or shop.owner == user or shop.mall.manager == user %}
+                <div style="display: flex; gap: 8px;">
+                  <a href="{% url 'promotion_update' shop.mall.slug shop.slug promo.pk %}" 
+                     style="flex: 1; text-align: center; padding: 8px; background: rgba(255,255,255,0.12); color: #fff; border-radius: 10px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: background 0.2s;"
+                     onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+                    <i class="fas fa-edit"></i> Modifier
+                  </a>
+                  <a href="{% url 'promotion_delete' shop.mall.slug shop.slug promo.pk %}" 
+                     style="padding: 8px 14px; background: rgba(239,68,68,0.2); color: #fca5a5; border-radius: 10px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: background 0.2s;"
+                     onmouseover="this.style.background='rgba(239,68,68,0.4)'" onmouseout="this.style.background='rgba(239,68,68,0.2)'">
+                    <i class="fas fa-trash"></i>
+                  </a>
+                </div>
+                {% endif %}
+              </div>
             </div>
             {% endfor %}
           </div>
+
+          {% else %}
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <i class="fas fa-bullhorn fa-2x" style="margin-bottom: 12px; opacity: 0.4;"></i>
+            <p style="margin: 0;">Aucune promotion active pour le moment.</p>
+          </div>
+          {% endif %}
         </div>
-        {% endif %}
 
       </div>
 
@@ -207,13 +260,13 @@
 
           <a href="{% url 'orders_items_list_shop' shop.slug %}" class="ym-btn ym-btn--dark" 
                     style="width:100%; justify-content:center; margin-top:24px;">
-            My Orders <i class="fas fa-arrow-right ym-btn__icon"></i>
+            Orders <i class="fas fa-arrow-right ym-btn__icon"></i>
           </a>
 
           {% if user.is_superuser or shop.owner == user or shop.mall.manager == user %}
           <a href="{% url 'shop_dashboard' shop.slug %}" class="ym-btn ym-btn--pink" 
                     style="width:100%; justify-content:center; margin-top:12px;">
-            Management Dashboard <i class="fas fa-cog ym-btn__icon"></i>
+                    Management Dashboard <i class="fas fa-cog ym-btn__icon"></i>
           </a>
           {% endif %}
 

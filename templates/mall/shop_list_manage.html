@@ -83,17 +83,15 @@ shops_manage.html
                             </td>
                             <td style="padding: 20px; text-align: right;">
                                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                    <a href="{% url 'shop_dashboard' shop.slug %}" class="btn-action-sm" title="Dashboard" style="color: #db2777; background: #fdf2f8;"><i class="fas fa-chart-line"></i></a>
-                                    
-                                    {% if shop.mall.slug %}
+                                    {% if shop.slug %}
+                                        <a href="{% url 'shop_dashboard' shop.slug %}"><i class="fas fa-chart-line"></i></a>
+                                    {% endif %} 
+
+                                    {% if shop.slug and shop.mall.slug %}
                                     <a href="{% url 'shop_update' shop.mall.slug shop.slug %}" class="btn-action-sm" title="Edit"><i class="fas fa-edit"></i></a>
                                     <a href="{% url 'shop' shop.mall.slug shop.slug %}" class="btn-action-sm" title="View"><i class="fas fa-eye"></i></a>
+                                    <a href="{% url 'shop_delete' shop.mall.slug shop.slug %}" class="btn-action btn-delete" title="Supprimer"> <i class="fas fa-trash"></i> </a>
                                     {% endif %}
-
-
-                                      <a href="{% url 'shop_delete' shop.mall.slug shop.slug %}" class="btn-action btn-delete" title="Supprimer">
-                                <i class="fas fa-trash"></i>
-                            </a>
 
                                 </div>
 

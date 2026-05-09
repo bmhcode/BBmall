@@ -31,20 +31,16 @@ urlpatterns = [
     path('mall/<slug:slug>/dashboard/', views.MallDashboardView.as_view(), name='mall_dashboard'),
     path('shop/<slug:slug>/dashboard/', views.ShopDashboardView.as_view(), name='shop_dashboard'),
     
-    # Management
-    path('malls/', views.MallsManageView.as_view(), name='malls_manage'),
-    path('shops/manage/', views.ShopsManageView.as_view(), name='shops_manage'),
-
-
+   
     # Malls 
     path('mall/add/', views.MallCreateView.as_view(), name='mall_create'),
     path('mall/<slug:slug>/', views.MallView.as_view(), name='mall'),
-    path('malls/list/', views.MallListView.as_view(), name='mall_list'),
+    path('malls/', views.MallListView.as_view(), name='mall_list'),
+    path('malls/manage/', views.MallsManageView.as_view(), name='malls_manage'),
     path('mall/<slug:slug>/edit/', views.MallUpdateView.as_view(), name='mall_update'),
     path('mall/<slug:slug>/delete/', views.MallDeleteView.as_view(), name='mall_delete'),
     
     path('mall-toggle/<int:mall_id>/', views.ToggleMallStatusView.as_view(), name='mall_toggle'),
-
 
     # Shops
     path('mall/<slug:slug>/shop/add/', views.ShopCreateView.as_view(), name='shop_create'),
@@ -52,18 +48,24 @@ urlpatterns = [
     path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/delete/', views.ShopDeleteView.as_view(), name='shop_delete'),
     path('mall/<slug:mall_slug>/shop/<slug:slug>/', views.ShopDetailView.as_view(), name='shop'),
     path('shops/', views.ShopListView.as_view(), name='shops_all'),
+    path('shops/manage/', views.ShopsManageView.as_view(), name='shops_manage'),
     path('mall/<slug:slug>/shops/', views.ShopListView.as_view(), name='shops_by_mall'),
     
     # Promotions
     path('promotions/', views.PromotionListView.as_view(), name='promotions_all'),
     path('mall/<slug:slug>/promotions/', views.PromotionListView.as_view(), name='promotions_by_mall'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/promotion/add/', views.PromotionCreateView.as_view(), name='promotion_create'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/promotion/<int:pk>/edit/', views.PromotionUpdateView.as_view(), name='promotion_update'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/promotion/<int:pk>/delete/', views.PromotionDeleteView.as_view(), name='promotion_delete'),
 
     # Événements
     path('events/', views.EventListView.as_view(), name='events_all'),
     path('mall/<slug:slug>/events/', views.EventListView.as_view(), name='events_by_mall'),
-    # path('evenement/<slug:slug>/', views.EvenementDetailView.as_view(), name='evenement_detail'),
+
+    path('mall/<slug:mall_slug>/event/add/', views.EventCreateView.as_view(), name='event_create'),
     path('mall/<slug:mall_slug>/event/<slug:slug>/', views.EventDetailView.as_view(), name='event_detail'),
-       
+    path('mall/<slug:mall_slug>/event/<slug:slug>/edit/', views.EventUpdateView.as_view(), name='event_update'),
+    path('mall/<slug:mall_slug>/event/<slug:slug>/delete/', views.EventDeleteView.as_view(), name='event_delete'),    
     # Blog
     path('blogs/', views.ArticleBlogListView.as_view(), name='blogs_all'),
     path('mall/<slug:slug>/blogs/', views.ArticleBlogListView.as_view(), name='blogs_by_mall'),
@@ -79,11 +81,16 @@ urlpatterns = [
     path('mall/<slug:mall_slug>/contact/<int:id>/', views.ContactMessageDetailView.as_view(), name='contact_message_detail'),
     path('mall/<slug:mall_slug>/contact/<int:id>/delete/', views.ContactMessageDeleteView.as_view(), name='contact_message_delete'),
 
+    # Category
+    # path('category/add/', views.CategoryCreateView.as_view(), name='category_add'),
+    path('category/ajax/add/', views.category_ajax_add, name='category_ajax_add'),
+
+
     # Product
     path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/add/', views.ProductCreateView.as_view(), name='product_create'),
-    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/<slug:slug>/', views.ProductDetailView.as_view(), name='product_detail'),
-    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/<slug:slug>/edit/', views.ProductUpdateView.as_view(), name='product_update'),
-    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/<slug:slug>/delete/', views.ProductDeleteView.as_view(), name='product_delete'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/<slug:product_slug>/', views.ProductDetailView.as_view(), name='product'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/<slug:product_slug>/edit/', views.ProductUpdateView.as_view(), name='product_update'),
+    path('mall/<slug:mall_slug>/shop/<slug:shop_slug>/product/<slug:product_slug>/delete/', views.ProductDeleteView.as_view(), name='product_delete'),
     path('mall/<slug:slug>/products/', views.ProductListView.as_view(), name='products_by_mall'),
     path('products/', views.ProductListView.as_view(), name='products_all'),
 
@@ -92,18 +99,10 @@ urlpatterns = [
     path('product-image/<int:id>/set-main/', views.product_image_set_main, name='product_image_set_main'),
 
 
-
-
-
     # Wishlist
     path('wishlist/', views.wishlist_list, name='wishlist'),
     path('wishlist/toggle/<int:product_id>/', views.wishlist_toggle, name='wishlist_toggle'),
     path('wishlist/to-cart/<int:product_id>/', views.wishlist_to_cart, name='wishlist_to_cart'),
-
-
-
-
-
 
     # Cart & Checkout
     path('cart/add/<int:product_id>/', views.cart_add, name='cart_add'),

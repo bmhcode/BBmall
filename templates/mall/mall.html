@@ -123,50 +123,51 @@
     </div>
 
     <div class="ym-promos-grid ym-reveal">
-      {% for promo in promotions_actives %}
+      {% for promotion in promotions_actives %}
 
       {% if forloop.first %}
       <div class="ym-promo-card ym-promo-card--gradient-1">
-        {% if promo.image %}
-        <div class="ym-promo-card__bg" style="background-image:url('{{ promo.image.url }}')"></div>
+        {% if promotion.product.main_image %}
+          <div class="ym-promo-card__bg" style="background-image:url('{{ promotion.product.main_image.image.url }}')"></div>
         {% endif %}
         <div class="ym-promo-card__overlay"></div>
         <div class="ym-promo-card__content">
           <span class="ym-promo-card__tag">Promo du jour</span>
-          <h3 class="ym-promo-card__title">{{ promo.title }}</h3>
-          <p class="ym-promo-card__store"><i class="fas fa-store me-1"></i>{{ promo.shop.name }}</p>
+          <h3 class="ym-promo-card__title">{{ promotion.title }}</h3>
+          <p class="ym-promo-card__store"><i class="fas fa-store me-1"></i> {{ promotion.product.shop.mall.name}} | {{ promotion.product.shop.name }} | {{ promotion.product.name }}</p>
           <p class="ym-promo-card__date">
-            <i class="fas fa-clock"></i>
-            Valable jusqu'au {{ promo.date_fin|date:"d F Y" }}
+            <i class="far fa-clock"></i> Jusqu'au {{ promotion.end_date|date:"d M Y" }}
           </p>
         </div>
       </div>
 
       {% elif forloop.counter == 2 %}
       <div class="ym-promo-card ym-promo-card--gradient-2">
-        {% if promo.image %}
-        <div class="ym-promo-card__bg" style="background-image:url('{{ promo.image.url }}')"></div>
+        {% if promotion.product.main_image %}
+        <div class="ym-promo-card__bg" style="background-image:url('{{ promotion.product.main_image.image.url }}')"></div>
         {% endif %}
         <div class="ym-promo-card__overlay"></div>
         <div class="ym-promo-card__content">
           <span class="ym-promo-card__tag">En ce moment</span>
-          <h3 class="ym-promo-card__title">{{ promo.title }}</h3>
-          <p class="ym-promo-card__store">{{ promo.shop.name }}</p>
-          <p class="ym-promo-card__date"><i class="fas fa-clock"></i> {{ promo.date_fin|date:"d F Y" }}</p>
+          <h3 class="ym-promo-card__title">{{ promotion.title }}</h3>
+          <p class="ym-promo-card__store"><i class="fas fa-store me-1"></i> {{ promotion.product.shop.mall.name}} | {{ promotion.product.shop.name }} | {{ promotion.product.name }}</p>
+          <p class="ym-promo-card__date"><i class="fas fa-clock"></i> Jusqu'au {{ promotion.end_date|date:"d M Y" }}</p>
         </div>
       </div>
 
       {% elif forloop.counter == 3 %}
       <div class="ym-promo-card ym-promo-card--gradient-3">
-        {% if promo.image %}
-        <div class="ym-promo-card__bg" style="background-image:url('{{ promo.image.url }}')"></div>
+        {% if promotion.product.main_image %}
+        <div class="ym-promo-card__bg" style="background-image:url('{{ promotion.product.main_image.image.url }}')"></div>
         {% endif %}
         <div class="ym-promo-card__overlay"></div>
         <div class="ym-promo-card__content">
           <span class="ym-promo-card__tag">Offre limitée</span>
-          <h3 class="ym-promo-card__title">{{ promo.title }}</h3>
-          <p class="ym-promo-card__store">{{ promo.shop.name }}</p>
-          <p class="ym-promo-card__date"><i class="fas fa-clock"></i> {{ promo.date_fin|date:"d F Y" }}</p>
+          <h3 class="ym-promo-card__title">{{ promotion.title }}</h3>
+          <p class="ym-promo-card__store"><i class="fas fa-store me-1"></i> {{ promotion.product.shop.mall.name}} | {{ promotion.product.shop.name }} | {{ promotion.product.name }}</p>
+          <p class="ym-promo-card__date">
+             <i class="far fa-clock"></i> Jusqu'au {{ promotion.end_date|date:"d M Y" }}
+          </p>
         </div>
       </div>
       {% endif %}
@@ -365,9 +366,16 @@
         <p class="ym-eyebrow" style="color:var(--color-accent)">À ne pas manquer</p>
         <h2 class="ym-section-title" id="events-heading">Événements à Venir</h2>
       </div>
-      <a href="{% url 'events_all' %}" class="ym-view-all">
-        Tous les événements <i class="fas fa-arrow-right fa-sm"></i>
-      </a>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        {% if user.is_superuser or mall.manager == user %}
+        <a href="{% url 'event_create' mall.slug %}" class="ym-btn ym-btn--accent ym-btn--sm">
+          <i class="fas fa-plus"></i> Ajouter un événement
+        </a>
+        {% endif %}
+        <a href="{% url 'events_by_mall' mall.slug %}" class="ym-view-all">
+          Tous les événements <i class="fas fa-arrow-right fa-sm"></i>
+        </a>
+      </div>
     </div>
 
     <div class="ym-events-row ym-reveal" style="border-color:rgba(255,255,255,0.1)">

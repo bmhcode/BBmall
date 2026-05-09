@@ -13,9 +13,19 @@ def cart_processor(request):
     }
 
 def wishlist_processor(request):
-    if request.user.is_authenticated and hasattr(request.user, 'wishlist'):
-        return {
-            'wishlist_count': request.user.wishlist.products.count()
-        }
-    return {'wishlist_count': 0}
 
+    wishlist_count = 0
+    mall_slug = None
+
+    if request.user.is_authenticated:
+        wishlist = getattr(request.user, 'wishlist', None)
+        if wishlist:
+            wishlist_count = wishlist.products.count()
+
+    if request.resolver_match:
+        mall_slug = request.resolver_match.kwargs.get('mall_slug')
+
+    return {
+        'wishlist_count': wishlist_count,
+        'mall_slug': mall_slug
+    }

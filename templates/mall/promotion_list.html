@@ -19,29 +19,31 @@
 
     <div class="ym-promos-grid ym-reveal">
       {% for promotion in promotions %}
-    
-        <a href="{% url 'shop_detail' mall_slug=promotion.shop.mall.slug slug=promotion.shop.slug %}" class="ym-promo-card">
-     
-        {% if promotion.image %}
-        <div class="ym-promo-card__bg" style="background-image:url('{{ promotion.image.url }}');"></div>
-        <div class="ym-promo-card__overlay"></div>
-        {% else %}
-        <div class="ym-promo-card__bg ym-promo-card--gradient-{{ forloop.counter|divisibleby:3|yesno:'3,1,2' }}" style="opacity:.6;"></div>
+
+        {% if promotion.product.shop.mall.slug and promotion.product.shop.slug and promotion.product.slug %}
+          <a href="{% url 'product' promotion.product.shop.mall.slug promotion.product.shop.slug promotion.product.slug %}" class="ym-promo-card">
+            {% if promotion.product.main_image %}
+              <div class="ym-promo-card__bg" style="background-image:url('{{ promotion.product.main_image.image.url }}');"></div>
+              <div class="ym-promo-card__overlay"></div>
+            {% else %}
+              <div class="ym-promo-card__bg ym-promo-card--gradient-{{ forloop.counter|divisibleby:3|yesno:'3,1,2' }}" style="opacity:.6;"></div>
+            {% endif %}
+
+            <div class="ym-promo-card__content">
+              <span class="ym-promo-card__tag">Promo</span>
+              <p class="ym-promo-card__store">{{ promotion.product.shop.mall.name}} | {{ promotion.product.shop.name }} | {{ promotion.product.name }}</p>
+              <h2 class="ym-promo-card__title">{{ promotion.title }}</h2>
+              <p class="ym-promo-card__date">
+                <i class="far fa-clock"></i> Jusqu'au {{ promotion.end_date|date:"d M Y" }}
+              </p>
+            </div>
+          </a>
         {% endif %}
-        <div class="ym-promo-card__content">
-          <span class="ym-promo-card__tag">Promo</span>
-          <p class="ym-promo-card__store">{{ promotion.shop.name }}</p>
-          <h2 class="ym-promo-card__title">{{ promotion.title }}</h2>
-          <p class="ym-promo-card__date">
-            <i class="far fa-clock"></i> Jusqu'au {{ promotion.end_date|date:"d M Y" }}
-          </p>
-        </div>
-      </a>
       {% empty %}
-      <div class="ym-empty" style="grid-column: 1/-1;">
-        <i class="fas fa-tag"></i>
-        <p>Aucune promotion en cours. Revenez bientôt !</p>
-      </div>
+        <div class="ym-empty" style="grid-column: 1/-1;">
+          <i class="fas fa-tag"></i>
+          <p>Aucune promotion en cours. Revenez bientôt !</p>
+        </div>
       {% endfor %}
     </div>
 

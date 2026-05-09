@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Événements — {{ mall.nom }}{% endblock %}
+{% block title %}Événements{% if mall %} — {{ mall.name }}{% endif %}{% endblock %}
 
 {% block content %}
+
+event_list.html
 
 <!-- Page Hero -->
 <section class="ym-page-hero">
@@ -10,6 +12,16 @@
     <p class="ym-eyebrow"><i class="fas fa-calendar-alt"></i> Agenda</p>
     <h1 class="ym-section-title">Événements &amp; Divertissement</h1>
     <p class="ym-section-subtitle">Plongez dans l'effervescence de notre centre. Concerts, ateliers, expositions et bien plus encore.</p>
+
+    {% if mall %}
+      {% if user.is_superuser or mall.manager == user %}
+      <div style="margin-top: 20px;">
+        <a href="{% url 'event_create' mall.slug %}" class="ym-btn ym-btn--primary ym-btn--sm">
+          <i class="fas fa-plus"></i> Ajouter un événement
+        </a>
+      </div>
+      {% endif %}
+    {% endif %}
   </div>
 </section>
 
@@ -19,11 +31,16 @@
 
     <div class="ym-events-row ym-reveal">
       {% for event in events %}
-     
+
+        <div style="position: relative;">
         {% if mall %}
           <a href="{% url 'event_detail' mall.slug event.slug %}" class="ym-event-item">
         {% else %}
-          <a href="{% url 'events_all'%}" class="ym-event-item">
+          {% if event.mall %}
+            <a href="{% url 'event_detail' event.mall.slug event.slug %}" class="ym-event-item">
+          {% else %}
+            <a href="{% url 'events_all' %}" class="ym-event-item">
+          {% endif %}
         {% endif %}
         <!-- Date -->
         <div class="ym-event-item__date">
@@ -32,7 +49,6 @@
         </div>
 
         <!-- Image -->
-        
         {% if event.imageURL %}
         <img src="{{ event.imageURL }}" class="ym-event-item__image" alt="{{ event.title }}">
         {% else %}
@@ -46,7 +62,9 @@
           <p class="ym-event-item__category">Événement</p>
           <h2 class="ym-event-item__title">{{ event.title }}</h2>
           <p class="ym-event-item__location">
-            <h2 class="ym-event-item__title">{{ event.mall.name }}</h2>
+            {% if not mall and event.mall %}
+              <strong>{{ event.mall.name }}</strong> · 
+            {% endif %}
             <i class="fas fa-map-marker-alt"></i> {{ event.location }}
             &nbsp;&nbsp;<i class="far fa-clock"></i> {{ event.date|date:"H:i" }}
           </p>
@@ -56,6 +74,22 @@
           <i class="fas fa-arrow-right"></i>
         </div>
       </a>
+
+      <!-- Edit/Delete buttons for manager -->
+      {% if mall %}
+        {% if user.is_superuser or mall.manager == user %}
+        <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; z-index: 5;">
+          <a href="{% url 'event_update' mall.slug event.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="padding: 6px 10px; font-size: 0.72rem;">
+            <i class="fas fa-edit"></i>
+          </a>
+          <a href="{% url 'event_delete' mall.slug event.slug %}" class="ym-btn ym-btn--dark ym-btn--sm" style="padding: 6px 10px; font-size: 0.72rem; background: #ef4444;">
+            <i class="fas fa-trash"></i>
+          </a>
+        </div>
+        {% endif %}
+      {% endif %}
+      </div>
+
       {% empty %}
       <div class="ym-empty">
         <i class="fas fa-calendar-times"></i>

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Profile, Mall, Shop, ContactMessage, Product, Order, OrderItem, ShopReview, ShopSocial, ShopValidation, WorkingHours, ShopHoliday
+from .models import Profile, Mall, Shop, Event, ContactMessage, Product, Promotion, Order, OrderItem, ShopReview, ShopSocial, ShopValidation, WorkingHours, ShopHoliday
 from django.contrib.auth.models import User
 from django.forms.models import inlineformset_factory
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -116,7 +116,7 @@ class ShopForm(forms.ModelForm):
         fields = [
             'owner',
             'mall',
-            'name','category', 'description', 
+            'name', 'slug', 'category', 'description', 
             'logo', 'cover', 'phone', 'location', 
             'email', 'website', 'is_featured', 'is_closed',
             'observation'
@@ -125,6 +125,7 @@ class ShopForm(forms.ModelForm):
             'owner': forms.Select(attrs={'class': 'form-control', 'required': True}),
             'mall': forms.Select(attrs={'class': 'form-control'}),
             'name':        forms.TextInput(attrs={ 'class': 'form-input', 'required': True, 'placeholder': 'Ex: Global Tech Store',}),
+            'slug':        forms.TextInput(attrs={ 'class': 'form-input', 'required': True, 'placeholder': 'Ex: Global Tech Store',}),
             'category':    forms.Select(attrs={'class': 'form-control', 'required': True}),
             'description': forms.Textarea(attrs={'placeholder': 'Describe the shop...', 'rows': 4}),
             'phone':       forms.TextInput(attrs={'placeholder': '+213 XX XX XX XX'}),
@@ -150,6 +151,38 @@ class ProductForm(forms.ModelForm):
             'old_price': forms.NumberInput(attrs={'placeholder': '0.00 (Optional)', 'class': 'form-input'}),
             'image':     forms.ClearableFileInput(attrs={'class': 'form-file'}),
         }
+
+class PromotionForm(forms.ModelForm):
+    class Meta:
+        model = Promotion
+        fields = ['product', 'title', 'description', 'image', 'start_date', 'end_date']
+        widgets = {
+            'product':     forms.Select(attrs={'class': 'form-select'}),
+            'title':       forms.TextInput(attrs={'placeholder': 'Ex: Summer Sale -30%', 'class': 'form-input'}),
+            'description': forms.Textarea(attrs={'placeholder': 'Describe the promotion...', 'rows': 3, 'class': 'form-control'}),
+            'image':       forms.ClearableFileInput(attrs={'class': 'form-file'}),
+            'start_date':  forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
+            'end_date':    forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
+        }
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = ['title', 'description', 'image', 'location', 'date', 'start_event', 'end_event']
+        widgets = {
+            'title':       forms.TextInput(attrs={'placeholder': 'Ex: Soirée Jazz Live', 'class': 'form-input'}),
+            'description': forms.Textarea(attrs={'placeholder': 'Décrivez l\'événement...', 'rows': 4, 'class': 'form-control'}),
+            'image':       forms.ClearableFileInput(attrs={'class': 'form-file'}),
+            'location':    forms.TextInput(attrs={'placeholder': 'Ex: Place Centrale, Niveau 2', 'class': 'form-input'}),
+            'date':        forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-input'}, format='%Y-%m-%dT%H:%M'),
+            'start_event': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-input'}, format='%Y-%m-%dT%H:%M'),
+            'end_event':   forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-input'}, format='%Y-%m-%dT%H:%M'),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in ['date', 'start_event', 'end_event']:
+            self.fields[field_name].input_formats = ['%Y-%m-%dT%H:%M']
 
 class ContactForm(forms.ModelForm):
     class Meta:

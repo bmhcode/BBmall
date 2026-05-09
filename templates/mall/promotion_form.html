@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Modifier{% else %}Créer{% endif %} une Promotion — {{ shop.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .promo-form-section { padding: 60px 0 80px; background: #f8f9fb; min-height: 70vh; }
+    .promo-form-card {
+        max-width: 700px; margin: 0 auto; background: #fff;
+        padding: 44px 48px; border-radius: 24px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    }
+    .promo-form-header { text-align: center; margin-bottom: 32px; }
+    .promo-form-header__icon {
+        width: 56px; height: 56px; border-radius: 16px;
+        background: linear-gradient(135deg, #e91e8c, #ff6ec7);
+        display: inline-flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 1.3rem; margin-bottom: 14px;
+        box-shadow: 0 6px 20px rgba(233,30,140,0.3);
+    }
+    .promo-form-header h1 {
+        font-family: 'Playfair Display', serif; font-size: 2rem;
+        color: #1a1a2e; margin: 0 0 6px;
+    }
+    .promo-form-header p { color: #6b7280; font-size: 0.9rem; margin: 0; }
+    .promo-form-header p strong { color: #1a1a2e; }
+
+    .promo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .promo-group { display: flex; flex-direction: column; gap: 6px; }
+    .promo-group.full { grid-column: 1 / -1; }
+    .promo-group label {
+        font-weight: 600; font-size: 0.78rem; text-transform: uppercase;
+        letter-spacing: 0.8px; color: #1a1a2e;
+    }
+    .promo-group input, .promo-group select, .promo-group textarea {
+        padding: 13px 16px; border: 1.5px solid #e5e7eb; border-radius: 12px;
+        font-size: 0.95rem; font-family: 'Inter', sans-serif;
+        width: 100%; box-sizing: border-box; transition: all 0.25s ease;
+    }
+    .promo-group input:focus, .promo-group select:focus, .promo-group textarea:focus {
+        outline: none; border-color: #e91e8c;
+        box-shadow: 0 0 0 4px rgba(233,30,140,0.08);
+    }
+    .promo-group textarea { resize: vertical; min-height: 80px; }
+
+    .promo-errors {
+        background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+        padding: 16px 20px; border-radius: 14px; margin-bottom: 24px;
+    }
+    .promo-errors ul { margin: 0; padding-left: 18px; font-size: 0.85rem; }
+
+    .promo-submit-area {
+        grid-column: 1 / -1; margin-top: 12px; padding-top: 24px;
+        border-top: 1px solid #e5e7eb;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .promo-btn-submit {
+        background: linear-gradient(135deg, #1a1a2e, #16213e); color: #fff;
+        padding: 14px 40px; border: none; border-radius: 50px;
+        font-weight: 700; font-size: 1rem; cursor: pointer;
+        transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .promo-btn-submit:hover {
+        background: linear-gradient(135deg, #e91e8c, #c4167a);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(233,30,140,0.3);
+    }
+    .promo-btn-cancel {
+        color: #6b7280; text-decoration: none; font-size: 0.9rem;
+        font-weight: 500; transition: color 0.2s;
+    }
+    .promo-btn-cancel:hover { color: #1a1a2e; }
+
+    @media (max-width: 768px) {
+        .promo-form-card { padding: 28px 22px; }
+        .promo-grid { grid-template-columns: 1fr; }
+        .promo-group.full { grid-column: 1; }
+        .promo-submit-area { grid-column: 1; flex-direction: column-reverse; gap: 12px; }
+        .promo-btn-submit { width: 100%; justify-content: center; }
+    }
+</style>
+
+<section class="promo-form-section">
+    <div class="ym-container">
+        <div class="promo-form-card">
+            <div class="promo-form-header">
+                <div class="promo-form-header__icon">
+                    <i class="fas fa-{% if object %}pen{% else %}bullhorn{% endif %}"></i>
+                </div>
+                <h1>{% if object %}Modifier la Promotion{% else %}Nouvelle Promotion{% endif %}</h1>
+                <p>Boutique <strong>{{ shop.name }}</strong> · {{ mall.name }}</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <div class="promo-errors">
+                    <p style="font-weight:700; margin:0 0 8px; font-size:0.9rem;">
+                        <i class="fas fa-exclamation-triangle"></i> Veuillez corriger les erreurs :
+                    </p>
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="promo-grid">
+                    <div class="promo-group full">
+                        <label for="{{ form.product.id_for_label }}">Produit</label>
+                        {{ form.product }}
+                    </div>
+
+                    <div class="promo-group full">
+                        <label for="{{ form.title.id_for_label }}">Titre de la promotion</label>
+                        {{ form.title }}
+                    </div>
+
+                    <div class="promo-group full">
+                        <label for="{{ form.description.id_for_label }}">Description</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="promo-group">
+                        <label for="{{ form.start_date.id_for_label }}">Date de début</label>
+                        {{ form.start_date }}
+                    </div>
+
+                    <div class="promo-group">
+                        <label for="{{ form.end_date.id_for_label }}">Date de fin</label>
+                        {{ form.end_date }}
+                    </div>
+
+                    <div class="promo-group full">
+                        <label for="{{ form.image.id_for_label }}">Image de la promotion</label>
+                        {{ form.image }}
+                    </div>
+
+                    <div class="promo-submit-area">
+                        <a href="{% url 'shop' mall.slug shop.slug %}" class="promo-btn-cancel">
+                            <i class="fas fa-arrow-left"></i> Annuler
+                        </a>
+                        <button type="submit" class="promo-btn-submit">
+                            <i class="fas fa-{% if object %}save{% else %}plus{% endif %}"></i>
+                            {% if object %}Enregistrer{% else %}Créer la promotion{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
